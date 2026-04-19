@@ -137,6 +137,7 @@ export const downloadReportImage = async (
     const canvas = await html2canvas(element, {
       useCORS: true,        // 允許跨域圖片（活動海報）
       allowTaint: false,    // 與 useCORS 搭配，拒絕汙染 canvas 的跨域圖片
+      // @ts-ignore — `scale` 為有效執行時屬性，但 @types/html2canvas 型別定義未包含
       scale,                // scale:3 → 1800×2700px → 300 DPI 列印品質
       backgroundColor: '#f8f6f0',
       logging: false,
