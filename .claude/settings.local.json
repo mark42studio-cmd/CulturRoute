@@ -29,7 +29,9 @@
       "WebFetch(domain:culture.taitung.gov.tw)",
       "Bash(find *)",
       "Bash(grep *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(ls E:/CulturRoute/cultur-route/middleware*)",
+      "Bash(ls *)"
     ]
   }
 }
