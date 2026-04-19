@@ -1,0 +1,53 @@
+import { createClient } from '@supabase/supabase-js';
+import EventCard from '@/components/EventCard';
+import Link from 'next/link'; 
+import AddItineraryButton from '@/components/AddItineraryButton'; // 🌟 引入剛剛做的按鈕
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default async function Home() {
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('start_time', { ascending: true });
+
+  if (error) return <div className="p-10 text-red-500">哎呀，載入活動失敗了...</div>;
+
+  return (
+    <main className="min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#FDFCFB]">
+      {/* ... header 區塊保持不變 ... */}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {events?.map((event) => (
+          <Link 
+            href={`/event/${event.id}`} 
+            key={event.id}
+            className="relative flex flex-col h-full group rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer bg-white"
+          >
+            <EventCard event={event} />
+            
+            {/* 🌟 調整了遮罩位置：從 absolute inset-0 改為 absolute inset-x-0 bottom-0 h-[55%] */}
+            <div className="absolute inset-x-0 bottom-0 h-[55%] bg-white/95 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-gray-100">
+              <h4 className="font-bold text-gray-800 mb-2 text-lg">活動簡介</h4>
+              
+              {/* 改用 line-clamp-3 讓文字少一點，騰出空間給按鈕 */}
+              <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-2">
+                {event.long_description || event.description || '暫無詳細簡介。'}
+              </p>
+              
+              <div className="text-blue-600 font-medium text-sm flex items-center mb-auto">
+                點擊卡片查看完整資訊 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+
+              {/* 🌟 放入我們做好的 Client Component 按鈕 */}
+              <AddItineraryButton event={event} />
+            </div>
+          </Link>
+        ))}
+      </div>
+    </main>
+  );
+}

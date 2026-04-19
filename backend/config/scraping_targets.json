@@ -1,0 +1,90 @@
+{
+  "_comment": "CulturRoute 爬蟲目標清單 v5",
+  "_updated": "2026-04-14",
+
+  "_scraper_ownership": {
+    "scraper.py":          "負責 official_sites 以外的舊有 5 個政府藝文網站（Playwright）",
+    "township_scraper.py": "負責 official_sites 清單（HTTPX/Playwright 雙引擎 v2）",
+    "apify_scraper.py":    "負責 social_media 清單（Apify → Facebook/Instagram）",
+    "threads_scraper.py":  "負責 Threads 關鍵字巡邏（SEARCH_KEYWORDS 定義於程式碼內）",
+    "Maps_scraper.py":     "負責 places / foods 表，與 events 完全獨立"
+  },
+
+  "_deduplication_rule": "同一網域不可同時出現在 official_sites 與 scraper.py 的 TARGET_SITES。新增站台請優先加在 official_sites，並從 scraper.py TARGET_SITES 移除。",
+
+  "official_sites": [
+    {
+      "_note": "此清單由 township_scraper.py 讀取。勿與 scraper.py TARGET_SITES 重複。目前為空，待新目標結構驗證後逐步加入。"
+    }
+  ],
+
+  "social_media": [
+    {
+      "name": "台東美術館",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/taitungartmuseum",
+      "keyword": "台東美術館",
+      "source_type": "official",
+      "max_posts": 5,
+      "fixed_coords": { "lat": 22.7561, "lng": 121.1498 }
+    },
+    {
+      "name": "晃晃二手書店",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/huanghuangbooks",
+      "keyword": "晃晃書店",
+      "source_type": "indie_curation",
+      "max_posts": 5,
+      "fixed_coords": { "lat": 22.7545, "lng": 121.1452 }
+    },
+    {
+      "name": "臺東藝穗節",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/TaitungFringeFestival",
+      "keyword": "臺東藝穗節",
+      "source_type": "official",
+      "max_posts": 5
+    },
+    {
+      "name": "饒慶鈴",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/Taitungaprilyao",
+      "keyword": "台東縣",
+      "source_type": "official",
+      "max_posts": 5
+    },
+    {
+      "name": "台東就醬玩 Amazing Taitung",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/taitung.tourism",
+      "keyword": "台東觀光",
+      "source_type": "official",
+      "max_posts": 5
+    },
+    {
+      "name": "南島台東-臺東縣原民處",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/aborigine089",
+      "keyword": "原住民文化",
+      "source_type": "official",
+      "max_posts": 5
+    },
+    {
+      "name": "台東縣政府社會處",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/profile.php?id=100064824842948",
+      "keyword": "台東社區",
+      "source_type": "official",
+      "max_posts": 5
+    },
+    {
+      "name": "池上鄉公所",
+      "platform": "facebook",
+      "url": "https://www.facebook.com/chihshangtour",
+      "keyword": "池上",
+      "source_type": "township",
+      "max_posts": 5,
+      "fixed_coords": { "lat": 23.0972, "lng": 121.2262 }
+    }
+  ]
+}

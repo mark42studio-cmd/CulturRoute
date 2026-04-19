@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//proc/**)",
+      "Bash(wait)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(echo \"PID=$!\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(python backend/seed_events.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(./node_modules/.bin/tsc:*)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(echo \"PID:$!\")",
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)",
+      "Bash(taskkill /PID 17148 /F)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell:*)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('process_pending.py', encoding='utf-8'\\).read\\(\\)\\); print\\('語法 OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('reset_db.py', encoding='utf-8'\\).read\\(\\)\\); print\\('語法 OK'\\)\")",
+      "Bash(python -c ':*)",
+      "Bash(python township_scraper.py --dry-run --limit 10)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('township_scraper.py', encoding='utf-8'\\).read\\(\\)\\); print\\('PASS'\\)\")",
+      "Bash(python township_scraper.py --dry-run --only 史前)",
+      "Bash(python -c \"print\\('\\\\a\\\\a\\\\a'\\)\")",
+      "Bash(python:*)",
+      "WebFetch(domain:culture.taitung.gov.tw)",
+      "Bash(find *)",
+      "Bash(grep *)"
+    ]
+  }
+}

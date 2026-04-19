@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+supabase
+beautifulsoup4
+requests
+httpx
+python-dotenv
+google-genai
+playwright
+playwright-stealth
+geopy
+urllib3
+apify-client

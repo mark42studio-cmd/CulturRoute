@@ -1,0 +1,232 @@
+import os
+import time
+import json
+import requests
+import urllib3
+from dotenv import load_dotenv, find_dotenv
+from playwright.sync_api import sync_playwright
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
+from google import genai
+from google.genai import types
+from supabase import create_client, Client
+
+# 🌟 新增：關閉煩人的 SSL 憑證黃字警告
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# 自動尋找 .env，並加入 utf-8-sig 破解隱形字元
+load_dotenv(find_dotenv(), encoding="utf-8-sig")
+
+supabase_url = os.getenv("SUPABASE_URL").strip() # 加上 strip() 殺掉所有隱形空白或換行
+supabase_key = os.getenv("SUPABASE_SERVICE_KEY").strip()
+gemini_key = os.getenv("GEMINI_API_KEY").strip()
+
+if not supabase_url or not supabase_key:
+    print("❌ 嚴重錯誤：讀不到 SUPABASE_URL，請檢查 .env 檔案！")
+    exit()
+
+client = genai.Client(api_key=gemini_key)
+supabase: Client = create_client(supabase_url, supabase_key)
+
+CITY_ID = None 
+
+def save_to_supabase(event_data):
+    """支援單筆或系列活動(List)的自動拆解寫入"""
+    
+    # 🌟 新邏輯：確保我們處理的永遠是一個 List
+    events_to_process = event_data if isinstance(event_data, list) else [event_data]
+    
+    for single_event in events_to_process:
+        try:
+            # 防重複檢查 (利用 標題 + 日期 當作唯一值，避免同一個系列活動被覆蓋)
+            check = supabase.table("events").select("id").eq("title", single_event.get('event_name', '')).eq("start_time", single_event.get('iso_start_time', '')).execute()
+            
+            if check.data:
+                print(f"⏩ 跳過：子活動已存在 ({single_event.get('event_name', '')})")
+                continue # 跳過這一筆，繼續處理下一筆
+
+            payload = {
+                "title": single_event.get('event_name', '未提供'),
+                "description": single_event.get('card_summary', ''),
+                "long_description": single_event.get('long_description', ''), 
+                "image_captured": single_event.get('image_url', ''),
+                "start_time": single_event.get('iso_start_time'), 
+                "end_time": single_event.get('iso_end_time'),
+                "venue_name": single_event.get('location', '未提供'),
+                "latitude": single_event.get('latitude'),
+                "longitude": single_event.get('longitude'),
+                "is_free": single_event.get('is_free', False),
+                "ticket_url": single_event.get('ticket_url'),
+                "source_url": single_event.get('source_url', ''),
+                "vibe_tags": single_event.get('vibe_tags', []),
+                "target_audience": single_event.get('target_audience', []),
+                "indoor_or_outdoor": single_event.get('indoor_or_outdoor'),
+                "weather_resilience": single_event.get('weather_resilience', 3),
+                "engagement_metrics": {"score": 0}
+            }
+            
+            supabase.table("events").insert(payload).execute()
+            print(f"✅ 成功存入：{payload['title']} (日期: {payload['start_time'][:10]})")
+            
+        except Exception as e:
+            print(f"❌ 存入失敗 [{single_event.get('event_name', '')}]: {e}")
+
+def ai_data_cleaner(raw_text, image_url, source_url):
+    
+    # 🌟 1. 抓取海報圖片，讓 Gemini 發揮視覺辨識能力
+    image_data = None
+    if image_url and image_url.startswith("http"):
+        try:
+            print("👁️ 正在將海報交給 AI 分析時間表...")
+            # 這裡我們之前已經加過 verify=False 了
+            img_res = requests.get(image_url, timeout=10, verify=False)
+            if img_res.status_code == 200:
+                # 🌟 修正：使用新版 SDK 專屬的 Part 格式包裝圖片
+                image_data = types.Part.from_bytes(
+                    data=img_res.content,
+                    mime_type="image/jpeg"
+                )
+        except Exception as e:
+            print(f"⚠️ 圖片下載失敗，僅使用文字分析: {e}")
+
+    # 🌟 2. 調整 Prompt，強制要求回傳 JSON Array 格式
+    prompt = f"""
+    你是專業的台灣在地文化策展人。請閱讀文字與【海報圖片】，萃取出活動資訊。
+    
+    【重要拆解任務】：
+    如果這是一個「系列活動」（例如總期間長達數月，但實際只有特定週末有演出，如圖片上的各個樂團表演日期），
+    請務必將其【拆解】成多個單一活動！把表演者名稱加入標題（例如：山海有聲 - 南王姊妹花）。
+    如果只是一般單日活動，也請包裝在 Array 中回傳。
+
+    請 strictly 回傳純 JSON Array 格式 (不要 ```json 標籤)：
+    [
+      {{
+        "event_name": "標題 (若為系列活動請加上子標題)",
+        "iso_start_time": "精準的單日開始時間 (ISO 8601)",
+        "iso_end_time": "精準的單日結束時間 (若無則 null)",
+        "location": "地點名稱",
+        "latitude": 緯度數字,
+        "longitude": 經度數字,
+        "is_free": true 或 false,
+        "ticket_url": "購票連結網址",
+        "image_url": "{image_url}",
+        "vibe_tags": ["#標籤1", "#標籤2"],
+        "target_audience": ["親子", "情侶", "獨旅", "銀髮"],
+        "indoor_or_outdoor": "indoor", "outdoor", 或 "semi-outdoor",
+        "weather_resilience": 1-5,
+        "card_summary": "15-30字吸睛簡介",
+        "long_description": "保留完整的活動介紹內文，越詳細越好",
+        "source_url": "{source_url}"
+      }}
+    ]
+
+    網頁文字：
+    {raw_text[:3000]}
+    """
+    
+    max_retries = 3 
+    for attempt in range(max_retries):
+        try:
+            # 🌟 3. 將圖片與文字同時餵給 Gemini
+            api_contents = [prompt]
+            if image_data:
+                api_contents.append(image_data)
+                
+            response = client.models.generate_content(
+                model='gemini-2.5-flash-lite',
+                contents=api_contents
+            )
+            clean_text = response.text.replace("```json", "").replace("```", "").strip()
+            return json.loads(clean_text)
+            
+        except Exception as e:
+            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                print(f"⏳ 撞到頻率限制！罰站 60 秒... (第 {attempt+1}/{max_retries} 次)")
+                time.sleep(60)
+            else:
+                print(f"🧠 AI 處理出錯: {e}")
+                return None
+                
+    return None
+
+def ai_powered_spider():
+    print("🚀 [CulturRoute 視覺海巡] 啟動...")
+    base_url = "https://culture.taitung.gov.tw/"
+    
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        
+        print(f"🚢 駛入大廳：{base_url}")
+        page.goto(base_url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_timeout(3000) 
+        
+        soup = BeautifulSoup(page.content(), 'html.parser')
+        potential_links = []
+        
+        for link in soup.find_all('a'):
+            href = link.get('href')
+            if href and any(k in href.lower() or k in link.get_text() for k in ['活動', '展演', 'activity']):
+                full_url = urljoin(base_url, href)
+                
+                # 【新邏輯】：過濾掉列表頁，只抓取真正的深層活動頁面
+                if base_url in full_url and full_url not in [l[1] for l in potential_links]:
+                    if not full_url.endswith('/activity') and not full_url.endswith('/history') and not full_url.endswith('/activity/') :
+                        potential_links.append((link.get_text(strip=True), full_url))
+        
+        # 【新邏輯】：放寬到抓取前 10 筆資料測試
+        for text, url in potential_links[:10]:
+            print(f"\n🚪 潛入活動頁：{url}")
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                page.wait_for_timeout(2500) 
+                
+                main_img_url = page.evaluate("""() => {
+                    let ogImg = document.querySelector('meta[property="og:image"]');
+                    if (ogImg && ogImg.content) return ogImg.content;
+
+                    let contentImg = document.querySelector('.activity img, .post-content img, article img, .editor img');
+                    if (contentImg) {
+                        return contentImg.getAttribute('data-src') || contentImg.getAttribute('data-original') || contentImg.src;
+                    }
+
+                    let imgs = Array.from(document.querySelectorAll('img'));
+                    let bestImg = null;
+                    let maxArea = 0;
+                    for (let img of imgs) {
+                        if (img.src.includes('icon') || img.src.includes('logo')) continue;
+                        let area = img.width * img.height;
+                        if (area > maxArea) {
+                            maxArea = area;
+                            bestImg = img;
+                        }
+                    }
+                    if (bestImg) {
+                        return bestImg.getAttribute('data-src') || bestImg.getAttribute('data-original') || bestImg.src;
+                    }
+                    return '未提供';
+                }""")
+                
+                if main_img_url and not main_img_url.startswith('http') and main_img_url != '未提供':
+                    main_img_url = urljoin(url, main_img_url)
+
+                print(f"🖼️  捕獲圖片：{main_img_url}")
+
+                raw_content = page.locator("body").inner_text()
+                event_json = ai_data_cleaner(raw_content, main_img_url, url)
+                
+                if event_json:
+                    print("✨ 準備寫入資料庫...")
+                    save_to_supabase(event_json)
+                
+            except Exception as e:
+                print(f"⚠️ 略過此頁面 (超時或錯誤): {e}")
+                
+            time.sleep(15)
+            
+        browser.close()
+        print("\n💡 本次海巡任務完成。")
+
+if __name__ == "__main__":
+    ai_powered_spider()

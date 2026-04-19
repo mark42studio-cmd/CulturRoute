@@ -1,0 +1,121 @@
+{
+  "_comment": "CulturRoute 爬蟲目標清單 — 在地公所 + 獨立空間",
+  "township_offices": [
+    {
+      "name": "台東市公所最新消息",
+      "source_type": "township",
+      "base_url": "https://www.taitung.gov.tw",
+      "news_path": "/news",
+      "pagination_param": "page",
+      "keywords": ["祭典", "活動", "市集", "通知", "表演", "展覽", "節慶", "競賽", "講座"]
+    },
+    {
+      "name": "卑南鄉公所最新消息",
+      "source_type": "township",
+      "base_url": "https://www.beinan.gov.tw",
+      "news_path": "/news",
+      "pagination_param": "page",
+      "keywords": ["祭典", "活動", "市集", "通知", "表演", "展覽", "節慶"]
+    },
+    {
+      "name": "池上鄉公所最新消息",
+      "source_type": "township",
+      "base_url": "https://www.chishang.gov.tw",
+      "news_path": "/news",
+      "pagination_param": "page",
+      "keywords": ["祭典", "活動", "市集", "通知", "表演", "展覽", "節慶"]
+    },
+    {
+      "name": "東河鄉公所最新消息",
+      "source_type": "township",
+      "base_url": "https://www.donghe.gov.tw",
+      "news_path": "/news",
+      "pagination_param": "page",
+      "keywords": ["祭典", "活動", "市集", "通知", "表演", "展覽", "節慶"]
+    },
+    {
+      "name": "成功鎮公所最新消息",
+      "source_type": "township",
+      "base_url": "https://www.chenggong.gov.tw",
+      "news_path": "/news",
+      "pagination_param": "page",
+      "keywords": ["祭典", "活動", "市集", "通知", "表演", "展覽", "節慶"]
+    }
+  ],
+  "indie_spaces": [
+    {
+      "name": "晃晃二手書店",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/huanghuangbooks",
+      "scrape_method": "facebook_page",
+      "address": "台東縣台東市新生路135巷24號",
+      "fixed_coords": { "lat": 22.7545, "lng": 121.1452 },
+      "auto_tags": ["#獨立書店", "#文青", "#選書"]
+    },
+    {
+      "name": "就藝會",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/juyi.taitung",
+      "scrape_method": "facebook_page",
+      "address": "台東縣台東市",
+      "fixed_coords": { "lat": 22.7533, "lng": 121.1481 },
+      "auto_tags": ["#當代藝術", "#展覽", "#實驗"]
+    },
+    {
+      "name": "the ARK 方舟",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/theARKtaitung",
+      "scrape_method": "facebook_page",
+      "address": "台東縣台東市中山路",
+      "fixed_coords": { "lat": 22.7528, "lng": 121.1463 },
+      "auto_tags": ["#展覽", "#藝文空間", "#創作"]
+    },
+    {
+      "name": "江賢二藝術園區",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/paul.chiang.studio",
+      "scrape_method": "facebook_page",
+      "address": "台東縣池上鄉",
+      "fixed_coords": { "lat": 23.0985, "lng": 121.2255 },
+      "auto_tags": ["#當代藝術", "#裝置藝術", "#池上"]
+    },
+    {
+      "name": "池上穀倉藝術館",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/chishangbarn",
+      "scrape_method": "facebook_page",
+      "address": "台東縣池上鄉中西三路6號",
+      "fixed_coords": { "lat": 23.0979, "lng": 121.2271 },
+      "auto_tags": ["#穀倉藝術", "#池上", "#田野"]
+    }
+  ],
+  "dulan_cluster": [
+    {
+      "name": "好的擺 Haodebai",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/haodebai",
+      "scrape_method": "facebook_page",
+      "address": "台東縣東河鄉都蘭村",
+      "fixed_coords": { "lat": 23.1295, "lng": 121.3762 },
+      "auto_tags": ["#都蘭", "#原住民文化", "#自然"]
+    },
+    {
+      "name": "月光小棧",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/moonlightdulan",
+      "scrape_method": "facebook_page",
+      "address": "台東縣東河鄉都蘭村",
+      "fixed_coords": { "lat": 23.1302, "lng": 121.3755 },
+      "auto_tags": ["#都蘭", "#音樂", "#文化聚落"]
+    },
+    {
+      "name": "都蘭糖廠",
+      "source_type": "indie_curation",
+      "base_url": "https://www.facebook.com/dulansugary",
+      "scrape_method": "facebook_page",
+      "address": "台東縣東河鄉都蘭村61號",
+      "fixed_coords": { "lat": 23.1278, "lng": 121.3768 },
+      "auto_tags": ["#都蘭糖廠", "#文創市集", "#都蘭"]
+    }
+  ]
+}

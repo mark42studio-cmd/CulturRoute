@@ -1,0 +1,8 @@
+4/10
+--新增美食表格
+--新增景點表格
+--取的MAP API KEY
+AIzaSyCWOSUB9IHsJ1OPaC4qGu1Q6MfvG7CqYj0
+--寫入美食表格
+--新增美食景點UI
+--串接google map X失敗了 要嗆他說我沒有空格只是記事本沒有顯示而已
