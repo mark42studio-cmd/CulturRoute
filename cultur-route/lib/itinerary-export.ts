@@ -1,7 +1,8 @@
 /**
  * 行程匯出工具
- * - generateICS / downloadICS : 產生符合 RFC 5545 的 .ics 檔（純 Vanilla JS，無額外套件）
- * - downloadReportImage       : 使用 html2canvas 將 Modal DOM 轉為 PNG 下載（動態 import，避免 SSR 錯誤）
+ * - generateICS / downloadICS     : 產生符合 RFC 5545 的 .ics 檔（以活動原始 start_time 為基準）
+ * - downloadItineraryICS          : 以使用者規劃的 assigned_date + visit_time 產生 .ics，含防呆標記
+ * - downloadReportImage           : 使用 html2canvas 將 Modal DOM 轉為 PNG 下載（動態 import，避免 SSR 錯誤）
  */
 
 import type { PlannedEvent } from '@/types';
@@ -109,6 +110,117 @@ export const downloadICS = (events: PlannedEvent[]): void => {
   URL.revokeObjectURL(url);
 };
 
+// ── 行程 ICS（以使用者規劃時間為準）────────────────────────────────────────────
+
+/**
+ * 將 YYYY-MM-DD + HH:MM（台北時間 UTC+8）轉為 ICS UTC 時間字串
+ * 例：('2026-04-15', '14:00') → '20260415T060000Z'
+ */
+const toICSDateTimeFromPlanned = (date: string, hhmm: string): string => {
+  const iso = `${date}T${hhmm}:00+08:00`;
+  return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+};
+
+/**
+ * 以使用者規劃的行程資料（assigned_date + visit_time）產生 iCalendar 字串
+ *
+ * 規則：
+ *  - 有 visit_time → 具體時間區塊（DTSTART/DTEND UTC）
+ *  - 無 visit_time → 全天事件（DTSTART;VALUE=DATE），標題加 [待確認]，
+ *                    DESCRIPTION 第一行加 ⚠️ 提醒
+ */
+const generateItineraryICS = (events: PlannedEvent[]): string => {
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//CulturRoute//台東藝文行程//ZH',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+  ];
+
+  for (const event of events) {
+    const { assigned_date, visit_time, stay_duration, title, venue_name } = event;
+    const hasTimed = !!visit_time;
+
+    // ── 描述文字 ─────────────────────────────────────────────────────────────
+    const descParts: string[] = [];
+    if (!hasTimed) {
+      descParts.push('⚠️ 此為預排行程，請自行確認實際營業或活動時間。');
+    }
+    if (event.description)       descParts.push(event.description);
+    if (event.isExtraDayTrigger) descParts.push('💡 多留了一天，記得多訂住宿！');
+    if (event.ticket_url)        descParts.push(`購票連結：${event.ticket_url}`);
+    if (event.source_url)        descParts.push(`活動頁面：${event.source_url}`);
+    // 使用真實換行符，escapeICS 會將其轉為 ICS 規範的 \n
+    const description = escapeICS(descParts.join('\n'));
+
+    // ── 地點：優先使用 address，其次 venue_name ───────────────────────────────
+    const location = escapeICS(event.address ?? venue_name);
+
+    let eventLines: string[];
+
+    if (hasTimed) {
+      // 有具體時間：轉為 UTC 時間區塊
+      const dtStart = toICSDateTimeFromPlanned(assigned_date, visit_time!);
+      const endMs =
+        new Date(`${assigned_date}T${visit_time}:00+08:00`).getTime() +
+        (stay_duration ?? 90) * 60_000;
+      const dtEnd = new Date(endMs).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+
+      eventLines = [
+        'BEGIN:VEVENT',
+        `UID:planned-${event.id}@culturroute`,
+        `DTSTART:${dtStart}`,
+        `DTEND:${dtEnd}`,
+        `SUMMARY:${escapeICS(title)}`,
+        `LOCATION:${location}`,
+        `DESCRIPTION:${description}`,
+        'END:VEVENT',
+      ];
+    } else {
+      // 無具體時間：全天事件
+      const dateCompact = assigned_date.replace(/-/g, '');
+      // DTEND 為下一天（RFC 5545 §3.6.1 全天事件為開區間）
+      const nextDay = new Date(`${assigned_date}T00:00:00+08:00`);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const nextDayCompact = nextDay.toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }).replace(/-/g, '');
+
+      eventLines = [
+        'BEGIN:VEVENT',
+        `UID:planned-${event.id}@culturroute`,
+        `DTSTART;VALUE=DATE:${dateCompact}`,
+        `DTEND;VALUE=DATE:${nextDayCompact}`,
+        `SUMMARY:${escapeICS(`[待確認] ${title}`)}`,
+        `LOCATION:${location}`,
+        `DESCRIPTION:${description}`,
+        'END:VEVENT',
+      ];
+    }
+
+    lines.push(...eventLines.map(foldLine));
+  }
+
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+};
+
+/**
+ * 觸發行程 .ics 檔案下載（以使用者規劃時間為準）
+ * 檔名：CulturRoute-Itinerary.ics
+ */
+export const downloadItineraryICS = (events: PlannedEvent[]): void => {
+  const content = generateItineraryICS(events);
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'CulturRoute-Itinerary.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
 // ── 圖片下載 ──────────────────────────────────────────────────────────────────
 
 /**
@@ -123,9 +235,12 @@ export const downloadReportImage = async (
   element: HTMLElement,
   onStart?: () => void,
   onEnd?: () => void,
-  scale = 3,
+  scale?: number,
   filename = `CulturRoute_台東明信片_${new Date().toISOString().substring(0, 10)}.png`,
 ): Promise<void> => {
+  // 手機裝置記憶體有限，自動降低解析度避免 OOM 閃退
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const resolvedScale = scale ?? (isMobile ? Math.min(window.devicePixelRatio, 2) : 3);
   onStart?.();
   try {
     // 套件載入失敗時立刻 throw，後續程式碼完全不執行
@@ -138,7 +253,7 @@ export const downloadReportImage = async (
       useCORS: true,        // 允許跨域圖片（活動海報）
       allowTaint: false,    // 與 useCORS 搭配，拒絕汙染 canvas 的跨域圖片
       // @ts-ignore — `scale` 為有效執行時屬性，但 @types/html2canvas 型別定義未包含
-      scale,                // scale:3 → 1800×2700px → 300 DPI 列印品質
+      scale: resolvedScale, // 手機降為 devicePixelRatio（最多 2x），桌機 3x
       backgroundColor: '#f8f6f0',
       logging: false,
     });

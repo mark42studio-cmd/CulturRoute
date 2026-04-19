@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, Fragment, useRef, useState } from 'react';
-import { downloadICS, downloadReportImage } from '@/lib/itinerary-export';
+import { downloadICS, downloadReportImage, downloadItineraryICS } from '@/lib/itinerary-export';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import type { PlannedEvent } from '@/types';
 
@@ -354,12 +354,17 @@ export default function ItineraryPage() {
     if (!postcardRef.current) return;
     // 防呆計時器：最多 10 秒後強制恢復按鈕，無論截圖成功或失敗
     const safetyTimer = setTimeout(() => setIsCapturing(false), 10_000);
+    // scale 不傳，讓 downloadReportImage 自動根據裝置選擇（手機降低解析度）
     downloadReportImage(
       postcardRef.current,
       () => setIsCapturing(true),
       () => { clearTimeout(safetyTimer); setIsCapturing(false); },
-      3,
     );
+  };
+
+  const handleAddToCalendar = () => {
+    if (plannedEvents.length === 0) return;
+    downloadItineraryICS(plannedEvents);
   };
 
   const handleExportICS = () => downloadICS(plannedEvents);
@@ -967,24 +972,60 @@ export default function ItineraryPage() {
           {/* ── 匯出區塊（手機版地圖下方，桌機版同位置） ── */}
           <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 flex flex-col sm:flex-row items-center gap-3">
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-stone-700 text-sm">產生行程報告 ＆ 匯出明信片</p>
-              <p className="text-xs text-stone-400 mt-0.5">將行程轉為精美圖片，方便分享或列印</p>
+              <p className="font-bold text-stone-700 text-sm">儲存 ＆ 分享行程</p>
+              <p className="text-xs text-stone-400 mt-0.5">匯出日曆或下載精美明信片圖片</p>
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 shrink-0 flex-wrap justify-end">
               <button
-                disabled
-                className="px-4 py-2.5 bg-stone-200 text-stone-400 text-xs font-bold rounded-xl cursor-not-allowed"
-                title="即將推出"
+                onClick={handleAddToCalendar}
+                disabled={plannedEvents.length === 0}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
               >
-                📋 行程報告
+                <CalendarPlus size={14} />
+                加到 Google 日曆
               </button>
               <button
-                disabled
-                className="px-4 py-2.5 bg-stone-200 text-stone-400 text-xs font-bold rounded-xl cursor-not-allowed"
-                title="即將推出"
+                onClick={handleDownloadImage}
+                disabled={isCapturing || plannedEvents.length === 0}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-700 hover:bg-stone-800 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
               >
-                🖼️ 匯出明信片
+                {isCapturing ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                {isCapturing ? '生成中…' : '匯出明信片'}
               </button>
+            </div>
+          </div>
+
+          {/* ── 導購 / 行銷連結區塊 ── */}
+          <div className="rounded-2xl border border-stone-200 bg-white p-5">
+            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">台東行前準備</p>
+            <div className="flex flex-col gap-3">
+              {/* 租車 */}
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-amber-50 border border-amber-100 cursor-not-allowed opacity-70">
+                <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center shrink-0 text-lg">🏍️</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-stone-700 text-sm">台東租車 / 租機車</p>
+                  <p className="text-xs text-stone-400">在地特惠方案，輕鬆移動各景點</p>
+                </div>
+                <span className="text-[10px] text-amber-600 font-bold border border-amber-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+              </div>
+              {/* 住宿 */}
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100 cursor-not-allowed opacity-70">
+                <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center shrink-0 text-lg">🏨</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-stone-700 text-sm">台東特色住宿</p>
+                  <p className="text-xs text-stone-400">海景民宿、溫泉飯店精選推薦</p>
+                </div>
+                <span className="text-[10px] text-blue-600 font-bold border border-blue-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+              </div>
+              {/* 票務 */}
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-violet-50 border border-violet-100 cursor-not-allowed opacity-70">
+                <div className="w-10 h-10 rounded-full bg-violet-200 flex items-center justify-center shrink-0 text-lg">🎟️</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-stone-700 text-sm">活動購票優惠</p>
+                  <p className="text-xs text-stone-400">早鳥折扣、套票方案一次掌握</p>
+                </div>
+                <span className="text-[10px] text-violet-600 font-bold border border-violet-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+              </div>
             </div>
           </div>
         </div>

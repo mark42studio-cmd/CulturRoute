@@ -28,10 +28,11 @@ const EventsMapDynamic = dynamic(() => import('@/components/EventsMap'), {
 export default function EventBrowser({ initialEvents }: { initialEvents: Event[] }) {
   const {
     tripStartDate: startDate, tripEndDate: endDate, setTripDates,
-    plannedEvents, addTripDay, addEvent, setHoveredEventId,
+    plannedEvents, addTripDay, addEvent, removeEvent, setHoveredEventId,
   } = useItineraryStore();
   const [isMounted, setIsMounted] = useState(false);
   const [viewMode, setViewMode] = useState<'all' | 'event' | 'exhibition'>('all');
+  const [quickToastId, setQuickToastId] = useState<string | null>(null);
 
   // useMemo 確保每次 render 不重新計算（日期在同一天內不會改變）
   const TODAY = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }), []);
@@ -91,6 +92,20 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     addEvent(event, { isExtraDayTrigger: true });   // 加入行程並帶入提醒標記
   };
 
+  // 快速加入行程（手機用）：阻止 Link 跳轉，切換加入/移除，短暫顯示回饋
+  const handleQuickAdd = (e: React.MouseEvent, event: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isAdded = plannedEvents.some(p => p.id === event.id);
+    if (isAdded) {
+      removeEvent(event.id);
+    } else {
+      addEvent(event);
+      setQuickToastId(event.id);
+      setTimeout(() => setQuickToastId(null), 1500);
+    }
+  };
+
   // 「多留幾天」區塊專用：卡片多一顆「多留一下」按鈕
   const renderMissedEventGrid = (events: Event[]) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -126,28 +141,46 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
 
   const renderEventGrid = (events: Event[]) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {events.map((event) => (
-        <Link href={`/event/${event.id}`} key={event.id} className="relative flex flex-col h-full group cursor-pointer">
-          {/* 進行中 badge */}
-          {isOngoing(event) && (
-            <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
-              進行中
+      {events.map((event) => {
+        const isAdded = plannedEvents.some(p => p.id === event.id);
+        const justAdded = quickToastId === event.id;
+        return (
+          <Link href={`/event/${event.id}`} key={event.id} className="relative flex flex-col h-full group cursor-pointer">
+            {/* 進行中 badge */}
+            {isOngoing(event) && (
+              <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
+                進行中
+              </div>
+            )}
+            <EventCard
+              event={event}
+              onMouseEnter={() => setHoveredEventId(event.id)}
+              onMouseLeave={() => setHoveredEventId(null)}
+            />
+            {/* 手機快速加入按鈕（只在 lg 以下顯示，永遠可點，不需要 hover） */}
+            <button
+              onClick={(e) => handleQuickAdd(e, event)}
+              className={[
+                'lg:hidden absolute bottom-3 right-3 z-30 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all duration-200 active:scale-90 border-2',
+                isAdded
+                  ? 'bg-teal-600 border-teal-600 text-white'
+                  : 'bg-white border-stone-200 text-stone-600 hover:border-teal-600 hover:text-teal-600',
+              ].join(' ')}
+              aria-label={isAdded ? '已加入行程' : '加入行程'}
+            >
+              {justAdded ? '✓' : isAdded ? '✓' : '+'}
+            </button>
+            {/* 桌機 hover 覆蓋層 */}
+            <div className="absolute inset-x-0 bottom-0 h-[55%] bg-white/97 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100">
+              <h4 className="font-serif font-bold text-stone-800 mb-2 text-base tracking-wide">活動簡介</h4>
+              <p className="text-stone-500 text-sm leading-relaxed line-clamp-3 mb-2">{event.long_description || event.description || '暫無詳細簡介。'}</p>
+              <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊查看完整資訊 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
+              <AddItineraryButton event={event} />
             </div>
-          )}
-          <EventCard
-            event={event}
-            onMouseEnter={() => setHoveredEventId(event.id)}
-            onMouseLeave={() => setHoveredEventId(null)}
-          />
-          <div className="absolute inset-x-0 bottom-0 h-[55%] bg-white/97 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100">
-            <h4 className="font-serif font-bold text-stone-800 mb-2 text-base tracking-wide">活動簡介</h4>
-            <p className="text-stone-500 text-sm leading-relaxed line-clamp-3 mb-2">{event.long_description || event.description || '暫無詳細簡介。'}</p>
-            <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊查看完整資訊 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
-            <AddItineraryButton event={event} />
-          </div>
-        </Link>
-      ))}
+          </Link>
+        );
+      })}
     </div>
   );
 
