@@ -161,7 +161,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
            桌面：右側 400px，sticky top-4，佔滿視窗高度
       ────────────────────────────────────────────────────────────────────── */}
       <aside className="w-full lg:w-[400px] lg:flex-shrink-0 sticky top-0 z-10 lg:top-4 bg-[#f8f6f0] lg:bg-transparent">
-        <div className="h-[40vh] lg:h-[calc(100vh-2rem)] overflow-hidden border border-stone-200">
+        <div className="h-[28vh] lg:h-[calc(100vh-2rem)] overflow-hidden border border-stone-200">
           <EventsMapDynamic events={currentEvents} />
         </div>
       </aside>

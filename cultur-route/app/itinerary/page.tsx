@@ -639,10 +639,10 @@ export default function ItineraryPage() {
       </header>
 
       {/* ── Main Grid ────────────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-120px)]">
+      <div className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:h-[calc(100vh-120px)]">
 
-        {/* 左欄：活動清單 + 待處理池 */}
-        <div className="lg:col-span-1 flex flex-col gap-4 overflow-y-auto pr-2 pb-10">
+        {/* 左欄：活動清單 + 待處理池（手機版在上，桌機版在左） */}
+        <div className="lg:col-span-1 flex flex-col gap-4 lg:overflow-y-auto pr-2 pb-10">
 
           {/* 當天活動（或空狀態） */}
           {currentDayEvents.length === 0 ? (
@@ -954,13 +954,39 @@ export default function ItineraryPage() {
           </div>
         </div>
 
-        {/* 右欄：地圖 */}
-        <div className="lg:col-span-2 rounded-3xl border border-gray-200 overflow-hidden relative shadow-inner min-h-[500px]">
-          <MapComponent
-            events={currentDayEvents}
-            selectedEventId={selectedEventId}
-            onLegDurationsChange={setLegDurations}
-          />
+        {/* 右欄：地圖（手機版在下，桌機版在右） */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <div className="rounded-3xl border border-gray-200 overflow-hidden relative shadow-inner h-[55vh] lg:h-full lg:min-h-[500px]">
+            <MapComponent
+              events={currentDayEvents}
+              selectedEventId={selectedEventId}
+              onLegDurationsChange={setLegDurations}
+            />
+          </div>
+
+          {/* ── 匯出區塊（手機版地圖下方，桌機版同位置） ── */}
+          <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-stone-700 text-sm">產生行程報告 ＆ 匯出明信片</p>
+              <p className="text-xs text-stone-400 mt-0.5">將行程轉為精美圖片，方便分享或列印</p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                disabled
+                className="px-4 py-2.5 bg-stone-200 text-stone-400 text-xs font-bold rounded-xl cursor-not-allowed"
+                title="即將推出"
+              >
+                📋 行程報告
+              </button>
+              <button
+                disabled
+                className="px-4 py-2.5 bg-stone-200 text-stone-400 text-xs font-bold rounded-xl cursor-not-allowed"
+                title="即將推出"
+              >
+                🖼️ 匯出明信片
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

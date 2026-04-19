@@ -91,8 +91,9 @@ export default function ItinerarySidebar() {
             <Calendar size={20} className="text-blue-600" />
             我的文化行程
           </h2>
-          <button onClick={toggleSidebar} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
-            <X size={20} />
+          <button onClick={toggleSidebar} className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">
+            <X size={18} />
+            <span className="text-xs">我再看看</span>
           </button>
         </div>
 
@@ -192,15 +193,20 @@ export default function ItinerarySidebar() {
 
         {/* 面板底部 */}
         {plannedEvents.length > 0 && (
-          <div className="p-6 border-t border-gray-100 bg-white">
-            {/* 🌟 改成 Link，並設定點擊後自動關閉側邊欄 */}
-            <Link 
-              href="/itinerary" 
+          <div className="p-4 border-t border-gray-100 bg-white flex flex-col gap-2">
+            <Link
+              href="/itinerary"
               onClick={toggleSidebar}
-              className="block w-full py-3 bg-slate-800 text-white text-center rounded-xl font-bold hover:bg-slate-900 transition-colors shadow-md"
+              className="block w-full py-3 bg-slate-800 text-white text-center rounded-xl font-bold hover:bg-slate-900 transition-colors shadow-md text-sm"
             >
               下一步：自動安排路線 →
             </Link>
+            <button
+              onClick={toggleSidebar}
+              className="w-full py-2.5 border border-gray-200 text-gray-500 text-sm font-bold rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              繼續探索活動
+            </button>
           </div>
         )}
       </div>
