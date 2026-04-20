@@ -51,6 +51,7 @@ from google.genai import types as genai_types
 from supabase import create_client, Client
 
 from venue_whitelist import lookup_venue_coords
+from scraper import generate_embedding, check_semantic_duplicate
 
 # ── 初始化 ─────────────────────────────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings("ignore", message="Unverified HTTPS request")
-load_dotenv(find_dotenv(), encoding="utf-8-sig")
+load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
 
 supabase_url = os.getenv("SUPABASE_URL", "").strip()
 supabase_key = os.getenv("SUPABASE_SERVICE_KEY", "").strip()
@@ -237,7 +238,10 @@ def fetch_html_playwright(url: str, timeout_ms: int = 30_000) -> str | None:
             page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             page.wait_for_timeout(1500)
             html = page.content()
-            browser.close()
+            try:
+                browser.close()
+            except Exception:
+                pass  # 瀏覽器已崩潰，忽略關閉失敗
             return html
     except Exception as e:
         print(f"  [WARN] Playwright fetch failed [{url[:60]}]: {e}")
@@ -941,6 +945,25 @@ def save_event(event_data: dict, source_url: str, source_name: str,
                 "accommodation": {"label": "周邊住宿",   "url": None},
             },
         }
+
+        # ── 向量語意去重（最終防線）────────────────────────────────────────────
+        embed_text = (
+            f"{title} "
+            f"{start[:10] if start else ''} "
+            f"{event_data.get('card_summary', event_data.get('long_description', ''))[:200]}"
+        ).strip()
+        embedding = generate_embedding(embed_text)
+        if embedding:
+            is_dup, matched = check_semantic_duplicate(
+                embedding,
+                new_start_date=start[:10] if start else None,
+                new_title=title,
+            )
+            if is_dup:
+                print(f"  🧠 語意重複，跳過：{title}（↳ 相似：{matched}）")
+                return False
+        payload["embedding"] = embedding  # None → Supabase 寫入 NULL
+
         supabase.table("events").insert(payload).execute()
         print(f"  [OK] saved: {title}")
         return True

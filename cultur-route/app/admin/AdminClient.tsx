@@ -23,7 +23,7 @@ export type AdminEvent = {
 }
 
 type Tab = 'events' | 'places' | 'foods'
-type SortMode = 'default' | 'time_asc' | 'time_desc' | 'name'
+type SortMode = 'default' | 'name' | 'issues'
 
 type EditState = {
   id: string
@@ -126,14 +126,15 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
 
     return base.sort((a, b) => {
       switch (sortMode) {
-        case 'time_asc':
-          return new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
-        case 'time_desc':
-          return new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
         case 'name':
           return a.title.localeCompare(b.title, 'zh-TW')
+        case 'issues': {
+          const weight = (e: AdminEvent) => needsGeofix(e) ? 0 : !e.is_published ? 1 : 2
+          const diff = weight(a) - weight(b)
+          return diff !== 0 ? diff : new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
+        }
         default:
-          return (needsGeofix(b) ? 1 : 0) - (needsGeofix(a) ? 1 : 0)
+          return new Date(b.start_time).getTime() - new Date(a.start_time).getTime()
       }
     })
   }, [events, searchQuery, sortMode, filterYear, filterMonth])
@@ -436,16 +437,27 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
 
             {/* Year / Month Filter */}
             <div className="flex flex-col gap-2">
-              <select
-                value={filterYear}
-                onChange={e => setFilterYear(e.target.value)}
-                className="self-start px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
-              >
-                <option value="all">全部年份</option>
-                {availableYears.map(y => (
-                  <option key={y} value={String(y)}>{y} 年</option>
-                ))}
-              </select>
+              <div className="flex items-center gap-2 flex-wrap">
+                <select
+                  value={filterYear}
+                  onChange={e => setFilterYear(e.target.value)}
+                  className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                >
+                  <option value="all">全部年份</option>
+                  {availableYears.map(y => (
+                    <option key={y} value={String(y)}>{y} 年</option>
+                  ))}
+                </select>
+                <select
+                  value={sortMode}
+                  onChange={e => setSortMode(e.target.value as SortMode)}
+                  className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                >
+                  <option value="default">🕐 預設（時間新→舊）</option>
+                  <option value="name">🔤 名稱排序</option>
+                  <option value="issues">⚠️ 問題置頂</option>
+                </select>
+              </div>
 
               <div className="flex flex-wrap gap-1.5">
                 {['all', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(m => (
@@ -464,55 +476,44 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
               </div>
             </div>
 
-            {/* Batch Control Bar — 僅在有可修復項目時顯示 */}
-            {fixableInView > 0 && (
-              <div className="flex items-center gap-2 flex-wrap bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
-                <p className="text-xs font-bold text-violet-700 mr-1">
-                  {fixableInView} 筆可修復
-                  {selectedIds.size > 0 && <span className="text-violet-500"> · 已選 {selectedIds.size} 筆</span>}
-                </p>
+            {/* Batch Control Bar — 永遠顯示 */}
+            <div className="flex items-center gap-2 flex-wrap bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
+              <p className="text-xs font-bold text-violet-700 mr-1">
+                {fixableInView > 0
+                  ? <>{fixableInView} 筆可修復{selectedIds.size > 0 && <span className="text-violet-500"> · 已選 {selectedIds.size} 筆</span>}</>
+                  : <span className="text-violet-400">目前無需修復的活動</span>
+                }
+              </p>
+              <button
+                onClick={handleSelectAll}
+                disabled={isBatchRunning || fixableInView === 0}
+                className="px-3 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                全選可修復
+              </button>
+              <button
+                onClick={handleClearSelection}
+                disabled={selectedIds.size === 0 || isBatchRunning}
+                className="px-3 py-1.5 bg-white hover:bg-gray-100 text-gray-500 rounded-lg text-xs font-bold border border-gray-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                清除選取
+              </button>
+              <div className="flex-1" />
+              {isBatchRunning ? (
+                <div className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg text-xs font-bold">
+                  <Loader2 size={13} className="animate-spin" />
+                  處理中 {batchProgress?.done ?? 0} / {batchProgress?.total ?? 0} 筆...
+                </div>
+              ) : (
                 <button
-                  onClick={handleSelectAll}
-                  disabled={isBatchRunning}
-                  className="px-3 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-40"
+                  onClick={handleBatchGeocode}
+                  disabled={selectedIds.size === 0}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  全選可修復
+                  🚀 批次修復所選座標
                 </button>
-                <button
-                  onClick={handleClearSelection}
-                  disabled={selectedIds.size === 0 || isBatchRunning}
-                  className="px-3 py-1.5 bg-white hover:bg-gray-100 text-gray-500 rounded-lg text-xs font-bold border border-gray-200 transition-colors disabled:opacity-40"
-                >
-                  清除選取
-                </button>
-                <select
-                  value={sortMode}
-                  onChange={e => setSortMode(e.target.value as SortMode)}
-                  disabled={isBatchRunning}
-                  className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-400 disabled:opacity-40"
-                >
-                  <option value="default">📌 預設（待辦置頂）</option>
-                  <option value="time_desc">🕐 時間（新→舊）</option>
-                  <option value="time_asc">🕐 時間（舊→新）</option>
-                  <option value="name">🔤 名稱排序</option>
-                </select>
-                <div className="flex-1" />
-                {isBatchRunning ? (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg text-xs font-bold">
-                    <Loader2 size={13} className="animate-spin" />
-                    處理中 {batchProgress?.done ?? 0} / {batchProgress?.total ?? 0} 筆...
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleBatchGeocode}
-                    disabled={selectedIds.size === 0}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    🚀 批次修復所選座標
-                  </button>
-                )}
-              </div>
-            )}
+              )}
+            </div>
 
             <p className="text-xs text-gray-400 font-mono px-1">
               顯示 {filtered.length} / {events.length} 筆 · 橘色置頂 = 需補座標 · 紅色背景 = 已下架

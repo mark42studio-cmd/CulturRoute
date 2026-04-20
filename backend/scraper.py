@@ -14,16 +14,18 @@ from google import genai
 from google.genai import types
 from playwright_stealth import Stealth
 from supabase import create_client, Client
+from venue_whitelist import lookup_venue_coords
 
 # 🌟 關閉煩人的 SSL 憑證黃字警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 自動尋找 .env，並加入 utf-8-sig 破解隱形字元
-load_dotenv(find_dotenv(), encoding="utf-8-sig")
+load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
 
 supabase_url = os.getenv("SUPABASE_URL").strip()
 supabase_key = os.getenv("SUPABASE_SERVICE_KEY").strip()
-gemini_key = os.getenv("GEMINI_API_KEY").strip()
+gemini_key       = os.getenv("GEMINI_API_KEY").strip()
+google_maps_key  = os.getenv("GOOGLE_MAPS_API_KEY", "").strip()
 
 if not supabase_url or not supabase_key:
     print("❌ 嚴重錯誤：讀不到 SUPABASE_URL，請檢查 .env 檔案！")
@@ -31,6 +33,140 @@ if not supabase_url or not supabase_key:
 
 client = genai.Client(api_key=gemini_key)
 supabase: Client = create_client(supabase_url, supabase_key)
+
+# ── Geocoding：白名單 + Google Places API ────────────────────────────────────
+
+_TAITUNG_KEYWORDS = ("台東", "臺東")
+_YELLOW = "\033[33m"
+_RESET  = "\033[0m"
+
+
+def get_coordinates(location_name: str) -> tuple:
+    """
+    查詢場館座標。優先層級：白名單 > Google Places API。
+    地址不含台東 → 回傳哨兵 ("FILTERED", None)，呼叫端應捨棄該活動。
+    """
+    if not location_name or location_name in ("未提供", ""):
+        return None, None
+
+    lat, lng = lookup_venue_coords(location_name)
+    if lat and lng:
+        return lat, lng
+
+    if not google_maps_key:
+        return None, None
+
+    query = (location_name if any(k in location_name for k in _TAITUNG_KEYWORDS)
+             else f"台東 {location_name}")
+    api_url = "https://places.googleapis.com/v1/places:searchText"
+    headers = {
+        "Content-Type":     "application/json",
+        "X-Goog-Api-Key":   google_maps_key,
+        "X-Goog-FieldMask": "places.displayName.text,places.location,places.formattedAddress",
+    }
+    body = {"textQuery": query, "languageCode": "zh-TW", "maxResultCount": 1}
+    try:
+        resp = requests.post(api_url, json=body, headers=headers, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        if "places" in data and data["places"]:
+            place          = data["places"][0]
+            loc            = place.get("location", {})
+            lat            = loc.get("latitude")
+            lng            = loc.get("longitude")
+            name           = place.get("displayName", {}).get("text", "")
+            formatted_addr = place.get("formattedAddress", "")
+            if formatted_addr and not any(k in formatted_addr for k in _TAITUNG_KEYWORDS):
+                print(f"{_YELLOW}  [過濾] 地點不在台東 (地址: {formatted_addr})，已捨棄。{_RESET}")
+                return "FILTERED", None  # type: ignore[return-value]
+            if lat and lng:
+                print(f"  📍 Google Places：{name} ({formatted_addr}) → ({lat:.5f}, {lng:.5f})")
+                return lat, lng
+    except Exception as e:
+        print(f"  ⚠️ Google Places 查詢失敗 ({location_name}): {e}")
+    return None, None
+
+
+# ── 語意去重：Embedding 向量生成 ─────────────────────────────────────────────
+
+def generate_embedding(text: str) -> list | None:
+    """
+    呼叫 Gemini models/gemini-embedding-001（google.genai 新版 SDK），
+    將文字轉為浮點向量。
+    失敗時回傳 None，主流程繼續但該筆不做語意去重。
+    """
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            result = client.models.embed_content(
+                model="models/gemini-embedding-001",
+                contents=text,
+            )
+            return list(result.embeddings[0].values)
+        except Exception as e:
+            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+                print(f"⏳ Embedding API 頻率限制，等待 60 秒... ({attempt + 1}/{max_retries})")
+                time.sleep(60)
+            else:
+                print(f"⚠️  Embedding 生成失敗（不中斷主流程）：{e}")
+                return None
+    return None
+
+
+def check_semantic_duplicate(
+    embedding: list,
+    new_start_date: str | None = None,
+    new_title: str | None = None,
+    threshold: float = 0.88,
+) -> tuple:
+    """
+    呼叫 Supabase match_events RPC，比對餘弦相似度。
+    回傳 (is_duplicate: bool, matched_title: str)。
+
+    語意相似時依序走「雙重豁免」，只有三條件全中才真正跳過：
+
+      豁免 1 — 日期不同：系列活動共用海報導致向量相近，但不同場次日期不同。
+                new_start_date ≠ matched start_time[:10] → 放行。
+
+      豁免 2 — 標題不同（終極防線）：AI 萃取出同一日期但標題含場次後綴
+                （例：「山海有聲 (2/14場)」vs「山海有聲 (3/7場)」）。
+                new_title ≠ matched title（完全比對）→ 放行。
+
+      三條件全中（語意高相似 + 同日 + 同標題）→ 真正重複，跳過。
+
+    RPC 失敗時回傳 (False, '')，確保不誤殺正常寫入。
+    """
+    try:
+        result = supabase.rpc("match_events", {
+            "query_embedding": embedding,
+            "match_threshold":  threshold,
+            "match_count":      1,
+        }).execute()
+        if result.data:
+            matched       = result.data[0]
+            matched_title = matched.get("title", "")
+
+            # ── 豁免 1：日期不同 → 不同場次，放行 ──────────────────────────────
+            if new_start_date:
+                matched_start = matched.get("start_time") or ""
+                matched_date  = matched_start[:10] if matched_start else ""
+                if matched_date and matched_date != new_start_date:
+                    print(f"🗓️  語意相似但日期不同（{new_start_date} ≠ {matched_date}），"
+                          f"同系列不同場次，放行：{matched_title}")
+                    return False, matched_title
+
+            # ── 豁免 2：標題不同 → AI 萃取盲點（同日不同場次後綴），放行 ────────
+            if new_title and matched_title and new_title != matched_title:
+                print(f"🏷️  語意相似但標題不同，同系列不同場次，放行")
+                print(f"   ↳ 新進：{new_title}")
+                print(f"   ↳ 既有：{matched_title}")
+                return False, matched_title
+
+            return True, matched_title
+        return False, ""
+    except Exception as e:
+        print(f"⚠️  向量查重 RPC 呼叫失敗（不中斷主流程）：{e}")
+        return False, ""
 
 # ==========================================
 # 🌟 多站台目標配置清單
@@ -410,6 +546,37 @@ def save_to_supabase(event_data, dry_run: bool = False):
                 print(f"⏩ 已存在（跨平台正規化比對），跳過：{title}")
                 continue
 
+            # ── Layer 3：語意向量去重（跨平台、跨日期）──────────────────────
+            # 將「標題 + 日期 + 簡介」組合成語意文字，透過 Gemini Embedding 比對
+            # 能捕捉官網與 FB 以不同文字描述同一活動的情況
+            embed_text = (
+                f"{title} "
+                f"{start_time[:10]} "
+                f"{single_event.get('card_summary', single_event.get('description', ''))}"
+            ).strip()
+            embedding = generate_embedding(embed_text)
+
+            if embedding:
+                is_semantic_dup, matched_title = check_semantic_duplicate(
+                    embedding, new_start_date=start_time[:10], new_title=title
+                )
+                if is_semantic_dup:
+                    print(f"🧠 偵測到語意重複活動，跳過寫入：{title}")
+                    print(f"   ↳ 相似既有活動：{matched_title}")
+                    continue
+            else:
+                # Embedding 失敗 → 略過語意比對，繼續寫入（不犧牲資料完整性）
+                print(f"⚠️  Embedding 失敗，跳過語意去重（仍寫入）：{title}")
+
+            # ── 座標補全（白名單 / Google Places）──────────────────────────────
+            lat = single_event.get('latitude')
+            lon = single_event.get('longitude')
+            if not lat or not lon:
+                lat, lon = get_coordinates(single_event.get('location', ''))
+            if lat == "FILTERED":
+                print(f"⚠️  地點不在台東（geocoding 過濾），跳過：{title}")
+                continue
+
             # ── 組 payload ────────────────────────────────────────────────────
             payload = {
                 "title":            title,
@@ -420,8 +587,8 @@ def save_to_supabase(event_data, dry_run: bool = False):
                 "end_time":         end_time,
                 "end_date":         end_date,        # ← 展覽區間核心欄位
                 "venue_name":       single_event.get('location', '未提供'),
-                "latitude":         single_event.get('latitude'),
-                "longitude":        single_event.get('longitude'),
+                "latitude":         lat,
+                "longitude":        lon,
                 "is_free":          single_event.get('is_free', False),
                 "ticket_url":       single_event.get('ticket_url'),
                 "source_url":       source_url,
@@ -435,6 +602,7 @@ def save_to_supabase(event_data, dry_run: bool = False):
                     "ticket":        {"label": "售票連結",   "url": None},
                     "accommodation": {"label": "周邊住宿",   "url": None},
                 },
+                "embedding": embedding,  # None 時 Supabase 寫入 NULL，不影響其他欄位
             }
 
             if dry_run:
@@ -707,14 +875,27 @@ def ai_powered_spider(site_config, dry_run: bool = False, limit: int = 0):
                     
                 except Exception as e:
                     print(f"⚠️ 略過此頁面 (超時或錯誤): {e}")
-                    
-                time.sleep(15) 
-                
+                    # 頁面或 context 崩潰後嘗試重建，確保後續 URL 不受影響
+                    try:
+                        page = context.new_page()
+                        print("   🔄 已重建頁面，繼續下一站")
+                    except Exception:
+                        try:
+                            page = browser.new_context().new_page()
+                        except Exception as rebuild_err:
+                            print(f"   🚨 瀏覽器已崩潰，中止此站台：{rebuild_err}")
+                            break
+
+                time.sleep(15)
+
         except Exception as e:
             print(f"❌ 無法連接到站台 {site_name}: {e}")
-            
+
         finally:
-            browser.close()
+            try:
+                browser.close()
+            except Exception:
+                pass  # 瀏覽器已崩潰，忽略關閉失敗
 
 # ==========================================
 # 🌟 大迴圈執行區塊

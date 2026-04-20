@@ -7,7 +7,7 @@ from supabase import create_client, Client
 # ==========================================
 # 1. 系統初始化
 # ==========================================
-load_dotenv(find_dotenv(), encoding="utf-8-sig")
+load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
 
 url: str = os.getenv("SUPABASE_URL").strip()
 key: str = os.getenv("SUPABASE_SERVICE_KEY").strip()

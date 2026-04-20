@@ -86,13 +86,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
               {event.is_free ? '免費參加' : '付費活動'}
             </span>
             
-            {event.weather_resilience && (
-               <span className="px-4 py-1.5 rounded-full text-sm font-bold bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">
-                氣候韌性: {event.weather_resilience}/5
-              </span>
-            )}
 
-            {event.vibe_tags?.map((tag: string) => (
+{event.vibe_tags?.map((tag: string) => (
               <span key={tag} className="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
                 #{tag.replace(/^#+/, '')}
               </span>

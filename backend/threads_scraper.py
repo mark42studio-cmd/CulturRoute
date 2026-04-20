@@ -9,8 +9,9 @@ from google import genai
 from supabase import create_client, Client
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
+from scraper import generate_embedding, check_semantic_duplicate
 
-load_dotenv(find_dotenv(), encoding="utf-8-sig")
+load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
 
 supabase_url = os.getenv("SUPABASE_URL").strip()
 supabase_key = os.getenv("SUPABASE_SERVICE_KEY").strip()
@@ -23,7 +24,7 @@ geolocator = Nominatim(user_agent="cultur_route_scraper")
 SEARCH_KEYWORDS = [
     "台東 活動", "台東 展覽", "台東 音樂祭", "台東 市集",
     "台東 親子", "台東 導覽", "台東 講座", "台東 表演",
-    "鐵花村", "台東美術館", "台東設計中心"
+    "台東美術館", "台東設計中心"
 ]
 
 
@@ -175,6 +176,25 @@ def save_event(event_data, source_url):
                 "accommodation": {"label": "周邊住宿",   "url": None}
             }
         }
+
+        # ── 向量語意去重（最終防線）────────────────────────────────────────────
+        embed_text = (
+            f"{payload['title']} "
+            f"{(payload.get('start_time') or '')[:10]} "
+            f"{payload.get('description', '')[:200]}"
+        ).strip()
+        embedding = generate_embedding(embed_text)
+        if embedding:
+            is_dup, matched = check_semantic_duplicate(
+                embedding,
+                new_start_date=(payload.get('start_time') or '')[:10],
+                new_title=payload['title'],
+            )
+            if is_dup:
+                print(f"🧠 語意重複，跳過：{payload['title']}（↳ 相似：{matched}）")
+                return False
+        payload["embedding"] = embedding  # None → Supabase 寫入 NULL
+
         supabase.table("events").insert(payload).execute()
         print(f"✅ 寫入 events：{payload['title']}")
         return True

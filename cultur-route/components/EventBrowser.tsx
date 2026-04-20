@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import EventCard from '@/components/EventCard';
-import Link from 'next/link';
 import AddItineraryButton from '@/components/AddItineraryButton';
+import EventDetailModal from '@/components/EventDetailModal';
 import { CalendarRange, CalendarX, Sparkles, Clock } from 'lucide-react';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { Event } from '@/types';
@@ -33,6 +33,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   const [isMounted, setIsMounted] = useState(false);
   const [viewMode, setViewMode] = useState<'all' | 'event' | 'exhibition'>('all');
   const [quickToastId, setQuickToastId] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   // useMemo 確保每次 render 不重新計算（日期在同一天內不會改變）
   const TODAY = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }), []);
@@ -110,7 +111,11 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   const renderMissedEventGrid = (events: Event[]) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {events.map((event) => (
-        <Link href={`/event/${event.id}`} key={event.id} className="relative flex flex-col h-full group cursor-pointer">
+        <div
+          key={event.id}
+          onClick={() => setSelectedEvent(event)}
+          className="relative flex flex-col h-full group cursor-pointer"
+        >
           {isOngoing(event) && (
             <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse inline-block" />
@@ -122,10 +127,13 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
             onMouseEnter={() => setHoveredEventId(event.id)}
             onMouseLeave={() => setHoveredEventId(null)}
           />
-          <div className="absolute inset-x-0 bottom-0 h-[60%] bg-white/97 p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100">
+          <div
+            className="absolute inset-x-0 bottom-0 h-[60%] bg-white/97 p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h4 className="font-serif font-bold text-stone-800 mb-1.5 text-base tracking-wide">活動簡介</h4>
             <p className="text-stone-500 text-sm leading-relaxed line-clamp-2 mb-2">{event.long_description || event.description || '暫無詳細簡介。'}</p>
-            <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊查看完整資訊 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
+            <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊卡片查看詳情 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
             <button
               onClick={(e) => handleStayLonger(e, event)}
               className="mt-3 w-full py-2 font-medium text-sm tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 border border-teal-800 text-teal-800 hover:bg-teal-800 hover:text-white"
@@ -134,7 +142,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
               多留一下，看這個！
             </button>
           </div>
-        </Link>
+        </div>
       ))}
     </div>
   );
@@ -145,7 +153,11 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
         const isAdded = plannedEvents.some(p => p.id === event.id);
         const justAdded = quickToastId === event.id;
         return (
-          <Link href={`/event/${event.id}`} key={event.id} className="relative flex flex-col h-full group cursor-pointer">
+          <div
+            key={event.id}
+            onClick={() => setSelectedEvent(event)}
+            className="relative flex flex-col h-full group cursor-pointer"
+          >
             {/* 進行中 badge */}
             {isOngoing(event) && (
               <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
@@ -172,13 +184,16 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
               {justAdded ? '✓' : isAdded ? '✓' : '+'}
             </button>
             {/* 桌機 hover 覆蓋層 */}
-            <div className="absolute inset-x-0 bottom-0 h-[55%] bg-white/97 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100">
+            <div
+              className="absolute inset-x-0 bottom-0 h-[55%] bg-white/97 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h4 className="font-serif font-bold text-stone-800 mb-2 text-base tracking-wide">活動簡介</h4>
               <p className="text-stone-500 text-sm leading-relaxed line-clamp-3 mb-2">{event.long_description || event.description || '暫無詳細簡介。'}</p>
-              <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊查看完整資訊 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
+              <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊卡片查看詳情 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
               <AddItineraryButton event={event} />
             </div>
-          </Link>
+          </div>
         );
       })}
     </div>
@@ -187,6 +202,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   if (!isMounted) return null;
 
   return (
+    <>
     <div className="flex flex-col lg:flex-row-reverse gap-6 items-start">
 
       {/* ── 地圖面板 ──────────────────────────────────────────────────────────
@@ -246,6 +262,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
               type="date" value={startDate}
               onChange={(e) => setTripDates(e.target.value, endDate)}
               className="w-full bg-transparent border-b border-stone-300 px-0 py-2 text-stone-700 focus:outline-none focus:border-teal-700 transition-colors"
+              suppressHydrationWarning
             />
           </div>
           <div className="flex-1 w-full">
@@ -254,6 +271,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
               type="date" min={startDate} value={endDate}
               onChange={(e) => setTripDates(startDate, e.target.value)}
               className="w-full bg-transparent border-b border-stone-300 px-0 py-2 text-stone-700 focus:outline-none focus:border-teal-700 transition-colors"
+              suppressHydrationWarning
             />
           </div>
           {isFiltering && (
@@ -311,5 +329,8 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       )}
       </div>{/* end 主內容 */}
     </div>
+
+    <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+    </>
   );
 }

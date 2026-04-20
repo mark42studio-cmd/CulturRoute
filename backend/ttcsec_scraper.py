@@ -34,7 +34,7 @@ from google.genai import types
 from scraper import save_to_supabase, normalize_title
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-load_dotenv(find_dotenv(), encoding="utf-8-sig")
+load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
 
 gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
 if not gemini_key:
@@ -532,13 +532,25 @@ def run(dry_run: bool = False, limit: int = 0) -> None:
 
                 except Exception as e:
                     print(f"⚠️  略過此頁（超時或錯誤）：{e}")
+                    try:
+                        page = context.new_page()
+                        print("   🔄 已重建頁面，繼續下一站")
+                    except Exception:
+                        try:
+                            page = browser.new_context().new_page()
+                        except Exception as rebuild_err:
+                            print(f"   🚨 瀏覽器已崩潰，中止美學館爬取：{rebuild_err}")
+                            break
 
                 time.sleep(15)   # 禮貌性延遲，避免對目標站造成壓力
 
         except Exception as e:
             print(f"❌ 美學館爬蟲發生嚴重錯誤：{e}")
         finally:
-            browser.close()
+            try:
+                browser.close()
+            except Exception:
+                pass  # 瀏覽器已崩潰，忽略關閉失敗
 
     print("\n💡 美學館爬蟲任務完成。")
 

@@ -207,6 +207,10 @@ const generateItineraryICS = (events: PlannedEvent[]): string => {
 /**
  * 觸發行程 .ics 檔案下載（以使用者規劃時間為準）
  * 檔名：CulturRoute-Itinerary.ics
+ *
+ * 手機相容性：
+ *  - target="_blank" 提高手機瀏覽器觸發下載的成功率
+ *  - setTimeout 10 秒後才釋放 Blob URL，給慢速手機足夠緩衝
  */
 export const downloadItineraryICS = (events: PlannedEvent[]): void => {
   const content = generateItineraryICS(events);
@@ -215,10 +219,11 @@ export const downloadItineraryICS = (events: PlannedEvent[]): void => {
   const a = document.createElement('a');
   a.href = url;
   a.download = 'CulturRoute-Itinerary.ics';
+  a.target = '_blank';   // 手機瀏覽器提高下載成功率的關鍵屬性
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 };
 
 // ── 圖片下載 ──────────────────────────────────────────────────────────────────
@@ -226,45 +231,62 @@ export const downloadItineraryICS = (events: PlannedEvent[]): void => {
 /**
  * 將目標 DOM 節點截圖並下載為 PNG（明信片模式）
  *
- * 動態 import html2canvas 避免 Next.js SSR 期間碰到 window。
- * 錯誤處理原則：
- *   - import 失敗 → console.error + throw，確保 html2canvas 絕不以 undefined 被呼叫
- *   - 截圖失敗    → console.error + alert，onEnd 在 finally 中必然執行
+ * 手機相容性策略：
+ *  1. scale 固定 1（避免手機 OOM 閃退）
+ *  2. useCORS + allowTaint: false（防止 Canvas 污染）
+ *  3. canvas.toBlob() → Blob URL（比 toDataURL 更省記憶體，手機友好）
+ *  4. iOS 偵測：直接開新分頁顯示圖片，提示長按儲存（iOS 不支援 download 屬性）
+ *  5. onEnd 放在 finally，確保無論成功/失敗按鈕都會恢復
  */
 export const downloadReportImage = async (
   element: HTMLElement,
   onStart?: () => void,
   onEnd?: () => void,
-  scale?: number,
   filename = `CulturRoute_台東明信片_${new Date().toISOString().substring(0, 10)}.png`,
 ): Promise<void> => {
-  // 手機裝置記憶體有限，自動降低解析度避免 OOM 閃退
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const resolvedScale = scale ?? (isMobile ? Math.min(window.devicePixelRatio, 2) : 3);
   onStart?.();
   try {
-    // 套件載入失敗時立刻 throw，後續程式碼完全不執行
     const { default: html2canvas } = await import('html2canvas').catch((err) => {
       console.error('[CulturRoute] html2canvas 套件載入失敗:', err);
       throw new Error('html2canvas 套件未安裝，請執行：npm install html2canvas');
     });
 
     const canvas = await html2canvas(element, {
-      useCORS: true,        // 允許跨域圖片（活動海報）
-      allowTaint: false,    // 與 useCORS 搭配，拒絕汙染 canvas 的跨域圖片
+      useCORS: true,
+      allowTaint: false,
       // @ts-ignore — `scale` 為有效執行時屬性，但 @types/html2canvas 型別定義未包含
-      scale: resolvedScale, // 手機降為 devicePixelRatio（最多 2x），桌機 3x
+      scale: 1,           // 固定 1x：手機不會 OOM，桌機也夠清晰
       backgroundColor: '#f8f6f0',
       logging: false,
     });
 
-    const url = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // toBlob 比 toDataURL 更省記憶體（手機必備）；包成 Promise 確保 finally 時序正確
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((b) => {
+        if (b) resolve(b);
+        else   reject(new Error('canvas.toBlob 回傳 null'));
+      }, 'image/png');
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    // iOS 不支援 <a download>；改開新分頁讓使用者長按儲存
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS) {
+      window.open(url, '_blank', 'noopener');
+      alert('長按圖片即可儲存至相簿 📸');
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // 延遲釋放，給慢速手機足夠緩衝
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
   } catch (err) {
     console.error('[CulturRoute] 明信片生成失敗:', err);
     alert('下載失敗，請稍後再試。\n詳細錯誤請查看瀏覽器 Console（F12）。');

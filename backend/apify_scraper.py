@@ -24,7 +24,7 @@ from dotenv import load_dotenv, find_dotenv
 from apify_client import ApifyClient
 from supabase import create_client, Client
 
-load_dotenv(find_dotenv(), encoding="utf-8-sig")
+load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
 
 APIFY_TOKEN  = os.getenv("APIFY_API_TOKEN", "").strip()
 supabase_url = os.getenv("SUPABASE_URL", "").strip()

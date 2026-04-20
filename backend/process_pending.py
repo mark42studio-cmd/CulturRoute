@@ -29,10 +29,11 @@ from dotenv import load_dotenv, find_dotenv
 from google import genai
 from supabase import create_client, Client
 
-from venue_whitelist import lookup_venue_coords, get_source_auto_tags
+from venue_whitelist import get_source_auto_tags
 from township_scraper import is_valid_image_url
+from scraper import generate_embedding, check_semantic_duplicate, get_coordinates
 
-load_dotenv(find_dotenv(), encoding="utf-8-sig")
+load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
 
 supabase_url   = os.getenv("SUPABASE_URL").strip()
 supabase_key   = os.getenv("SUPABASE_SERVICE_KEY").strip()
@@ -442,76 +443,6 @@ def ai_data_cleaner(raw_text: str, source_type: str = "threads"):
     return None
 
 
-# ── 座標查詢（Google Places API）──────────────────────────────────────────────
-
-_TAITUNG_KEYWORDS = ("台東", "臺東")
-
-# ANSI yellow for terminal warning
-_YELLOW = "\033[33m"
-_RESET  = "\033[0m"
-
-
-def get_coordinates(location_name: str) -> tuple[float | None, float | None] | tuple[None, None]:
-    """
-    查詢場館座標。優先層級：白名單 > Google Places API。
-    白名單命中時不消耗 API quota。
-
-    防線 B（地理攔截）：Google Places 回傳的 formatted_address 若不含「台東」或「臺東」，
-    視為非台東場館，回傳特殊哨兵 (None, None) 並印出黃色警告。
-    呼叫端應在收到 (None, None) 且已明確是 Places 過濾的情況下捨棄該活動。
-    """
-    if not location_name or location_name in ("未提供", ""):
-        return None, None
-
-    # 1. 查座標白名單（零成本、精準；白名單只收台東場館，天然安全）
-    lat, lng = lookup_venue_coords(location_name)
-    if lat and lng:
-        return lat, lng
-
-    # 2. Google Places API
-    if not google_maps_key:
-        return None, None
-
-    query = location_name if any(k in location_name for k in _TAITUNG_KEYWORDS) else f"台東 {location_name}"
-    api_url = "https://places.googleapis.com/v1/places:searchText"
-    headers = {
-        "Content-Type":    "application/json",
-        "X-Goog-Api-Key":  google_maps_key,
-        "X-Goog-FieldMask": "places.displayName.text,places.location,places.formattedAddress",
-    }
-    payload = {
-        "textQuery":      query,
-        "languageCode":   "zh-TW",
-        "maxResultCount": 1,
-    }
-    try:
-        resp = requests.post(api_url, json=payload, headers=headers, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
-        if "places" in data and data["places"]:
-            place            = data["places"][0]
-            loc              = place.get("location", {})
-            lat              = loc.get("latitude")
-            lng              = loc.get("longitude")
-            name             = place.get("displayName", {}).get("text", "")
-            formatted_addr   = place.get("formattedAddress", "")
-
-            # ── 防線 B：地址不含台東 → 攔截，回傳 FILTERED 哨兵 ──────────────
-            if formatted_addr and not any(k in formatted_addr for k in _TAITUNG_KEYWORDS):
-                print(
-                    f"{_YELLOW}  [過濾] 地點不在台東 "
-                    f"(地址: {formatted_addr})，已捨棄。{_RESET}"
-                )
-                return "FILTERED", None  # type: ignore[return-value]
-
-            if lat and lng:
-                print(f"  📍 Google Places：{name} ({formatted_addr}) → ({lat:.5f}, {lng:.5f})")
-                return lat, lng
-    except Exception as e:
-        print(f"  ⚠️ Google Places 查詢失敗 ({location_name}): {e}")
-    return None, None
-
-
 # ── 場館地址白名單（Geocoding 防偏移，從源頭覆寫）──────────────────────────────
 # 使用 substring match：只要 venue_name 包含 key，就強制覆寫 address 欄位。
 # 前端 buildGeoQuery 優先使用 address，精準地址寫進 DB 即可消除 Geocoding 跳空。
@@ -738,6 +669,24 @@ def save_event(event_data: dict, source_url: str, source_type: str = "threads",
             lat=payload["latitude"], lon=payload["longitude"],
         ):
             return True   # 視為已處理成功，不標記 ai_failed
+
+        # ── 第四層：向量語意去重（跨平台最終防線）────────────────────────────
+        embed_text = (
+            f"{payload['title']} "
+            f"{(payload['start_time'] or '')[:10]} "
+            f"{payload.get('description', '')[:200]}"
+        ).strip()
+        embedding = generate_embedding(embed_text)
+        if embedding:
+            is_dup, matched = check_semantic_duplicate(
+                embedding,
+                new_start_date=(payload['start_time'] or '')[:10],
+                new_title=payload['title'],
+            )
+            if is_dup:
+                print(f"  🧠 語意重複，跳過：{payload['title']}（↳ 相似：{matched}）")
+                return True   # 視為已處理成功
+        payload["embedding"] = embedding  # None → Supabase 寫入 NULL
 
         supabase.table("events").insert(payload).execute()
         print(f"  ✅ 寫入 events：{payload['title']}")

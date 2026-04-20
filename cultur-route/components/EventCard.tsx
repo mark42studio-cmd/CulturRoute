@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import Image from 'next/image';
-import { Calendar, MapPin, CloudSun } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import type { Event } from '@/types';
 
 interface EventProps {
@@ -125,13 +125,7 @@ const EventCard = ({ event, onMouseEnter, onMouseLeave }: EventProps) => {
 
         {/* 右上角徽章（absolute 僅在圖片容器內） */}
         <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
-          {event.weather_resilience && (
-            <div className="bg-white/90 backdrop-blur-sm px-2.5 py-0.5 flex items-center gap-1">
-              <CloudSun size={12} className="text-sky-600" />
-              <span className="text-[10px] font-medium text-stone-600 tracking-wide">韌性 {event.weather_resilience}/5</span>
-            </div>
-          )}
-          {event.is_free && (
+{event.is_free && (
             <div className="bg-teal-800/90 backdrop-blur-sm text-white px-2.5 py-0.5 text-[10px] font-medium tracking-wider">
               免費
             </div>

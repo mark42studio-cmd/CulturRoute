@@ -1,20 +1,29 @@
 import { NextResponse } from 'next/server';
+import { PlacesQuerySchema, parseRequest } from '@/lib/validation';
 
 export async function POST(request: Request) {
+  // ── 1. 解析並校驗 request body ────────────────────────────────────────────
+  let body: unknown;
   try {
-    const body = await request.json();
-    const { query } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: '請求 body 必須為合法 JSON' }, { status: 400 });
+  }
 
-    if (!query) {
-      return NextResponse.json({ error: '請提供搜尋關鍵字' }, { status: 400 });
-    }
+  const parsed = parseRequest(PlacesQuerySchema, body);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
+  }
 
-    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: '未設定 Google API Key' }, { status: 500 });
-    }
+  const { query } = parsed.data;  // 已通過 trim + max(100) 驗證
 
-    // 1. 向 Google 索取資料 (🌟 注意 FieldMask 多加了 places.photos)
+  // ── 2. 呼叫 Google Places API ─────────────────────────────────────────────
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: '未設定 Google API Key' }, { status: 500 });
+  }
+
+  try {
     const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
       headers: {
@@ -29,31 +38,24 @@ export async function POST(request: Request) {
     });
 
     const data = await response.json();
-    
-    // 2. 如果有抓到資料，我們幫前端把「圖片真實網址」組合好
+
+    // ── 3. 組合圖片真實網址後回傳 ─────────────────────────────────────────
     if (data.places) {
       const placesWithPhotos = data.places.map((place: any) => {
         let photoUrl = '';
-        // 判斷這家店有沒有上傳照片
         if (place.photos && place.photos.length > 0) {
-          // 拿第一張照片的代號
-          const photoName = place.photos[0].name; 
-          // 🌟 組合出可以直接在 <img> 標籤顯示的真實網址 (限制最大寬度 800px 節省流量)
+          const photoName = place.photos[0].name;
           photoUrl = `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=800&key=${apiKey}`;
         }
-        
-        return {
-          ...place,
-          photoUrl // 把組合好的網址塞回資料裡傳給前端
-        };
+        return { ...place, photoUrl };
       });
-
       return NextResponse.json({ places: placesWithPhotos });
     }
 
     return NextResponse.json(data);
-    
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+  } catch {
+    // 不向前端洩漏內部錯誤細節
+    return NextResponse.json({ error: '查詢失敗，請稍後再試' }, { status: 500 });
   }
 }

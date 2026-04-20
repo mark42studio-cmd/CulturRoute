@@ -255,7 +255,9 @@ export default function ItineraryPage() {
   const [isMounted,        setIsMounted]        = useState(false);
   const [activeDate,       setActiveDate]       = useState<string>('');
   const [showReport,       setShowReport]       = useState(false);
-  const [isCapturing,      setIsCapturing]      = useState(false);
+  const [showMap,          setShowMap]          = useState(false);
+  const [isCapturing,         setIsCapturing]         = useState(false);
+  const [isExportingCalendar, setIsExportingCalendar] = useState(false);
   // Bug 2：行程清單點擊活動時，通知地圖高亮對應 Marker
   const [selectedEventId,  setSelectedEventId]  = useState<string | null>(null);
   // Directions API 各 leg 實際車程（分鐘），由 ItineraryMap 回傳，用於精準衝突分析
@@ -266,8 +268,9 @@ export default function ItineraryPage() {
   const [feedbackSent,      setFeedbackSent]      = useState(false);
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [feedbackError,     setFeedbackError]     = useState(false);
-  const reportCardRef  = useRef<HTMLDivElement>(null);
-  const postcardRef    = useRef<HTMLDivElement>(null);
+  const reportCardRef    = useRef<HTMLDivElement>(null);
+  const postcardRef      = useRef<HTMLDivElement>(null);
+  const mapContainerRef  = useRef<HTMLDivElement>(null);
   // Toast 通知（取代舊的 warningModal）
   const [toasts, setToasts] = useState<Array<{ id: number; message: string }>>([]);
   const showToast = useCallback((message: string) => {
@@ -298,9 +301,9 @@ export default function ItineraryPage() {
   const sortedDates = buildTripDates(tripStartDate, tripEndDate, plannedEvents);
   const actualActiveDate = sortedDates.includes(activeDate) ? activeDate : sortedDates[0];
 
-  // 切換日期時清空舊的車程資料，避免暫時顯示不正確的衝突警告
+  // 切換日期時清空車程資料並收起地圖，避免舊路線閃現
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { setLegDurations([]); }, [actualActiveDate]);
+  useEffect(() => { setLegDurations([]); setShowMap(false); }, [actualActiveDate]);
 
   // ── 容錯：偵測 assigned_date 不在 sortedDates 內的活動（動態範圍下理論上不存在）
   const unassignedEvents: PlannedEvent[] = plannedEvents.filter(
@@ -351,10 +354,9 @@ export default function ItineraryPage() {
   };
 
   const handleDownloadImage = () => {
-    if (!postcardRef.current) return;
-    // 防呆計時器：最多 10 秒後強制恢復按鈕，無論截圖成功或失敗
-    const safetyTimer = setTimeout(() => setIsCapturing(false), 10_000);
-    // scale 不傳，讓 downloadReportImage 自動根據裝置選擇（手機降低解析度）
+    if (!postcardRef.current || isCapturing) return;
+    // 防呆計時器：最多 15 秒後強制恢復按鈕（手機截圖可能較慢）
+    const safetyTimer = setTimeout(() => setIsCapturing(false), 15_000);
     downloadReportImage(
       postcardRef.current,
       () => setIsCapturing(true),
@@ -362,12 +364,28 @@ export default function ItineraryPage() {
     );
   };
 
-  const handleAddToCalendar = () => {
-    if (plannedEvents.length === 0) return;
-    downloadItineraryICS(plannedEvents);
+  const handleAddToCalendar = async () => {
+    if (plannedEvents.length === 0 || isExportingCalendar) return;
+    setIsExportingCalendar(true);
+    try {
+      downloadItineraryICS(plannedEvents);
+      // 給瀏覽器時間處理下載觸發後再恢復按鈕
+      await new Promise(r => setTimeout(r, 1000));
+    } finally {
+      setIsExportingCalendar(false);
+    }
   };
 
   const handleExportICS = () => downloadICS(plannedEvents);
+
+  // 生成路線圖：顯示地圖並平滑捲回頂部讓使用者立刻看到地圖
+  const handleGenerateMap = () => {
+    setShowMap(true);
+    // 等 React 渲染完成後再捲動，確保地圖容器已出現在 DOM
+    requestAnimationFrame(() => {
+      mapContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   // 按讚：Optimistic UI → 先更新本地，再呼叫 increment_like() RPC；失敗時回滾
   const handleLike = async () => {
@@ -437,6 +455,9 @@ export default function ItineraryPage() {
     });
     // 不呼叫 reorderEvents：store 索引與 sorted view 索引不同步；
     // 改由 visit_time 的重新賦值驅動下次 render 的排序結果。
+
+    // 若地圖已顯示，重置舊的車程資料，讓 MapComponent 以新順序重算路線
+    if (showMap) setLegDurations([]);
   };
 
   // 分潤彙總（取第一個非 null URL）
@@ -644,10 +665,19 @@ export default function ItineraryPage() {
       </header>
 
       {/* ── Main Grid ────────────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:h-[calc(100vh-120px)]">
+      {/*
+        RWD 雙軌佈局：
+          手機（<lg）： 單欄垂直。order-1=地圖, order-2=左欄全部內容。
+                        底部 Sticky 浮動按鈕負責「生成路線」。
+          桌機（lg+）：  三欄 Grid。左欄（col-span-1）可捲動，右欄（col-span-2）sticky 固定地圖。
+                        生成按鈕出現在左欄活動清單下方。
+        pb-28 lg:pb-0：為手機 Sticky 按鈕留底部空間。
+      */}
+      <div className="max-w-7xl mx-auto px-6 mt-4 lg:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 pb-28 lg:pb-0 lg:items-start">
 
-        {/* 左欄：活動清單 + 待處理池（手機版在上，桌機版在左） */}
-        <div className="lg:col-span-1 flex flex-col gap-4 lg:overflow-y-auto pr-2 pb-10">
+        {/* ── 左欄：活動清單 + 生成按鈕(桌機) + 匯出 + 導購 + Footer
+            手機：order-2（地圖下方）  桌機：order-1（左側，可捲動）── */}
+        <div className="order-2 lg:order-1 lg:col-span-1 flex flex-col gap-4 pb-4">
 
           {/* 當天活動（或空狀態） */}
           {currentDayEvents.length === 0 ? (
@@ -866,39 +896,90 @@ export default function ItineraryPage() {
             </div>
           )}
 
-          {/* ── 卡片 Footer：操作按鈕 + 回饋（貼合左欄底部，在 scrollable 列表內）── */}
-          <div className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
+          {/* ── 桌機專用：生成路線按鈕（手機版用底部 Sticky，此處 lg 才顯示）── */}
+          {!showMap && currentDayEvents.length > 0 && (
+            <button
+              onClick={handleGenerateMap}
+              className="hidden lg:flex items-center justify-center gap-2 w-full py-3 bg-[#1e3a5f] hover:bg-[#162d4a] active:bg-[#0f2238] text-white rounded-2xl font-bold text-sm shadow-md transition-colors"
+            >
+              <MapIcon size={16} />
+              時間確認，生成路線圖
+            </button>
+          )}
 
-            {/* 核心操作按鈕：Primary → Secondary → Tertiary */}
-            <div className="flex flex-col gap-3">
-              {/* Primary：最重要的功能，品牌深海藍底白字 */}
+          {/* ── 匯出區塊（手機：活動清單下方；桌機：左欄）── */}
+          <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 flex flex-col gap-3">
+            <div>
+              <p className="font-bold text-stone-700 text-sm">儲存 ＆ 分享行程</p>
+              <p className="text-xs text-stone-400 mt-0.5">匯出日曆或下載精美明信片圖片</p>
+            </div>
+            <div className="flex flex-col gap-2">
               <button
                 onClick={() => setShowReport(true)}
                 disabled={plannedEvents.length === 0}
-                className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#1e3a5f] hover:bg-[#162d4a] active:bg-[#0f2238] text-white rounded-xl font-bold text-sm shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-sm font-bold rounded-xl transition-colors disabled:cursor-not-allowed shadow-md"
               >
                 <FileText size={15} />
-                生成完整行程報告
+                生成活動總覽
               </button>
-              {/* Secondary：實用功能，暖灰底深字 */}
-              <button
-                onClick={handleExportICS}
-                disabled={plannedEvents.length === 0}
-                className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#e8e4da] hover:bg-[#dedad0] active:bg-[#d4cfc4] text-slate-700 rounded-xl font-bold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <CalendarPlus size={15} />
-                匯出行程檔案 (ICS)
-              </button>
-              {/* Tertiary：附加功能，outline 低調 */}
-              <button
-                onClick={handleDownloadImage}
-                disabled={isCapturing || plannedEvents.length === 0}
-                className="flex items-center justify-center gap-2 w-full py-2.5 border border-[#d4cfc4] hover:border-[#c5bfb3] hover:bg-[#ede9e0] active:bg-[#e5e0d6] text-slate-500 rounded-xl font-bold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {isCapturing ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />}
-                {isCapturing ? '製作中...' : '下載台東明信片'}
-              </button>
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
+                <button
+                  onClick={handleAddToCalendar}
+                  disabled={plannedEvents.length === 0 || isExportingCalendar}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
+                >
+                  {isExportingCalendar
+                    ? <><Loader2 size={14} className="animate-spin" />生成中，請稍候...</>
+                    : <><CalendarPlus size={14} />加入 Google 日曆</>
+                  }
+                </button>
+                <button
+                  onClick={handleDownloadImage}
+                  disabled={isCapturing || plannedEvents.length === 0}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 bg-stone-700 hover:bg-stone-800 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
+                >
+                  {isCapturing
+                    ? <><Loader2 size={14} className="animate-spin" />生成中，請稍候...</>
+                    : <><Camera size={14} />下載台東回憶明信片</>
+                  }
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* ── 導購區塊（手機：匯出下方；桌機：左欄）── */}
+          <div className="rounded-2xl border border-stone-200 bg-white p-5">
+            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">台東行前準備</p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-amber-50 border border-amber-100 cursor-not-allowed opacity-70">
+                <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center shrink-0 text-lg">🏍️</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-stone-700 text-sm">台東租車 / 租機車</p>
+                  <p className="text-xs text-stone-400">在地特惠方案，輕鬆移動各景點</p>
+                </div>
+                <span className="text-[10px] text-amber-600 font-bold border border-amber-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+              </div>
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100 cursor-not-allowed opacity-70">
+                <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center shrink-0 text-lg">🏨</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-stone-700 text-sm">台東特色住宿</p>
+                  <p className="text-xs text-stone-400">海景民宿、溫泉飯店精選推薦</p>
+                </div>
+                <span className="text-[10px] text-blue-600 font-bold border border-blue-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+              </div>
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-violet-50 border border-violet-100 cursor-not-allowed opacity-70">
+                <div className="w-10 h-10 rounded-full bg-violet-200 flex items-center justify-center shrink-0 text-lg">🎟️</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-stone-700 text-sm">活動購票優惠</p>
+                  <p className="text-xs text-stone-400">早鳥折扣、套票方案一次掌握</p>
+                </div>
+                <span className="text-[10px] text-violet-600 font-bold border border-violet-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Footer：按讚回饋 ── */}
+          <div className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
 
             {/* 按讚與留言 */}
             <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col gap-4">
@@ -959,74 +1040,40 @@ export default function ItineraryPage() {
           </div>
         </div>
 
-        {/* 右欄：地圖（手機版在下，桌機版在右） */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="rounded-3xl border border-gray-200 overflow-hidden relative shadow-inner h-[55vh] lg:h-full lg:min-h-[500px]">
-            <MapComponent
-              events={currentDayEvents}
-              selectedEventId={selectedEventId}
-              onLegDurationsChange={setLegDurations}
-            />
-          </div>
-
-          {/* ── 匯出區塊（手機版地圖下方，桌機版同位置） ── */}
-          <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 flex flex-col sm:flex-row items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-stone-700 text-sm">儲存 ＆ 分享行程</p>
-              <p className="text-xs text-stone-400 mt-0.5">匯出日曆或下載精美明信片圖片</p>
-            </div>
-            <div className="flex gap-2 shrink-0 flex-wrap justify-end">
-              <button
-                onClick={handleAddToCalendar}
-                disabled={plannedEvents.length === 0}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
-              >
-                <CalendarPlus size={14} />
-                加到 Google 日曆
-              </button>
-              <button
-                onClick={handleDownloadImage}
-                disabled={isCapturing || plannedEvents.length === 0}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-700 hover:bg-stone-800 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
-              >
-                {isCapturing ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-                {isCapturing ? '生成中…' : '匯出明信片'}
-              </button>
-            </div>
-          </div>
-
-          {/* ── 導購 / 行銷連結區塊 ── */}
-          <div className="rounded-2xl border border-stone-200 bg-white p-5">
-            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">台東行前準備</p>
-            <div className="flex flex-col gap-3">
-              {/* 租車 */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-amber-50 border border-amber-100 cursor-not-allowed opacity-70">
-                <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center shrink-0 text-lg">🏍️</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-stone-700 text-sm">台東租車 / 租機車</p>
-                  <p className="text-xs text-stone-400">在地特惠方案，輕鬆移動各景點</p>
+        {/* ── 右欄：地圖（純地圖，不含其他區塊）
+            手機：order-1（最頂部）  桌機：order-2（右側，sticky 固定）── */}
+        <div className="order-1 lg:order-2 lg:col-span-2 lg:sticky lg:top-[80px]">
+          <div
+            ref={mapContainerRef}
+            className={`${showMap ? 'h-[60vh]' : 'h-[250px]'} lg:h-[calc(100vh-100px)] rounded-3xl border border-gray-200 overflow-hidden relative shadow-inner transition-[height] duration-500 ease-in-out`}
+          >
+            {showMap ? (
+              <MapComponent
+                events={currentDayEvents}
+                selectedEventId={selectedEventId}
+                onLegDurationsChange={setLegDurations}
+              />
+            ) : (
+              <div className="h-full bg-[#f0ede6] flex flex-col items-center justify-center gap-4 p-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center">
+                  <MapIcon size={28} className="text-slate-400" />
                 </div>
-                <span className="text-[10px] text-amber-600 font-bold border border-amber-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
-              </div>
-              {/* 住宿 */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100 cursor-not-allowed opacity-70">
-                <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center shrink-0 text-lg">🏨</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-stone-700 text-sm">台東特色住宿</p>
-                  <p className="text-xs text-stone-400">海景民宿、溫泉飯店精選推薦</p>
+                <div>
+                  <p className="font-bold text-slate-700 text-base mb-1">路線圖尚未生成</p>
+                  {/* 手機提示：引導往下看清單再按底部按鈕 */}
+                  <p className="lg:hidden text-slate-400 text-sm leading-relaxed mt-1">
+                    👇 請先在下方排序活動<br />完成後點擊底部按鈕生成路線
+                  </p>
+                  {/* 桌機提示：引導往左側操作 */}
+                  <p className="hidden lg:block text-slate-400 text-sm leading-relaxed mt-1">
+                    👉 請在左側調整活動順序與時間後<br />點擊生成路線
+                  </p>
                 </div>
-                <span className="text-[10px] text-blue-600 font-bold border border-blue-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+                {currentDayEvents.length === 0 && (
+                  <p className="text-slate-300 text-xs">請先從首頁加入活動至今日行程</p>
+                )}
               </div>
-              {/* 票務 */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-violet-50 border border-violet-100 cursor-not-allowed opacity-70">
-                <div className="w-10 h-10 rounded-full bg-violet-200 flex items-center justify-center shrink-0 text-lg">🎟️</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-stone-700 text-sm">活動購票優惠</p>
-                  <p className="text-xs text-stone-400">早鳥折扣、套票方案一次掌握</p>
-                </div>
-                <span className="text-[10px] text-violet-600 font-bold border border-violet-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -1168,6 +1215,23 @@ export default function ItineraryPage() {
           </div>{/* /安全區 1200×800 */}
         </div>{/* /出血容器 1271×871 */}
       </div>
+
+      {/* ── 手機底部 Sticky 浮動按鈕（桌機隱藏）────────────────────────────────
+          僅在地圖尚未生成 且 當天有活動時顯示。
+          點擊後：渲染地圖 + 平滑捲動回頂部讓使用者立刻看到地圖。
+      ─────────────────────────────────────────────────────────────────────── */}
+      {!showMap && currentDayEvents.length > 0 && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none">
+          <button
+            onClick={handleGenerateMap}
+            className="pointer-events-auto w-full flex items-center justify-center gap-2.5 py-4 bg-[#1e3a5f] hover:bg-[#162d4a] active:bg-[#0f2238] text-white rounded-2xl font-bold text-base shadow-xl transition-colors"
+          >
+            <MapIcon size={18} />
+            時間確認，生成路線圖
+          </button>
+        </div>
+      )}
+
     </main>
   );
 }
