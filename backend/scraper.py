@@ -487,8 +487,17 @@ def save_to_supabase(event_data, dry_run: bool = False):
     """
     events_to_process = event_data if isinstance(event_data, list) else [event_data]
 
+    # 外縣市分館黑名單：含這些關鍵字的地點或標題直接捨棄，不寫入 Supabase
+    VENUE_BLACKLIST = ['南科', '南科考古館']
+
     for single_event in events_to_process:
-        title = single_event.get('event_name', '未提供')
+        title  = single_event.get('event_name', '未提供')
+        venue  = single_event.get('location', '') or single_event.get('venue_name', '') or ''
+
+        if any(kw in title or kw in venue for kw in VENUE_BLACKLIST):
+            print(f"🚫 跳過（外縣市分館黑名單）：{title}｜地點：{venue}")
+            continue
+
         try:
             # ── 清洗時間欄位 ──────────────────────────────────────────────────
             start_time = sanitize_timestamp(single_event.get('iso_start_time'))

@@ -3,6 +3,7 @@
  * - generateICS / downloadICS     : 產生符合 RFC 5545 的 .ics 檔（以活動原始 start_time 為基準）
  * - downloadItineraryICS          : 以使用者規劃的 assigned_date + visit_time 產生 .ics，含防呆標記
  * - downloadReportImage           : 使用 html2canvas 將 Modal DOM 轉為 PNG 下載（動態 import，避免 SSR 錯誤）
+ * - buildGoogleCalendarUrl        : 產生單一活動的 Google Calendar 新增事件 URL
  */
 
 import type { PlannedEvent } from '@/types';
@@ -226,6 +227,50 @@ export const downloadItineraryICS = (events: PlannedEvent[]): void => {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 };
 
+// ── Google Calendar URL 建構 ──────────────────────────────────────────────────
+
+/** ISO 字串 → Google Calendar dates 格式（YYYYMMDDTHHMMSSZ） */
+const formatGCalDateTime = (isoStr: string): string =>
+  new Date(isoStr).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z/, 'Z');
+
+/**
+ * 建立單一活動的 Google Calendar 新增事件 URL。
+ * 使用 assigned_date + visit_time（台北時間 UTC+8）計算 UTC 起訖時間。
+ * 無 visit_time 時改用全天事件格式（YYYYMMDD/YYYYMMDD）。
+ */
+export const buildGoogleCalendarUrl = (event: PlannedEvent): string => {
+  const base = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+
+  const text     = encodeURIComponent(event.title ?? '');
+  const location = encodeURIComponent(event.address ?? event.venue_name ?? '');
+
+  const descParts = [
+    event.description ?? '',
+    event.ticket_url  ? `購票連結：${event.ticket_url}` : '',
+    event.source_url  ? `活動頁面：${event.source_url}` : '',
+  ].filter(Boolean);
+  const details = encodeURIComponent(descParts.join('\n'));
+
+  let dates: string;
+  if (event.visit_time) {
+    const startIso = `${event.assigned_date}T${event.visit_time}:00+08:00`;
+    const endMs    = new Date(startIso).getTime() + (event.stay_duration ?? 90) * 60_000;
+    const start    = formatGCalDateTime(startIso);
+    const end      = formatGCalDateTime(new Date(endMs).toISOString());
+    dates = encodeURIComponent(`${start}/${end}`);
+  } else {
+    const dateCompact = event.assigned_date.replace(/-/g, '');
+    const nextDay = new Date(`${event.assigned_date}T00:00:00+08:00`);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const nextDayCompact = nextDay
+      .toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' })
+      .replace(/-/g, '');
+    dates = `${dateCompact}/${nextDayCompact}`;
+  }
+
+  return `${base}&text=${text}&dates=${dates}&details=${details}&location=${location}`;
+};
+
 // ── 圖片下載 ──────────────────────────────────────────────────────────────────
 
 /**
@@ -243,6 +288,8 @@ export const downloadReportImage = async (
   onStart?: () => void,
   onEnd?: () => void,
   filename = `CulturRoute_台東明信片_${new Date().toISOString().substring(0, 10)}.png`,
+  /** iOS 專用：將 blob URL 回傳給呼叫端，由呼叫端在頁面內渲染 <img> 供長按儲存 */
+  onIOSPreview?: (url: string) => void,
 ): Promise<void> => {
   onStart?.();
   try {
@@ -270,11 +317,17 @@ export const downloadReportImage = async (
 
     const url = URL.createObjectURL(blob);
 
-    // iOS 不支援 <a download>；改開新分頁讓使用者長按儲存
+    // iOS 不支援 <a download>；由呼叫端在頁面內渲染 <img> 讓使用者長按儲存
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isIOS) {
-      window.open(url, '_blank', 'noopener');
-      alert('長按圖片即可儲存至相簿 📸');
+      if (onIOSPreview) {
+        // 呼叫端負責管理 URL 生命週期（關閉 overlay 時再 revoke）
+        onIOSPreview(url);
+      } else {
+        window.open(url, '_blank', 'noopener');
+        alert('長按圖片即可儲存至相簿 📸');
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      }
     } else {
       const a = document.createElement('a');
       a.href = url;
@@ -283,10 +336,8 @@ export const downloadReportImage = async (
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
     }
-
-    // 延遲釋放，給慢速手機足夠緩衝
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
   } catch (err) {
     console.error('[CulturRoute] 明信片生成失敗:', err);
     alert('下載失敗，請稍後再試。\n詳細錯誤請查看瀏覽器 Console（F12）。');

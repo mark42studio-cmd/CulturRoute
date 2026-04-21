@@ -305,7 +305,9 @@ export default function ItineraryMap({ events, selectedEventId, onLegDurationsCh
   const { validEvents, spiderGroups } = useMemo(() => {
     const withCoords = eventsWithResolvedCoords.filter(
       (e): e is MapEvent & { latitude: number; longitude: number } =>
-        typeof e.latitude === 'number' && typeof e.longitude === 'number'
+        typeof e.latitude === 'number' && typeof e.longitude === 'number' &&
+        e.latitude  >= TAITUNG_BBOX.south && e.latitude  <= TAITUNG_BBOX.north &&
+        e.longitude >= TAITUNG_BBOX.west  && e.longitude <= TAITUNG_BBOX.east
     );
     const { events: spiderfied, spiderGroups } = applyCoordJitter(withCoords);
     return { validEvents: spiderfied, spiderGroups };

@@ -24,7 +24,7 @@ interface ItineraryStore {
   hoveredEventId: string | null;
   setHoveredEventId: (id: string | null) => void;
   setTripDates: (start: string, end: string) => void;
-  addEvent: (event: Event, options?: { isExtraDayTrigger?: boolean }) => void;
+  addEvent: (event: Event, options?: { isExtraDayTrigger?: boolean; addToToday?: boolean }) => void;
   removeEvent: (eventId: string) => void;
   toggleSidebar: () => void;
   reorderEvents: (startIndex: number, endIndex: number, targetDate: string) => void;
@@ -59,30 +59,47 @@ export const useItineraryStore = create<ItineraryStore>()(
 
         const eventStartDate = getLocalYYYYMMDD(event.start_time);
 
-        // 智慧預設日期（Smart Default Date Assignment）
-        //
-        // 展覽（有 end_date 且跨日）的排程規則：
-        //   ① 抵達日 落在展期內  → assigned_date = tripStartDate（最常見情境）
-        //   ② 抵達日 早於展覽開幕 → assigned_date = eventStartDate（使用者提早規劃）
-        //   ③ 抵達日 晚於展覽結束 → assigned_date = eventStartDate（讓硬排警告提醒使用者）
-        //
-        // 不屬於展覽（單次活動）→ 維持 eventStartDate 不變。
-        const isMultiDayExhibition = !!(event.end_date && event.end_date > eventStartDate);
-        let assigned_date = eventStartDate;
-        if (isMultiDayExhibition && state.tripStartDate) {
-          const tripStart    = state.tripStartDate;
-          const exhibitionEnd = event.end_date!;          // 已知非空
-          // 情境 ①：抵達日在展期內，強制排到抵達日
-          if (tripStart >= eventStartDate && tripStart <= exhibitionEnd) {
-            assigned_date = tripStart;
-          }
-          // 情境 ②③：抵達日不在展期內，保留 eventStartDate（讓硬排警告提醒）
-        }
+        // 展覽判斷：end_date 或 end_time 與 start_time 不在同一天
+        const exhibitionEnd =
+          event.end_date ??
+          (event.end_time ? getLocalYYYYMMDD(event.end_time) : null);
+        const isMultiDayExhibition = !!(exhibitionEnd && exhibitionEnd > eventStartDate);
 
-        const isExhibitionEvent = !!(
-          event.vibe_tags?.includes('靜態展覽') ||
-          /個展|聯展|特展/.test(event.title)
-        );
+        let assigned_date = eventStartDate;
+
+        if (isMultiDayExhibition && state.tripStartDate) {
+          const tripStart = state.tripStartDate;
+
+          if (options?.addToToday) {
+            // 快速選擇今天 → 排到 Day 1（抵達日），若在展期內直接採用
+            assigned_date =
+              tripStart >= eventStartDate && tripStart <= exhibitionEnd!
+                ? tripStart
+                : eventStartDate;
+          } else {
+            // 預設：排到 Day 2（抵達日 +1），讓第一天保留給長途移動
+            const [y, m, d] = tripStart.split('-').map(Number);
+            const day2Date = new Date(y, m - 1, d + 1);
+            const day2Str = [
+              day2Date.getFullYear(),
+              String(day2Date.getMonth() + 1).padStart(2, '0'),
+              String(day2Date.getDate()).padStart(2, '0'),
+            ].join('-');
+
+            if (
+              day2Str >= eventStartDate &&
+              day2Str <= exhibitionEnd! &&
+              (!state.tripEndDate || day2Str <= state.tripEndDate)
+            ) {
+              // Day 2 在展期內且不超出行程 → 優先排 Day 2
+              assigned_date = day2Str;
+            } else if (tripStart >= eventStartDate && tripStart <= exhibitionEnd!) {
+              // Day 2 不可用，但 Day 1 在展期內 → fallback 到 Day 1
+              assigned_date = tripStart;
+            }
+            // 其他情況（行程日期完全在展期外）→ 保留 eventStartDate，讓衝突警告提醒使用者
+          }
+        }
 
         return {
           plannedEvents: [

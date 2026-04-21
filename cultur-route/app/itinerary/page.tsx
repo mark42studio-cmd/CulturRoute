@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, Fragment, useRef, useState } from 'react';
-import { downloadICS, downloadReportImage, downloadItineraryICS } from '@/lib/itinerary-export';
+import { downloadICS, downloadReportImage, downloadItineraryICS, buildGoogleCalendarUrl } from '@/lib/itinerary-export';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import type { PlannedEvent } from '@/types';
 
@@ -257,7 +257,7 @@ export default function ItineraryPage() {
   const [showReport,       setShowReport]       = useState(false);
   const [showMap,          setShowMap]          = useState(false);
   const [isCapturing,         setIsCapturing]         = useState(false);
-  const [isExportingCalendar, setIsExportingCalendar] = useState(false);
+  const [postcardPreviewUrl,  setPostcardPreviewUrl]  = useState<string | null>(null);
   // Bug 2：行程清單點擊活動時，通知地圖高亮對應 Marker
   const [selectedEventId,  setSelectedEventId]  = useState<string | null>(null);
   // Directions API 各 leg 實際車程（分鐘），由 ItineraryMap 回傳，用於精準衝突分析
@@ -353,27 +353,31 @@ export default function ItineraryPage() {
     updateEventDate(event.id, newDateStr);
   };
 
+  const handleDismissPostcardPreview = () => {
+    if (postcardPreviewUrl) {
+      URL.revokeObjectURL(postcardPreviewUrl);
+      setPostcardPreviewUrl(null);
+    }
+  };
+
   const handleDownloadImage = () => {
     if (!postcardRef.current || isCapturing) return;
-    // 防呆計時器：最多 15 秒後強制恢復按鈕（手機截圖可能較慢）
     const safetyTimer = setTimeout(() => setIsCapturing(false), 15_000);
     downloadReportImage(
       postcardRef.current,
       () => setIsCapturing(true),
       () => { clearTimeout(safetyTimer); setIsCapturing(false); },
+      undefined,
+      (url) => setPostcardPreviewUrl(url),
     );
   };
 
-  const handleAddToCalendar = async () => {
-    if (plannedEvents.length === 0 || isExportingCalendar) return;
-    setIsExportingCalendar(true);
-    try {
-      downloadItineraryICS(plannedEvents);
-      // 給瀏覽器時間處理下載觸發後再恢復按鈕
-      await new Promise(r => setTimeout(r, 1000));
-    } finally {
-      setIsExportingCalendar(false);
-    }
+  const handleAddToCalendar = () => {
+    if (plannedEvents.length === 0) return;
+    // 強制開啟 Google Calendar（繞過 iOS 自動導向 Apple Calendar 的問題）
+    plannedEvents.forEach(event => {
+      window.open(buildGoogleCalendarUrl(event), '_blank', 'noopener');
+    });
   };
 
   const handleExportICS = () => downloadICS(plannedEvents);
@@ -925,13 +929,10 @@ export default function ItineraryPage() {
               <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
                 <button
                   onClick={handleAddToCalendar}
-                  disabled={plannedEvents.length === 0 || isExportingCalendar}
+                  disabled={plannedEvents.length === 0}
                   className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
                 >
-                  {isExportingCalendar
-                    ? <><Loader2 size={14} className="animate-spin" />生成中，請稍候...</>
-                    : <><CalendarPlus size={14} />加入 Google 日曆</>
-                  }
+                  <CalendarPlus size={14} />加入 Google 日曆
                 </button>
                 <button
                   onClick={handleDownloadImage}
@@ -1228,6 +1229,34 @@ export default function ItineraryPage() {
           >
             <MapIcon size={18} />
             時間確認，生成路線圖
+          </button>
+        </div>
+      )}
+
+      {/* ── iOS 明信片長按 overlay ────────────────────────────────────────────
+          iOS 不支援 <a download>；html2canvas 生成圖片後將 blob URL 傳到此處，
+          讓使用者直接長按 <img> 儲存至相簿，不需另開新分頁。
+      ─────────────────────────────────────────────────────────────────── */}
+      {postcardPreviewUrl && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 p-5 gap-5"
+          onClick={handleDismissPostcardPreview}
+        >
+          <p className="text-white text-sm font-bold text-center leading-relaxed pointer-events-none">
+            長按下方圖片即可儲存至相簿 📸
+          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={postcardPreviewUrl}
+            alt="台東明信片預覽"
+            className="max-w-full max-h-[70vh] rounded-2xl shadow-2xl object-contain"
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            onClick={handleDismissPostcardPreview}
+            className="mt-2 px-6 py-2.5 bg-white/20 hover:bg-white/30 text-white text-sm font-bold rounded-full transition-colors"
+          >
+            關閉
           </button>
         </div>
       )}
