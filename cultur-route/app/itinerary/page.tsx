@@ -593,8 +593,8 @@ export default function ItineraryPage() {
             </div>
             </div>{/* ↑ 關閉 reportCardRef wrapper */}
 
-            {/* ── Modal Footer：下載圖片 / 匯出行事曆 ────────────────────── */}
-            <div className="bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 rounded-b-2xl">
+            {/* ── Modal Footer：下載圖片 / Google 日曆 / Apple 日曆 ────────── */}
+            <div className="bg-white border-t border-gray-100 px-6 py-4 flex flex-wrap items-center justify-end gap-2 rounded-b-2xl">
               <button
                 onClick={handleDownloadImage}
                 disabled={isCapturing || plannedEvents.length === 0}
@@ -603,15 +603,23 @@ export default function ItineraryPage() {
                 {isCapturing
                   ? <Loader2 size={15} className="animate-spin" />
                   : <Camera size={15} />}
-                {isCapturing ? '製作中...' : '下載台東明信片'}
+                {isCapturing ? '製作中...' : '下載明信片'}
               </button>
               <button
-                onClick={handleExportICS}
+                onClick={handleAddToCalendar}
                 disabled={plannedEvents.length === 0}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <CalendarPlus size={15} />
-                匯出至行事曆
+                Google 日曆
+              </button>
+              <button
+                onClick={() => downloadItineraryICS(plannedEvents)}
+                disabled={plannedEvents.length === 0}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm bg-stone-600 hover:bg-stone-700 active:bg-stone-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <CalendarPlus size={15} />
+                Apple 日曆
               </button>
             </div>
           </div>
