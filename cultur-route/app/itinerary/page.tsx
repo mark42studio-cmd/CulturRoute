@@ -926,25 +926,35 @@ export default function ItineraryPage() {
                 <FileText size={15} />
                 生成活動總覽
               </button>
-              <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
+              {/* 日曆按鈕：Google / Apple 並列 */}
+              <div className="flex flex-row gap-2">
                 <button
                   onClick={handleAddToCalendar}
                   disabled={plannedEvents.length === 0}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-1 px-2 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
                 >
-                  <CalendarPlus size={14} />加入 Google 日曆
+                  <CalendarPlus size={13} className="shrink-0" />
+                  <span className="truncate">Google 日曆</span>
                 </button>
                 <button
-                  onClick={handleDownloadImage}
-                  disabled={isCapturing || plannedEvents.length === 0}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 bg-stone-700 hover:bg-stone-800 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
+                  onClick={() => downloadItineraryICS(plannedEvents)}
+                  disabled={plannedEvents.length === 0}
+                  className="flex-1 flex items-center justify-center gap-1 px-2 py-3 bg-stone-600 hover:bg-stone-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
                 >
-                  {isCapturing
-                    ? <><Loader2 size={14} className="animate-spin" />生成中，請稍候...</>
-                    : <><Camera size={14} />下載台東回憶明信片</>
-                  }
+                  <CalendarPlus size={13} className="shrink-0" />
+                  <span className="truncate">Apple 日曆</span>
                 </button>
               </div>
+              <button
+                onClick={handleDownloadImage}
+                disabled={isCapturing || plannedEvents.length === 0}
+                className="w-full flex items-center justify-center gap-1.5 px-4 py-3 bg-stone-700 hover:bg-stone-800 disabled:bg-stone-200 disabled:text-stone-400 text-white text-xs font-bold rounded-xl transition-colors disabled:cursor-not-allowed"
+              >
+                {isCapturing
+                  ? <><Loader2 size={14} className="animate-spin" />生成中，請稍候...</>
+                  : <><Camera size={14} />下載台東回憶明信片</>
+                }
+              </button>
             </div>
           </div>
 
@@ -1238,23 +1248,26 @@ export default function ItineraryPage() {
           讓使用者直接長按 <img> 儲存至相簿，不需另開新分頁。
       ─────────────────────────────────────────────────────────────────── */}
       {postcardPreviewUrl && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 p-5 gap-5"
-          onClick={handleDismissPostcardPreview}
-        >
-          <p className="text-white text-sm font-bold text-center leading-relaxed pointer-events-none">
-            長按下方圖片即可儲存至相簿 📸
-          </p>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-5 gap-4">
+          {/* 透明背景層：僅負責點擊關閉，不遮蓋圖片 */}
+          <div
+            className="absolute inset-0 bg-black/80"
+            onClick={handleDismissPostcardPreview}
+          />
+          {/* 圖片：relative z-10 確保在背景層之上，不掛任何 onClick 以免攔截長按手勢 */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={postcardPreviewUrl}
             alt="台東明信片預覽"
-            className="max-w-full max-h-[70vh] rounded-2xl shadow-2xl object-contain"
-            onClick={e => e.stopPropagation()}
+            className="relative z-10 max-w-full max-h-[70vh] rounded-2xl shadow-2xl object-contain"
           />
+          {/* 說明文字：圖片下方，pointer-events-none 避免干擾 */}
+          <p className="relative z-10 text-white text-sm font-bold text-center leading-relaxed pointer-events-none">
+            長按圖片即可儲存至相簿 📸
+          </p>
           <button
             onClick={handleDismissPostcardPreview}
-            className="mt-2 px-6 py-2.5 bg-white/20 hover:bg-white/30 text-white text-sm font-bold rounded-full transition-colors"
+            className="relative z-10 px-6 py-2.5 bg-white/20 hover:bg-white/30 text-white text-sm font-bold rounded-full transition-colors"
           >
             關閉
           </button>
