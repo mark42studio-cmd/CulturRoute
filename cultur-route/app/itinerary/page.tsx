@@ -593,32 +593,30 @@ export default function ItineraryPage() {
             </div>
             </div>{/* ↑ 關閉 reportCardRef wrapper */}
 
-            {/* ── Modal Footer：下載圖片 / Google 日曆 / Apple 日曆 ────────── */}
-            <div className="bg-white border-t border-gray-100 px-6 py-4 flex flex-wrap items-center justify-end gap-2 rounded-b-2xl">
+            {/* ── Modal Footer：Grid 2 列：第 1 列「下載明信片」滿寬；第 2 列兩個日曆並排 */}
+            <div className="bg-white border-t border-gray-100 px-4 py-4 grid grid-cols-2 gap-2 rounded-b-2xl">
               <button
                 onClick={handleDownloadImage}
                 disabled={isCapturing || plannedEvents.length === 0}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border border-gray-200 text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border border-gray-200 text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
               >
-                {isCapturing
-                  ? <Loader2 size={15} className="animate-spin" />
-                  : <Camera size={15} />}
+                {isCapturing ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />}
                 {isCapturing ? '製作中...' : '下載明信片'}
               </button>
               <button
                 onClick={handleAddToCalendar}
                 disabled={plannedEvents.length === 0}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
               >
-                <CalendarPlus size={15} />
+                <CalendarPlus size={14} className="shrink-0" />
                 Google 日曆
               </button>
               <button
                 onClick={() => downloadItineraryICS(plannedEvents)}
                 disabled={plannedEvents.length === 0}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm bg-stone-600 hover:bg-stone-700 active:bg-stone-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-sm bg-stone-600 hover:bg-stone-700 active:bg-stone-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
               >
-                <CalendarPlus size={15} />
+                <CalendarPlus size={14} className="shrink-0" />
                 Apple 日曆
               </button>
             </div>
