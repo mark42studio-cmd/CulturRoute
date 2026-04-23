@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Serif_TC } from "next/font/google";
+import Image from "next/image";
 import "./globals.css";
 import ItinerarySidebar from '@/components/ItinerarySidebar';
 
@@ -28,8 +29,8 @@ export const metadata: Metadata = {
   description: "聚合台東在地藝文、節慶與展覽，為你策展專屬的台東文化路徑。",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
   },
   themeColor: "#1e3a5f",
   appleWebApp: {
@@ -58,6 +59,11 @@ export default function RootLayout({
         <ItinerarySidebar /> 
         
         {children}
+
+        <footer className="mt-auto py-6 flex flex-col items-center gap-2 text-xs text-gray-500">
+          <Image src="/logo.png" alt="一圈工作室" width={32} height={32} className="opacity-70" />
+          一圈工作室 mark42studio@gmail.com
+        </footer>
       </body>
     </html>
   );

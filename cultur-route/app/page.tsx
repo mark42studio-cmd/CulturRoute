@@ -19,7 +19,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#f8f6f0]">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">CulturRoute 臺東藝文</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">CulturRoute 臺東藝文 - 你若來台東</h1>
         <p className="text-slate-500 text-lg">探索此時此地的文化路徑</p>
       </header>
 

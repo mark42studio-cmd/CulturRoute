@@ -31,18 +31,39 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     plannedEvents, addTripDay, addEvent, removeEvent, setHoveredEventId,
   } = useItineraryStore();
   const [isMounted, setIsMounted] = useState(false);
-  const [viewMode, setViewMode] = useState<'all' | 'event' | 'exhibition'>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'performance' | 'lecture' | 'exhibition'>('all');
   const [quickToastId, setQuickToastId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   // useMemo 確保每次 render 不重新計算（日期在同一天內不會改變）
   const TODAY = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }), []);
 
-  // 分類判斷：vibe_tags 含「靜態展覽」，或標題含「個展」「聯展」「特展」→ 靜態展覽
+  // 展覽：vibe_tags 含「靜態展覽」，或標題含「個展」「聯展」「特展」
   // 不再依賴 end_date，避免多日節慶被誤判
   const isExhibition = (event: Event): boolean => {
     if (event.vibe_tags?.includes('靜態展覽')) return true;
     return /個展|聯展|特展/.test(event.title);
+  };
+
+  // 演出：vibe_tags 含表演/音樂/舞蹈/戲劇相關標籤，且非展覽
+  const PERFORMANCE_TAGS = ['演出', '表演', '音樂', '音樂會', '演唱會', '舞蹈', '戲劇', '劇場'];
+  const isPerformance = (event: Event): boolean => {
+    if (isExhibition(event)) return false;
+    return event.vibe_tags?.some(t => PERFORMANCE_TAGS.includes(t)) ?? false;
+  };
+
+  // 講座：vibe_tags 含講座/工作坊/論壇等標籤，且非展覽
+  const LECTURE_TAGS = ['講座', '工作坊', '論壇', '分享', '課程', '演講', '研習'];
+  const isLecture = (event: Event): boolean => {
+    if (isExhibition(event)) return false;
+    return event.vibe_tags?.some(t => LECTURE_TAGS.some(lt => t.includes(lt))) ?? false;
+  };
+
+  const applyViewMode = (events: Event[]): Event[] => {
+    if (viewMode === 'performance') return events.filter(isPerformance);
+    if (viewMode === 'lecture')     return events.filter(isLecture);
+    if (viewMode === 'exhibition')  return events.filter(isExhibition);
+    return events;
   };
 
   useEffect(() => { setIsMounted(true); }, []);
@@ -52,8 +73,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   let missedEvents: Event[] = [];
 
   // viewMode 過濾（在所有其他篩選之前先套，保證非篩選模式也生效）
-  if (viewMode === 'event')      currentEvents = currentEvents.filter(e => !isExhibition(e));
-  if (viewMode === 'exhibition') currentEvents = currentEvents.filter(e =>  isExhibition(e));
+  currentEvents = applyViewMode(currentEvents);
 
   if (isFiltering) {
 
@@ -66,8 +86,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     });
 
     // 日期篩選後再套 viewMode（避免 initialEvents 重賦值蓋掉外層的過濾）
-    if (viewMode === 'event')      currentEvents = currentEvents.filter(e => !isExhibition(e));
-    if (viewMode === 'exhibition') currentEvents = currentEvents.filter(e =>  isExhibition(e));
+    currentEvents = applyViewMode(currentEvents);
 
     // 錯過活動：活動開始在行程結束後 7 天內
     const tripEnd = new Date(endDate);
@@ -289,9 +308,10 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       <div className="mb-8 flex gap-2 flex-wrap">
         {(
           [
-            { key: 'all',        label: '✨ 全部' },
-            { key: 'event',      label: '⚡ 活動' },
-            { key: 'exhibition', label: '🏛️ 靜態展覽' },
+            { key: 'all',         label: '✨ 全部' },
+            { key: 'performance', label: '🎭 演出' },
+            { key: 'lecture',     label: '🎤 講座' },
+            { key: 'exhibition',  label: '🏛️ 展覽' },
           ] as const
         ).map(({ key, label }) => (
           <button
