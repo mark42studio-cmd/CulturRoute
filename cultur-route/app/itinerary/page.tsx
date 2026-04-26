@@ -18,7 +18,7 @@ import { useCallback, useEffect, Fragment, useRef, useState } from 'react';
 import { downloadICS, downloadReportImage, downloadItineraryICS, buildGoogleCalendarUrl } from '@/lib/itinerary-export';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import type { PlannedEvent } from '@/types';
-import { submitEvent } from '@/actions/submitEvent';
+import { submitEvent } from '../actions/submitEvent';
 
 const MapComponent = dynamic(
   () => import('@/components/ItineraryMap'),
