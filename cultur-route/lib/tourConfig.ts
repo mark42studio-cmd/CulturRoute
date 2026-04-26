@@ -90,4 +90,13 @@ export const itinerarySteps: DriveStep[] = [
       side: 'top',
     },
   },
+  {
+    element: '#tour-generate-route-btn',
+    popover: {
+      title: '✨ 最後一步：生成專屬路線！',
+      description:
+        '排好行程了嗎？千萬別忘了點擊這裡，系統才會幫你畫出完整的地圖與交通路線喔！',
+      side: 'top',
+    },
+  },
 ];

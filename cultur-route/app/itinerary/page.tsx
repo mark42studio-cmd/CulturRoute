@@ -909,8 +909,9 @@ export default function ItineraryPage() {
           {/* ── 桌機專用：生成路線按鈕（手機版用底部 Sticky，此處 lg 才顯示）── */}
           {!showMap && currentDayEvents.length > 0 && (
             <button
+              id="tour-generate-route-btn"
               onClick={handleGenerateMap}
-              className="hidden lg:flex items-center justify-center gap-2 w-full py-3 bg-[#1e3a5f] hover:bg-[#162d4a] active:bg-[#0f2238] text-white rounded-2xl font-bold text-sm shadow-md transition-colors"
+              className="hidden lg:flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:from-indigo-700 active:to-purple-800 text-white rounded-2xl font-bold text-sm shadow-lg border border-white/20 transition-all duration-200"
             >
               <MapIcon size={16} />
               時間確認，生成路線圖
@@ -1240,8 +1241,9 @@ export default function ItineraryPage() {
       {!showMap && currentDayEvents.length > 0 && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none">
           <button
+            id="tour-generate-route-btn"
             onClick={handleGenerateMap}
-            className="pointer-events-auto w-full flex items-center justify-center gap-2.5 py-4 bg-[#1e3a5f] hover:bg-[#162d4a] active:bg-[#0f2238] text-white rounded-2xl font-bold text-base shadow-xl transition-colors"
+            className="pointer-events-auto w-full flex items-center justify-center gap-2.5 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:from-indigo-700 active:to-purple-800 text-white rounded-2xl font-bold text-base shadow-xl border border-white/20 transition-all duration-200"
           >
             <MapIcon size={18} />
             時間確認，生成路線圖
