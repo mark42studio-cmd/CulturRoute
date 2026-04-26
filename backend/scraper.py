@@ -4,11 +4,12 @@ import time
 import json
 import argparse
 import requests
+import hashlib
 import urllib3
 import unicodedata
 from dotenv import load_dotenv, find_dotenv
 from playwright.sync_api import sync_playwright
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, urlencode, parse_qs, urlunparse
 from bs4 import BeautifulSoup
 from google import genai
 from google.genai import types
@@ -255,6 +256,37 @@ def normalize_title(s: str) -> str:
     return s
 
 
+# ── URL 標準化與確定性 ID 產生 ────────────────────────────────────────────────
+
+_TRACKING_PARAMS = frozenset({
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+    'fbclid', 'gclid', 'yclid', 'mc_cid', 'mc_eid', '_ga', 'ref',
+})
+
+def normalize_url(url: str) -> str:
+    """移除 tracking 參數並統一格式（小寫 scheme/host、去除尾斜線、無 fragment）。"""
+    try:
+        p = urlparse(url.strip())
+        clean_qs = {k: v for k, v in parse_qs(p.query).items()
+                    if k.lower() not in _TRACKING_PARAMS}
+        return urlunparse((
+            p.scheme.lower(),
+            p.netloc.lower(),
+            p.path.rstrip('/'),
+            p.params,
+            urlencode(clean_qs, doseq=True),
+            '',
+        ))
+    except Exception:
+        return url.strip()
+
+
+def generate_event_id(source_name: str, normalized_url: str) -> str:
+    """SHA256(source_name::normalized_url) → 64-char hex，作為跨批次去重主鍵。"""
+    raw = f"{source_name}::{normalized_url}"
+    return hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
+
 # ── 共用：從當前頁面 HTML 蒐集活動連結 ──────────────────────────────────────
 def _collect_links_from_soup(
     soup, base_url: str, keywords: list,
@@ -469,98 +501,95 @@ def paginate_and_collect(
     return collected
 
 
-def save_to_supabase(event_data, dry_run: bool = False):
+def flush_crawl_log(run_id: str, source_name: str, run_stats: dict, duration_ms: int):
+    """每站台爬取完成後，將執行統計寫入 crawl_logs 表。"""
+    try:
+        supabase.table("crawl_logs").insert({
+            "run_id":         run_id,
+            "source_name":    source_name,
+            "found_count":    run_stats.get('found', 0),
+            "inserted_count": run_stats.get('inserted', 0),
+            "updated_count":  run_stats.get('updated', 0),
+            "skipped_count":  run_stats.get('skipped', 0),
+            "error_count":    run_stats.get('error', 0),
+            "duration_ms":    duration_ms,
+        }).execute()
+        print(
+            f"📊 crawl_log：{source_name} ｜"
+            f" ✅ {run_stats.get('inserted', 0)} 新"
+            f" 🔄 {run_stats.get('updated', 0)} 更新"
+            f" ⏩ {run_stats.get('skipped', 0)} 跳過"
+            f" ❌ {run_stats.get('error', 0)} 失敗"
+        )
+    except Exception as e:
+        print(f"⚠️  crawl_log 寫入失敗（不中斷主流程）：{e}")
+
+
+def save_event_upsert(event_data, run_stats: dict, source_name: str = "", dry_run: bool = False):
     """
-    支援單筆或系列活動 (List) 的自動拆解寫入。
+    以 event_id (SHA256) 為衝突鍵執行 upsert，取代舊版 insert-after-check 流程。
 
-    去重邏輯（兩層）：
-      Layer 1 — 複合鍵（source_url + title）：
-        同網址的多場次系列活動 title 各不同（含 (M/N場) 後綴），
-        因此必須兩欄都相符才算重複，確保每場都能寫入。
-      Layer 2 — 跨平台模糊比對（start_time + title[:6].ilike）：
-        捕捉不同網站刊登的同場活動（標題略有差異）。
-
-    其他：
-      - timestamp 清洗：start_time/end_time "None" 字串 → SQL NULL
-      - end_date 寫入：展覽的結束日期單獨存到 end_date 欄位
-      - dry_run 硬鎖：dry_run=True 時絕對不呼叫 Supabase insert
+    去重邏輯：
+      Layer 2 — 跨平台正規化比對：不同 URL 但同一活動，純化標題 + 同日比對。
+      Layer 3 — 語意向量去重：Gemini Embedding 餘弦相似度，捕捉不同描述的同場活動。
+      （Layer 1 由 event_id upsert 內建取代，不再需要額外查重。）
     """
     events_to_process = event_data if isinstance(event_data, list) else [event_data]
-
-    # 外縣市分館黑名單：含這些關鍵字的地點或標題直接捨棄，不寫入 Supabase
     VENUE_BLACKLIST = ['南科', '南科考古館']
 
     for single_event in events_to_process:
-        title  = single_event.get('event_name', '未提供')
-        venue  = single_event.get('location', '') or single_event.get('venue_name', '') or ''
+        title = single_event.get('event_name', '未提供')
+        venue = single_event.get('location', '') or single_event.get('venue_name', '') or ''
 
         if any(kw in title or kw in venue for kw in VENUE_BLACKLIST):
-            print(f"🚫 跳過（外縣市分館黑名單）：{title}｜地點：{venue}")
+            print(f"🚫 跳過（外縣市黑名單）：{title}｜地點：{venue}")
+            run_stats['skipped'] += 1
             continue
 
         try:
-            # ── 清洗時間欄位 ──────────────────────────────────────────────────
+            # ── 時間欄位清洗 ──────────────────────────────────────────────────
             start_time = sanitize_timestamp(single_event.get('iso_start_time'))
             end_time   = sanitize_timestamp(single_event.get('iso_end_time'))
             end_date   = single_event.get('end_date') or extract_end_date(end_time)
+            start_date = start_time[:10] if start_time else None
 
-            # start_time 為 NULL → 資料無效，直接跳過
             if not start_time:
                 print(f"⚠️  跳過（無有效 start_time）：{title}")
+                run_stats['skipped'] += 1
                 continue
 
-            # ── 去重（兩層）────────────────────────────────────────────────────
+            # ── event_id 產生 ────────────────────────────────────────────────
             source_url = single_event.get('source_url', '')
+            norm_url   = normalize_url(source_url) if source_url else ''
+            event_id   = generate_event_id(source_name, norm_url) if norm_url else None
 
-            # Layer 1：複合鍵（source_url + title）
-            # 同一頁面拆解出的多場次活動，source_url 相同但 title 不同（帶 (M/N場) 後綴）
-            # → 必須兩者都相符才算重複，確保系列場次全部寫入
-            if source_url:
-                dup = (supabase.table("events").select("id")
-                       .eq("source_url", source_url).eq("title", title).execute())
-                if dup.data:
-                    print(f"⏩ 已存在（source_url+title 重複），跳過：{title}")
-                    continue
-            else:
-                # 無 source_url 時降級：用 title + start_time 查重
-                dup = (supabase.table("events").select("id")
-                       .eq("title", title).eq("start_time", start_time).execute())
-                if dup.data:
-                    print(f"⏩ 已存在（title+time 重複），跳過：{title}")
-                    continue
-
-            # Layer 2：跨平台正規化比對（純化標題 + 相同日期）
-            # 純化後比較，解決不同站台在標題加入不同標點/括號/空格而誤放行的問題。
-            # 策略：抓同一天的所有活動，在 Python 端做正規化字串比對。
-            date_prefix = start_time[:10]                    # YYYY-MM-DD
+            # ── Layer 2：跨平台正規化比對（不同來源、不同 URL 的同一活動）──────
             norm_new    = normalize_title(title)
+            date_prefix = start_time[:10]
             same_day = (supabase.table("events")
-                        .select("id, title")
+                        .select("id, title, event_id")
                         .gte("start_time", f"{date_prefix}T00:00:00")
                         .lte("start_time", f"{date_prefix}T23:59:59")
                         .execute())
             fuzzy_matched = False
             for ev in same_day.data:
                 norm_ev = normalize_title(ev["title"])
-                # 判定為同一活動：一方為另一方子字串，或共享 ≥ 8 字純化字元前綴
                 if norm_new and norm_ev and (
-                    norm_new in norm_ev
-                    or norm_ev in norm_new
+                    norm_new in norm_ev or norm_ev in norm_new
                     or (len(norm_new) >= 8 and len(norm_ev) >= 8
                         and norm_new[:8] == norm_ev[:8])
                 ):
-                    fuzzy_matched = True
+                    if ev.get("event_id") != event_id:  # 不同來源的同一活動 → 跳過
+                        print(f"⏩ 跨平台重複，跳過：{title}")
+                        run_stats['skipped'] += 1
+                        fuzzy_matched = True
                     break
             if fuzzy_matched:
-                print(f"⏩ 已存在（跨平台正規化比對），跳過：{title}")
                 continue
 
-            # ── Layer 3：語意向量去重（跨平台、跨日期）──────────────────────
-            # 將「標題 + 日期 + 簡介」組合成語意文字，透過 Gemini Embedding 比對
-            # 能捕捉官網與 FB 以不同文字描述同一活動的情況
+            # ── Layer 3：語意向量去重 ────────────────────────────────────────
             embed_text = (
-                f"{title} "
-                f"{start_time[:10]} "
+                f"{title} {start_time[:10]} "
                 f"{single_event.get('card_summary', single_event.get('description', ''))}"
             ).strip()
             embedding = generate_embedding(embed_text)
@@ -570,11 +599,10 @@ def save_to_supabase(event_data, dry_run: bool = False):
                     embedding, new_start_date=start_time[:10], new_title=title
                 )
                 if is_semantic_dup:
-                    print(f"🧠 偵測到語意重複活動，跳過寫入：{title}")
-                    print(f"   ↳ 相似既有活動：{matched_title}")
+                    print(f"🧠 語意重複，跳過：{title}\n   ↳ 相似：{matched_title}")
+                    run_stats['skipped'] += 1
                     continue
             else:
-                # Embedding 失敗 → 略過語意比對，繼續寫入（不犧牲資料完整性）
                 print(f"⚠️  Embedding 失敗，跳過語意去重（仍寫入）：{title}")
 
             # ── 座標補全（白名單 / Google Places）──────────────────────────────
@@ -583,27 +611,33 @@ def save_to_supabase(event_data, dry_run: bool = False):
             if not lat or not lon:
                 lat, lon = get_coordinates(single_event.get('location', ''))
             if lat == "FILTERED":
-                print(f"⚠️  地點不在台東（geocoding 過濾），跳過：{title}")
+                print(f"⚠️  地點不在台東，跳過：{title}")
+                run_stats['skipped'] += 1
                 continue
 
             # ── 組 payload ────────────────────────────────────────────────────
             payload = {
-                "title":            title,
-                "description":      single_event.get('card_summary', ''),
-                "long_description": single_event.get('long_description', ''),
-                "image_captured":   single_event.get('image_url', ''),
-                "start_time":       start_time,
-                "end_time":         end_time,
-                "end_date":         end_date,        # ← 展覽區間核心欄位
-                "venue_name":       single_event.get('location', '未提供'),
-                "latitude":         lat,
-                "longitude":        lon,
-                "is_free":          single_event.get('is_free', False),
-                "ticket_url":       single_event.get('ticket_url'),
-                "source_url":       source_url,
-                "vibe_tags":        single_event.get('vibe_tags', []),
-                "target_audience":  single_event.get('target_audience', []),
-                "indoor_or_outdoor": single_event.get('indoor_or_outdoor'),
+                "event_id":           event_id,
+                "title":              title,
+                "description":        single_event.get('card_summary', ''),
+                "long_description":   single_event.get('long_description', ''),
+                "image_captured":     single_event.get('image_url', ''),
+                "start_time":         start_time,
+                "start_date":         start_date,
+                "end_time":           end_time,
+                "end_date":           end_date,
+                "date_parse_status":  'success',
+                "raw_date_text":      single_event.get('raw_date_text'),
+                "normalized_url":     norm_url or None,
+                "venue_name":         venue or '未提供',
+                "latitude":           lat,
+                "longitude":          lon,
+                "is_free":            single_event.get('is_free', False),
+                "ticket_url":         single_event.get('ticket_url'),
+                "source_url":         source_url,
+                "vibe_tags":          single_event.get('vibe_tags', []),
+                "target_audience":    single_event.get('target_audience', []),
+                "indoor_or_outdoor":  single_event.get('indoor_or_outdoor'),
                 "weather_resilience": single_event.get('weather_resilience', 3),
                 "engagement_metrics": {"score": 0},
                 "affiliate_links": {
@@ -611,20 +645,38 @@ def save_to_supabase(event_data, dry_run: bool = False):
                     "ticket":        {"label": "售票連結",   "url": None},
                     "accommodation": {"label": "周邊住宿",   "url": None},
                 },
-                "embedding": embedding,  # None 時 Supabase 寫入 NULL，不影響其他欄位
+                "embedding": embedding,
             }
 
             if dry_run:
-                print(f"[DRY-RUN] 預覽 payload（不寫入）：")
-                print(json.dumps(payload, ensure_ascii=False, indent=2))
+                print(f"[DRY-RUN] {(event_id or '?')[:8]}… {title}")
+                run_stats['inserted'] += 1
+                continue
+
+            # ── Upsert（event_id 衝突 → UPDATE；否則 INSERT）────────────────
+            if event_id:
+                existing  = (supabase.table("events").select("id")
+                             .eq("event_id", event_id).execute())
+                is_update = bool(existing.data)
+                supabase.table("events").upsert(
+                    payload, on_conflict="event_id"
+                ).execute()
             else:
+                is_update = False
                 supabase.table("events").insert(payload).execute()
-                date_label = start_time[:10]
-                end_label  = f" ~ {end_date}" if end_date and end_date != start_time[:10] else ""
-                print(f"✅ 存入：{title} ({date_label}{end_label})")
+
+            date_label = start_time[:10]
+            end_label  = f" ~ {end_date}" if end_date and end_date != start_time[:10] else ""
+            if is_update:
+                print(f"🔄 已更新：{title} ({date_label}{end_label})")
+                run_stats['updated'] += 1
+            else:
+                print(f"✅ 新寫入：{title} ({date_label}{end_label})")
+                run_stats['inserted'] += 1
 
         except Exception as e:
-            print(f"❌ 存入失敗 [{title}]: {e}")
+            print(f"❌ Upsert 失敗 [{title}]: {e}")
+            run_stats['error'] += 1
 
 def ai_data_cleaner(raw_text, image_url, source_url):
     image_data = None
@@ -772,6 +824,10 @@ def ai_powered_spider(site_config, dry_run: bool = False, limit: int = 0):
     list_url = site_config.get("list_url")   # 可選：已知的活動列表頁（有分頁）
     keywords = site_config["keywords"]
 
+    run_id    = time.strftime('%Y%m%d_%H%M%S')
+    run_stats = {'found': 0, 'inserted': 0, 'updated': 0, 'skipped': 0, 'error': 0}
+    t_start   = time.time()
+
     print(f"\n🚢 駛入大廳：{site_name} ({base_url})")
 
     with Stealth().use_sync(sync_playwright()) as p:
@@ -810,6 +866,7 @@ def ai_powered_spider(site_config, dry_run: bool = False, limit: int = 0):
                             if not full_url.endswith('/history') and full_url != base_url:
                                 potential_links.append((link_text, full_url))
 
+            run_stats['found'] = len(potential_links)
             print(f"🔎 共蒐集 {len(potential_links)} 個活動連結。")
 
             # ── Phase 2：逐頁 AI 萃取 ────────────────────────────────────────────
@@ -880,7 +937,13 @@ def ai_powered_spider(site_config, dry_run: bool = False, limit: int = 0):
                         print("🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過")
                     else:
                         print("✨ 準備寫入資料庫...")
-                        save_to_supabase(event_json, dry_run=dry_run)
+                        if isinstance(event_json, list):
+                            for ev in event_json:
+                                ev['source_name'] = site_name
+                        elif isinstance(event_json, dict):
+                            event_json['source_name'] = site_name
+                        save_event_upsert(event_json, run_stats=run_stats,
+                                          source_name=site_name, dry_run=dry_run)
                     
                 except Exception as e:
                     print(f"⚠️ 略過此頁面 (超時或錯誤): {e}")
@@ -896,6 +959,11 @@ def ai_powered_spider(site_config, dry_run: bool = False, limit: int = 0):
                             break
 
                 time.sleep(15)
+
+            # ── 爬蟲結束：寫入執行日誌 ────────────────────────────────────────
+            duration_ms = int((time.time() - t_start) * 1000)
+            if not dry_run:
+                flush_crawl_log(run_id, site_name, run_stats, duration_ms)
 
         except Exception as e:
             print(f"❌ 無法連接到站台 {site_name}: {e}")

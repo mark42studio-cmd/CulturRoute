@@ -24,3 +24,50 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-noto-serif-tc), 'Noto Serif TC', Georgia, serif;
   letter-spacing: 0.05em;
 }
+
+/* ── driver.js 導引覆寫（品牌色系）────────────────────────────────────────── */
+.driver-popover {
+  background-color: #F9F8F6 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 40px rgba(27, 46, 38, 0.18), 0 2px 10px rgba(27, 46, 38, 0.08) !important;
+  max-width: 320px !important;
+}
+.driver-popover-title {
+  font-family: var(--font-noto-serif-tc), 'Noto Serif TC', Georgia, serif !important;
+  color: #1B2E26 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+.driver-popover-description {
+  color: #637068 !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+}
+.driver-popover-progress-text {
+  color: #8A9A91 !important;
+  font-size: 11px !important;
+}
+.driver-popover-next-btn {
+  background-color: #1B2E26 !important;
+  border-color: #1B2E26 !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  font-size: 12.5px !important;
+}
+.driver-popover-next-btn:hover {
+  background-color: #243d34 !important;
+}
+.driver-popover-prev-btn {
+  border-radius: 999px !important;
+  font-size: 12.5px !important;
+  color: #1B2E26 !important;
+  border-color: rgba(27, 46, 38, 0.25) !important;
+}
+.driver-popover-close-btn {
+  color: #8A9A91 !important;
+}
+.driver-popover-footer {
+  border-top: 1px solid rgba(27, 46, 38, 0.08) !important;
+  margin-top: 8px !important;
+  padding-top: 10px !important;
+}

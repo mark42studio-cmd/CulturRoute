@@ -31,7 +31,9 @@
       "Bash(grep *)",
       "Bash(node *)",
       "Bash(ls E:/CulturRoute/cultur-route/middleware*)",
-      "Bash(ls *)"
+      "Bash(ls *)",
+      "Bash(rm -rf \"E:/CulturRoute/cultur-route/.next\")",
+      "Bash(rm -rf \"E:/CulturRoute/backend/__pycache__\")"
     ]
   }
 }

@@ -59,6 +59,7 @@ export default function ItinerarySidebar() {
     <>
       {/* 🌟 1. 右下角浮動按鈕 */}
       <button
+        id="itinerary-sidebar-btn"
         onClick={toggleSidebar}
         className="fixed bottom-6 right-6 z-40 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-300 flex items-center justify-center"
       >

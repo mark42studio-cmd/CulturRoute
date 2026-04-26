@@ -637,7 +637,7 @@ export default function ItineraryPage() {
           </div>
 
           {/* 日期 Tab Bar：snap 水平滑動 + 右側漸層遮罩 */}
-          <div className="flex-1 min-w-0 relative">
+          <div id="tour-itinerary-tabs" className="flex-1 min-w-0 relative">
             <div
               className="flex bg-[#ede9e0] p-1 rounded-xl overflow-x-auto scroll-smooth snap-x"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -687,7 +687,7 @@ export default function ItineraryPage() {
 
         {/* ── 左欄：活動清單 + 生成按鈕(桌機) + 匯出 + 導購 + Footer
             手機：order-2（地圖下方）  桌機：order-1（左側，可捲動）── */}
-        <div className="order-2 lg:order-1 lg:col-span-1 flex flex-col gap-4 pb-4">
+        <div id="tour-itinerary-events" className="order-2 lg:order-1 lg:col-span-1 flex flex-col gap-4 pb-4">
 
           {/* 當天活動（或空狀態） */}
           {currentDayEvents.length === 0 ? (
@@ -918,7 +918,7 @@ export default function ItineraryPage() {
           )}
 
           {/* ── 匯出區塊（手機：活動清單下方；桌機：左欄）── */}
-          <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 flex flex-col gap-3">
+          <div id="tour-itinerary-export" className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 flex flex-col gap-3">
             <div>
               <p className="font-bold text-stone-700 text-sm">儲存 ＆ 分享行程</p>
               <p className="text-xs text-stone-400 mt-0.5">匯出日曆或下載精美明信片圖片</p>
@@ -1059,7 +1059,7 @@ export default function ItineraryPage() {
 
         {/* ── 右欄：地圖（純地圖，不含其他區塊）
             手機：order-1（最頂部）  桌機：order-2（右側，sticky 固定）── */}
-        <div className="order-1 lg:order-2 lg:col-span-2 lg:sticky lg:top-[80px]">
+        <div id="tour-itinerary-map" className="order-1 lg:order-2 lg:col-span-2 lg:sticky lg:top-[80px]">
           <div
             ref={mapContainerRef}
             className={`${showMap ? 'h-[60vh]' : 'h-[250px]'} lg:h-[calc(100vh-100px)] rounded-3xl border border-gray-200 overflow-hidden relative shadow-inner transition-[height] duration-500 ease-in-out`}

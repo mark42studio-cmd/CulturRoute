@@ -257,7 +257,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
         ) : null;
       })()}
 
-      <div className="mb-10 border-b border-stone-200 pb-8">
+      <div id="tour-date-filter" className="mb-10 border-b border-stone-200 pb-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <CalendarRange className="text-teal-800" size={18} />
@@ -305,7 +305,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       </div>
 
       {/* ── 類型膠囊篩選器 ──────────────────────────────────────────────────── */}
-      <div className="mb-8 flex gap-2 flex-wrap">
+      <div id="tour-event-type-filter" className="mb-8 flex gap-2 flex-wrap">
         {(
           [
             { key: 'all',         label: '✨ 全部' },
@@ -335,7 +335,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           <h3 className="text-base font-serif tracking-wide text-stone-500 mb-1">這幾天剛好沒有活動</h3>
         </div>
       ) : (
-        <div className="mb-16">{renderEventGrid(currentEvents)}</div>
+        <div id="tour-event-grid" className="mb-16">{renderEventGrid(currentEvents)}</div>
       )}
 
       {isFiltering && missedEvents.length > 0 && (

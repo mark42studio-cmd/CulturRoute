@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Noto_Serif_TC } from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
 import ItinerarySidebar from '@/components/ItinerarySidebar';
+import TourGuide from '@/components/TourGuide';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,8 +57,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         
         {/* 🌟 把側邊欄元件放在這裡，children 的上面 */}
-        <ItinerarySidebar /> 
-        
+        <ItinerarySidebar />
+        <TourGuide />
+
         {children}
 
         <footer className="mt-auto py-6 flex items-center justify-center gap-2 text-xs text-gray-500">
