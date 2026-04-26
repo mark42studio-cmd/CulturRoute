@@ -18,6 +18,7 @@ import { useCallback, useEffect, Fragment, useRef, useState } from 'react';
 import { downloadICS, downloadReportImage, downloadItineraryICS, buildGoogleCalendarUrl } from '@/lib/itinerary-export';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import type { PlannedEvent } from '@/types';
+import { submitEvent } from '@/actions/submitEvent';
 
 const MapComponent = dynamic(
   () => import('@/components/ItineraryMap'),
@@ -268,6 +269,10 @@ export default function ItineraryPage() {
   const [feedbackSent,      setFeedbackSent]      = useState(false);
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [feedbackError,     setFeedbackError]     = useState(false);
+  const [showSubmitModal,   setShowSubmitModal]   = useState(false);
+  const [submitForm,        setSubmitForm]        = useState({ name: '', time: '', location: '', description: '', image_url: '', comments: '' });
+  const [submitStatus,      setSubmitStatus]      = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [submitErrorMsg,    setSubmitErrorMsg]    = useState('');
   const reportCardRef    = useRef<HTMLDivElement>(null);
   const postcardRef      = useRef<HTMLDivElement>(null);
   const mapContainerRef  = useRef<HTMLDivElement>(null);
@@ -299,7 +304,9 @@ export default function ItineraryPage() {
 
   // ── 動態日期區間：合併旅程設定 + 所有活動日期，自動延伸 Tabs ─────────────────
   const sortedDates = buildTripDates(tripStartDate, tripEndDate, plannedEvents);
-  const actualActiveDate = sortedDates.includes(activeDate) ? activeDate : sortedDates[0];
+  const actualActiveDate = sortedDates.includes(activeDate)
+    ? activeDate
+    : (sortedDates.length > 1 ? sortedDates[1] : sortedDates[0] ?? '');
 
   // 切換日期時清空車程資料並收起地圖，避免舊路線閃現
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -414,6 +421,20 @@ export default function ItineraryPage() {
     } else {
       setFeedbackSent(true);
       setFeedbackText('');
+    }
+  };
+
+  const handleSubmitEvent = async () => {
+    if (!submitForm.name.trim() || !submitForm.time.trim() || !submitForm.location.trim() || !submitForm.description.trim()) return;
+    setSubmitStatus('loading');
+    setSubmitErrorMsg('');
+    try {
+      const result = await submitEvent(submitForm);
+      if (result.error) { setSubmitStatus('error'); setSubmitErrorMsg(result.error); return; }
+      setSubmitStatus('success');
+    } catch {
+      setSubmitStatus('error');
+      setSubmitErrorMsg('送出失敗，請稍後再試。');
     }
   };
 
@@ -698,21 +719,29 @@ export default function ItineraryPage() {
               <h2 className="text-sm font-bold text-gray-600 mb-1">當天尚無活動</h2>
               {nearestDateWithEvents && nearestDateWithEvents !== actualActiveDate ? (
                 <div className="mt-3 space-y-2">
-                  <p className="text-gray-400 text-xs">
-                    建議查看{' '}
-                    <button onClick={() => setActiveDate(nearestDateWithEvents)} className="text-blue-500 font-bold hover:underline">
-                      {formatTabLabel(nearestDateWithEvents, sortedDates.indexOf(nearestDateWithEvents))}
-                    </button>
-                  </p>
                   <button
                     onClick={() => setActiveDate(nearestDateWithEvents)}
-                    className="inline-flex items-center gap-2 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-xl transition-colors shadow-sm"
+                    className="w-full inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-xl transition-colors shadow-sm"
                   >
                     <Calendar size={12} />定位到最近有活動的日期
                   </button>
+                  <button
+                    disabled
+                    className="w-full inline-flex items-center justify-center gap-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl cursor-not-allowed opacity-70"
+                  >
+                    🍜 台東500碗上架中
+                  </button>
                 </div>
               ) : (
-                <p className="text-gray-400 text-xs mt-2">可以從其他天把行程移過來，或回首頁探索！</p>
+                <div className="mt-3 space-y-2">
+                  <p className="text-gray-400 text-xs">可以從其他天把行程移過來，或回首頁探索！</p>
+                  <button
+                    disabled
+                    className="w-full inline-flex items-center justify-center gap-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl cursor-not-allowed opacity-70"
+                  >
+                    🍜 台東500碗上架中
+                  </button>
+                </div>
               )}
             </div>
           ) : (
@@ -1055,6 +1084,20 @@ export default function ItineraryPage() {
               )}
             </div>
 
+            {/* 活動上架申請 */}
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h4 className="text-gray-800 font-bold text-sm">有活動想在台東曝光？</h4>
+                <p className="text-xs text-gray-400 mt-0.5">歡迎在地業者、社群主辦方送件申請上架</p>
+              </div>
+              <button
+                onClick={() => { setShowSubmitModal(true); setSubmitStatus('idle'); }}
+                className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white text-sm font-bold rounded-full hover:bg-amber-600 transition-colors shadow-sm"
+              >
+                🎉 我有活動想要上架
+              </button>
+            </div>
+
           </div>
         </div>
 
@@ -1279,6 +1322,172 @@ export default function ItineraryPage() {
           >
             關閉
           </button>
+        </div>
+      )}
+
+      {/* ── 活動上架申請 Modal ── */}
+      {showSubmitModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && submitStatus !== 'loading') {
+              setShowSubmitModal(false);
+              setSubmitStatus('idle');
+            }
+          }}
+        >
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6 flex flex-col gap-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">🎉 活動上架申請</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">我們審核後會儘快聯繫</p>
+                </div>
+                <button
+                  onClick={() => { setShowSubmitModal(false); setSubmitStatus('idle'); }}
+                  disabled={submitStatus === 'loading'}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-40"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {submitStatus === 'success' ? (
+                <div className="flex flex-col items-center gap-3 py-8">
+                  <div className="text-5xl">🎊</div>
+                  <p className="text-green-700 font-bold text-base">申請已送出！</p>
+                  <p className="text-gray-500 text-sm text-center">感謝您的申請，我們將盡快審核並與您聯繫。</p>
+                  <button
+                    onClick={() => {
+                      setShowSubmitModal(false);
+                      setSubmitStatus('idle');
+                      setSubmitForm({ name: '', time: '', location: '', description: '', image_url: '', comments: '' });
+                    }}
+                    className="mt-2 px-6 py-2 bg-gray-800 text-white text-sm rounded-full hover:bg-gray-700 transition-colors"
+                  >
+                    關閉
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        活動名稱 <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={submitForm.name}
+                        onChange={e => setSubmitForm(f => ({ ...f, name: e.target.value }))}
+                        placeholder="例：2026 台東鐵花野餐派對"
+                        maxLength={100}
+                        className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        時間 <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={submitForm.time}
+                        onChange={e => setSubmitForm(f => ({ ...f, time: e.target.value }))}
+                        placeholder="例：2026/05/10 14:00–17:00"
+                        maxLength={200}
+                        className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        地點 <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={submitForm.location}
+                        onChange={e => setSubmitForm(f => ({ ...f, location: e.target.value }))}
+                        placeholder="例：台東縣台東市中正路某段"
+                        maxLength={200}
+                        className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        活動介紹 <span className="text-red-400">*</span>
+                      </label>
+                      <textarea
+                        value={submitForm.description}
+                        onChange={e => setSubmitForm(f => ({ ...f, description: e.target.value }))}
+                        placeholder="請簡介活動內容、特色或注意事項..."
+                        maxLength={2000}
+                        rows={4}
+                        className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        圖片連結 <span className="text-gray-300 font-normal">（選填）</span>
+                      </label>
+                      <input
+                        type="url"
+                        value={submitForm.image_url}
+                        onChange={e => setSubmitForm(f => ({ ...f, image_url: e.target.value }))}
+                        placeholder="https://example.com/poster.jpg"
+                        maxLength={500}
+                        className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        其他建議或合作留言 <span className="text-gray-300 font-normal">（選填）</span>
+                      </label>
+                      <textarea
+                        value={submitForm.comments}
+                        onChange={e => setSubmitForm(f => ({ ...f, comments: e.target.value }))}
+                        placeholder="有什麼特別想告訴我們的嗎？"
+                        maxLength={1000}
+                        rows={3}
+                        className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {submitStatus === 'error' && (
+                    <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-xl px-4 py-2">
+                      {submitErrorMsg || '送出失敗，請稍後再試。'}
+                    </p>
+                  )}
+
+                  <p className="text-[11px] text-gray-400">
+                    <span className="text-red-400">*</span> 為必填欄位
+                  </p>
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => { setShowSubmitModal(false); setSubmitStatus('idle'); }}
+                      disabled={submitStatus === 'loading'}
+                      className="px-5 py-2 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40"
+                    >
+                      取消
+                    </button>
+                    <button
+                      onClick={handleSubmitEvent}
+                      disabled={
+                        submitStatus === 'loading' ||
+                        !submitForm.name.trim() ||
+                        !submitForm.time.trim() ||
+                        !submitForm.location.trim() ||
+                        !submitForm.description.trim()
+                      }
+                      className="flex items-center gap-2 px-5 py-2 bg-amber-500 text-white text-sm font-bold rounded-full hover:bg-amber-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {submitStatus === 'loading' && <Loader2 size={13} className="animate-spin" />}
+                      送出申請
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

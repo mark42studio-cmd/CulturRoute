@@ -149,6 +149,16 @@ export const DeleteEventSchema = z.object({
   id: UuidSchema,
 });
 
+/** submitEvent(payload) — 使用者活動上架申請 */
+export const SubmitEventSchema = z.object({
+  name:        z.string().trim().min(1, '活動名稱不得為空').max(100),
+  time:        z.string().trim().min(1, '時間不得為空').max(200),
+  location:    z.string().trim().min(1, '地點不得為空').max(200),
+  description: z.string().trim().min(1, '活動介紹不得為空').max(2000),
+  image_url:   z.string().trim().max(500).optional().or(z.literal('')),
+  comments:    z.string().trim().max(1000).optional().or(z.literal('')),
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 工具函式
 // ─────────────────────────────────────────────────────────────────────────────
