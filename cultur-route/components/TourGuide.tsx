@@ -4,16 +4,17 @@ import 'driver.js/dist/driver.css';
 import { driver } from 'driver.js';
 import type { DriveStep } from 'driver.js';
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CircleHelp } from 'lucide-react';
 import {
   HOME_TOUR_KEY,
   ITINERARY_TOUR_KEY,
+  ITINERARY_TOUR_KEY_V3,
   homeSteps,
   itinerarySteps,
 } from '@/lib/tourConfig';
 
-const LEGACY_TOUR_KEYS = ['cultrRoute_homeTour_v1', 'cultrRoute_itineraryTour_v1'];
+const LEGACY_TOUR_KEYS = ['cultrRoute_homeTour_v1', 'cultrRoute_itineraryTour_v1', 'cultrRoute_itineraryTour_v2'];
 
 function buildTour(steps: DriveStep[], tourKey: string) {
   let d: ReturnType<typeof driver>;
@@ -44,6 +45,15 @@ export default function TourGuide() {
   const steps   = isItinerary ? itinerarySteps : homeSteps;
   const tourKey = isItinerary ? ITINERARY_TOUR_KEY : HOME_TOUR_KEY;
 
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsDesktop(window.innerWidth >= 768);
+    const handler = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
   const getFilteredSteps = useCallback(() => {
     if (isItinerary) {
       const hasEvents = document.querySelector('.planned-event-card') !== null;
@@ -55,24 +65,30 @@ export default function TourGuide() {
     return steps;
   }, [isItinerary, steps]);
 
-  // 清除舊版 v1 快取，確保使用者能看到最新導引
+  // 清除舊版 v1/v2 快取，確保使用者能看到最新導引
   useEffect(() => {
     LEGACY_TOUR_KEYS.forEach(k => localStorage.removeItem(k));
   }, []);
 
-  // Auto-start on first visit, only on pages with a defined tour
+  // Auto-start on first visit, only on desktop pages with a defined tour
   useEffect(() => {
     if (!hasTour) return;
-    if (localStorage.getItem(tourKey)) return;
-    const t = setTimeout(() => buildTour(getFilteredSteps(), tourKey).drive(), 800);
+    if (isDesktop === null || !isDesktop) return;
+    // 行程頁改用 v3 key；首頁沿用 tourKey
+    const effectiveKey = isItinerary ? ITINERARY_TOUR_KEY_V3 : tourKey;
+    if (localStorage.getItem(effectiveKey)) return;
+    const t = setTimeout(() => buildTour(getFilteredSteps(), effectiveKey).drive(), 800);
     return () => clearTimeout(t);
-  }, [pathname, hasTour, getFilteredSteps, tourKey]);
+  }, [pathname, hasTour, isDesktop, isItinerary, getFilteredSteps, tourKey]);
 
   const startTour = useCallback(() => {
-    buildTour(getFilteredSteps(), tourKey).drive();
-  }, [getFilteredSteps, tourKey]);
+    const effectiveKey = isItinerary ? ITINERARY_TOUR_KEY_V3 : tourKey;
+    buildTour(getFilteredSteps(), effectiveKey).drive();
+  }, [isItinerary, getFilteredSteps, tourKey]);
 
   if (!hasTour) return null;
+  // 行程頁手機版由 OnboardingModal 接手，不顯示 driver.js 按鈕
+  if (isItinerary && isDesktop === false) return null;
 
   return (
     <button

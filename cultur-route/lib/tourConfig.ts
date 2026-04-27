@@ -2,6 +2,7 @@ import type { DriveStep } from 'driver.js';
 
 export const HOME_TOUR_KEY = 'cultrRoute_homeTour_v2';
 export const ITINERARY_TOUR_KEY = 'cultrRoute_itineraryTour_v2';
+export const ITINERARY_TOUR_KEY_V3 = 'hasSeenTour_v3';
 
 export const homeSteps: DriveStep[] = [
   {

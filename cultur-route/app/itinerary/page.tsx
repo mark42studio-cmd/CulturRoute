@@ -19,7 +19,8 @@ import { downloadICS, downloadReportImage, downloadItineraryICS, buildGoogleCale
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import type { PlannedEvent } from '@/types';
 import { submitEvent } from '../actions/submitEvent';
-import { ITINERARY_TOUR_KEY } from '@/lib/tourConfig';
+import { ITINERARY_TOUR_KEY_V3 } from '@/lib/tourConfig';
+import OnboardingModal from '@/components/OnboardingModal';
 
 const MapComponent = dynamic(
   () => import('@/components/ItineraryMap'),
@@ -289,6 +290,8 @@ export default function ItineraryPage() {
   const [submitStatus,      setSubmitStatus]      = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [submitErrorMsg,    setSubmitErrorMsg]    = useState('');
   const [mockTourEvents,    setMockTourEvents]    = useState<PlannedEvent[]>([]);
+  const [isDesktop,         setIsDesktop]         = useState<boolean | null>(null);
+  const [showOnboarding,    setShowOnboarding]    = useState(false);
   const reportCardRef    = useRef<HTMLDivElement>(null);
   const postcardRef      = useRef<HTMLDivElement>(null);
   const mapContainerRef  = useRef<HTMLDivElement>(null);
@@ -308,7 +311,23 @@ export default function ItineraryPage() {
 
   useEffect(() => { setIsMounted(true); }, []);
 
-  // 導引結束（完成或略過）時清除 mock 假資料
+  // 偵測視窗寬度，設定 isDesktop（安全：只在 client 執行）
+  useEffect(() => {
+    setIsDesktop(window.innerWidth >= 768);
+    const handler = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // 手機版新手：掛載後判斷是否開啟 OnboardingModal
+  useEffect(() => {
+    if (isDesktop === null || isDesktop) return;
+    if (!localStorage.getItem(ITINERARY_TOUR_KEY_V3)) {
+      setShowOnboarding(true);
+    }
+  }, [isDesktop]);
+
+  // 導引結束（driver.js 完成/略過）時清除 mock 假資料
   useEffect(() => {
     const handler = () => setMockTourEvents([]);
     window.addEventListener('cultrRoute:tourDestroyed', handler);
@@ -318,7 +337,7 @@ export default function ItineraryPage() {
   // 新手導引假資料注入：tour 未完成 且 當天無有效活動時自動插入兩筆示範資料
   useEffect(() => {
     if (!isMounted || !actualActiveDate) return;
-    if (localStorage.getItem(ITINERARY_TOUR_KEY)) return;
+    if (localStorage.getItem(ITINERARY_TOUR_KEY_V3)) return;
     const hasReal = plannedEvents.some(e =>
       e.assigned_date === actualActiveDate &&
       e.latitude != null && e.longitude != null &&
@@ -556,10 +575,21 @@ export default function ItineraryPage() {
   const aggAccommodation = plannedEvents.find(e => e.affiliate_links?.accommodation?.url)?.affiliate_links?.accommodation
                         ?? { label: '周邊住宿', url: null };
 
+  const handleOnboardingClose = () => {
+    localStorage.setItem(ITINERARY_TOUR_KEY_V3, 'true');
+    setShowOnboarding(false);
+    setMockTourEvents([]);
+  };
+
   if (!isMounted) return null;
 
   return (
     <main className="min-h-[100dvh] bg-[#f8f6f0] relative">
+
+      {/* ── 手機版新手歡迎彈窗 ──────────────────────────────────────────────── */}
+      {showOnboarding && isDesktop === false && (
+        <OnboardingModal onClose={handleOnboardingClose} />
+      )}
 
       {/* ── Toast 通知（日期變更防呆） ────────────────────────────────────────── */}
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center pointer-events-none w-full max-w-xs px-4">
