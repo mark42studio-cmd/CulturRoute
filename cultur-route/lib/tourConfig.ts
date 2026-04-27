@@ -97,6 +97,10 @@ export const itinerarySteps: DriveStep[] = [
       description:
         '排好行程了嗎？千萬別忘了點擊這裡，系統才會幫你畫出完整的地圖與交通路線喔！',
       side: 'top',
+      align: 'center',
+    },
+    onHighlightStarted: (element: Element | undefined) => {
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     },
   },
 ];
