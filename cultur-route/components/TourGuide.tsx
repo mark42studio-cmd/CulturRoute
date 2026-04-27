@@ -25,7 +25,7 @@ function buildTour(steps: DriveStep[], tourKey: string) {
     prevBtnText: '← 上一步',
     doneBtnText: '完成 ✓',
     smoothScroll: true,
-    overlayColor: 'rgba(27, 46, 38, 0.65)',
+    overlayColor: 'rgba(0,0,0,0.8)',
     steps,
     onDestroyStarted: () => {
       localStorage.setItem(tourKey, 'true');
@@ -82,6 +82,7 @@ export default function TourGuide() {
   }, [pathname, hasTour, isDesktop, isItinerary, getFilteredSteps, tourKey]);
 
   const startTour = useCallback(() => {
+    if (window.innerWidth < 768) return;
     const effectiveKey = isItinerary ? ITINERARY_TOUR_KEY_V3 : tourKey;
     buildTour(getFilteredSteps(), effectiveKey).drive();
   }, [isItinerary, getFilteredSteps, tourKey]);

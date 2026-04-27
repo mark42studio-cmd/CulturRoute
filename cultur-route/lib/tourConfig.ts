@@ -43,15 +43,6 @@ export const homeSteps: DriveStep[] = [
       align: 'center',
     },
   },
-  {
-    element: '#itinerary-sidebar-btn',
-    popover: {
-      title: '📋 查看行程清單',
-      description:
-        '加入的活動都收納在這裡！點擊右下角的日曆圖示，隨時查看與管理你的台東行程。',
-      side: 'left',
-    },
-  },
 ];
 
 export const itinerarySteps: DriveStep[] = [
@@ -92,11 +83,11 @@ export const itinerarySteps: DriveStep[] = [
     },
   },
   {
-    element: '#tour-bottom-anchor',
+    element: '#tour-generate-route-btn',
     popover: {
       title: '✨ 最後一步：生成專屬路線！',
       description:
-        '排好行程了嗎？千萬別忘了點擊「螢幕最下方」的按鈕，系統才會幫你畫出完整的地圖與交通路線喔！',
+        '排好行程了嗎？點擊這個按鈕，系統會幫你畫出完整的地圖與交通路線喔！',
       side: 'top',
       align: 'center',
     },

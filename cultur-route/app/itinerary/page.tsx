@@ -368,14 +368,14 @@ export default function ItineraryPage() {
     const base = `${actualActiveDate}T09:00:00+08:00`;
     setMockTourEvents([
       {
-        id: 'mock-1', title: '👇 [教學] 試著按住並上下拖拉排序',
+        id: 'mock-1', title: '👉 [新手任務] 按住這張卡片，試著上下拖拉排序！',
         description: '', vibe_tags: [], weather_resilience: 3, is_free: true,
         start_time: base, venue_name: '台東火車站', address: '台東市鐵花路369號',
         latitude: 22.7999, longitude: 121.1208,
         assigned_date: actualActiveDate, stay_duration: 60,
       },
       {
-        id: 'mock-2', title: '🌅 [教學] 傍晚去海邊看夕陽',
+        id: 'mock-2', title: '🗺️ [新手任務] 排好後，點擊最下方的按鈕生成路線！',
         description: '', vibe_tags: [], weather_resilience: 3, is_free: true,
         start_time: `${actualActiveDate}T17:00:00+08:00`, venue_name: '台東海濱公園', address: '台東市大同路',
         latitude: 22.7553, longitude: 121.1514,
