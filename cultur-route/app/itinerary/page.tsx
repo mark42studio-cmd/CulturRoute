@@ -759,7 +759,7 @@ export default function ItineraryPage() {
                             {...provided.draggableProps}
                             onClick={() => setSelectedEventId(prev => prev === event.id ? null : event.id)}
                             className={[
-                              'rounded-2xl p-5 border shadow-sm relative group flex gap-4 transition-colors cursor-pointer',
+                              'planned-event-card rounded-2xl p-5 border shadow-sm relative group flex gap-4 transition-colors cursor-pointer',
                               // 斑馬紋：偶數 white，奇數 slate-50
                               index % 2 === 0 ? 'bg-white' : 'bg-slate-50',
                               snapshot.isDragging ? 'border-blue-500 shadow-xl scale-[1.02] z-50'
@@ -1277,6 +1277,9 @@ export default function ItineraryPage() {
           </div>{/* /安全區 1200×800 */}
         </div>{/* /出血容器 1271×871 */}
       </div>
+
+      {/* 導引錨點：固定存在，供 driver.js 定位底部按鈕步驟使用 */}
+      <div id="tour-generate-route-anchor" style={{ position: 'relative', height: 0, marginBottom: '80px', pointerEvents: 'none' }} aria-hidden="true" />
 
       {/* ── 手機底部 Sticky 浮動按鈕（桌機隱藏）────────────────────────────────
           僅在地圖尚未生成 且 當天有活動時顯示。

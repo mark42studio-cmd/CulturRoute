@@ -91,7 +91,7 @@ export const itinerarySteps: DriveStep[] = [
     },
   },
   {
-    element: '#tour-generate-route-btn',
+    element: '#tour-generate-route-anchor',
     popover: {
       title: '✨ 最後一步：生成專屬路線！',
       description:
@@ -101,6 +101,13 @@ export const itinerarySteps: DriveStep[] = [
     },
     onHighlightStarted: (element: Element | undefined) => {
       element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+  },
+  {
+    popover: {
+      title: '📱 把台東帶在身邊！',
+      description:
+        '點擊瀏覽器底部的「分享」或選單按鈕，選擇「加入主畫面」，就能把這個網站變成手機 App，隨時查看行程不迷路！',
     },
   },
 ];

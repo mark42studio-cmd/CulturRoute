@@ -41,17 +41,28 @@ export default function TourGuide() {
   const steps   = isItinerary ? itinerarySteps : homeSteps;
   const tourKey = isItinerary ? ITINERARY_TOUR_KEY : HOME_TOUR_KEY;
 
+  const getFilteredSteps = useCallback(() => {
+    if (isItinerary) {
+      const hasEvents = document.querySelector('.planned-event-card') !== null;
+      return steps.filter((s) => {
+        if ((s as DriveStep & { element?: string }).element === '#tour-itinerary-events' && !hasEvents) return false;
+        return true;
+      });
+    }
+    return steps;
+  }, [isItinerary, steps]);
+
   // Auto-start on first visit, only on pages with a defined tour
   useEffect(() => {
     if (!hasTour) return;
     if (localStorage.getItem(tourKey)) return;
-    const t = setTimeout(() => buildTour(steps, tourKey).drive(), 800);
+    const t = setTimeout(() => buildTour(getFilteredSteps(), tourKey).drive(), 800);
     return () => clearTimeout(t);
-  }, [pathname, hasTour, steps, tourKey]);
+  }, [pathname, hasTour, getFilteredSteps, tourKey]);
 
   const startTour = useCallback(() => {
-    buildTour(steps, tourKey).drive();
-  }, [steps, tourKey]);
+    buildTour(getFilteredSteps(), tourKey).drive();
+  }, [getFilteredSteps, tourKey]);
 
   if (!hasTour) return null;
 
