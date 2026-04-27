@@ -13,6 +13,8 @@ import {
   itinerarySteps,
 } from '@/lib/tourConfig';
 
+const LEGACY_TOUR_KEYS = ['cultrRoute_homeTour_v1', 'cultrRoute_itineraryTour_v1'];
+
 function buildTour(steps: DriveStep[], tourKey: string) {
   let d: ReturnType<typeof driver>;
   d = driver({
@@ -26,6 +28,7 @@ function buildTour(steps: DriveStep[], tourKey: string) {
     steps,
     onDestroyStarted: () => {
       localStorage.setItem(tourKey, 'true');
+      window.dispatchEvent(new CustomEvent('cultrRoute:tourDestroyed'));
       d.destroy();
     },
   });
@@ -51,6 +54,11 @@ export default function TourGuide() {
     }
     return steps;
   }, [isItinerary, steps]);
+
+  // 清除舊版 v1 快取，確保使用者能看到最新導引
+  useEffect(() => {
+    LEGACY_TOUR_KEYS.forEach(k => localStorage.removeItem(k));
+  }, []);
 
   // Auto-start on first visit, only on pages with a defined tour
   useEffect(() => {

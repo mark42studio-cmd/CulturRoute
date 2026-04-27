@@ -1,7 +1,7 @@
 import type { DriveStep } from 'driver.js';
 
-export const HOME_TOUR_KEY = 'cultrRoute_homeTour_v1';
-export const ITINERARY_TOUR_KEY = 'cultrRoute_itineraryTour_v1';
+export const HOME_TOUR_KEY = 'cultrRoute_homeTour_v2';
+export const ITINERARY_TOUR_KEY = 'cultrRoute_itineraryTour_v2';
 
 export const homeSteps: DriveStep[] = [
   {
@@ -91,7 +91,7 @@ export const itinerarySteps: DriveStep[] = [
     },
   },
   {
-    element: '#tour-footer-anchor',
+    element: '#tour-bottom-anchor',
     popover: {
       title: '✨ 最後一步：生成專屬路線！',
       description:
@@ -100,7 +100,9 @@ export const itinerarySteps: DriveStep[] = [
       align: 'center',
     },
     onHighlightStarted: (element: Element | undefined) => {
-      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 120);
     },
   },
   {

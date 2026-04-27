@@ -19,6 +19,7 @@ import { downloadICS, downloadReportImage, downloadItineraryICS, buildGoogleCale
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import type { PlannedEvent } from '@/types';
 import { submitEvent } from '../actions/submitEvent';
+import { ITINERARY_TOUR_KEY } from '@/lib/tourConfig';
 
 const MapComponent = dynamic(
   () => import('@/components/ItineraryMap'),
@@ -287,6 +288,7 @@ export default function ItineraryPage() {
   const [submitForm,        setSubmitForm]        = useState({ name: '', time: '', location: '', description: '', image_url: '', comments: '' });
   const [submitStatus,      setSubmitStatus]      = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [submitErrorMsg,    setSubmitErrorMsg]    = useState('');
+  const [mockTourEvents,    setMockTourEvents]    = useState<PlannedEvent[]>([]);
   const reportCardRef    = useRef<HTMLDivElement>(null);
   const postcardRef      = useRef<HTMLDivElement>(null);
   const mapContainerRef  = useRef<HTMLDivElement>(null);
@@ -305,6 +307,43 @@ export default function ItineraryPage() {
   }, [activeDate]);
 
   useEffect(() => { setIsMounted(true); }, []);
+
+  // 導引結束（完成或略過）時清除 mock 假資料
+  useEffect(() => {
+    const handler = () => setMockTourEvents([]);
+    window.addEventListener('cultrRoute:tourDestroyed', handler);
+    return () => window.removeEventListener('cultrRoute:tourDestroyed', handler);
+  }, []);
+
+  // 新手導引假資料注入：tour 未完成 且 當天無有效活動時自動插入兩筆示範資料
+  useEffect(() => {
+    if (!isMounted || !actualActiveDate) return;
+    if (localStorage.getItem(ITINERARY_TOUR_KEY)) return;
+    const hasReal = plannedEvents.some(e =>
+      e.assigned_date === actualActiveDate &&
+      e.latitude != null && e.longitude != null &&
+      (e.venue_name?.trim().length ?? 0) >= 2 &&
+      !e.venue_name.includes('待定')
+    );
+    if (hasReal) { setMockTourEvents([]); return; }
+    const base = `${actualActiveDate}T09:00:00+08:00`;
+    setMockTourEvents([
+      {
+        id: 'mock-1', title: '👇 [教學] 試著按住並上下拖拉排序',
+        description: '', vibe_tags: [], weather_resilience: 3, is_free: true,
+        start_time: base, venue_name: '台東火車站', address: '台東市鐵花路369號',
+        latitude: 22.7999, longitude: 121.1208,
+        assigned_date: actualActiveDate, stay_duration: 60,
+      },
+      {
+        id: 'mock-2', title: '🌅 [教學] 傍晚去海邊看夕陽',
+        description: '', vibe_tags: [], weather_resilience: 3, is_free: true,
+        start_time: `${actualActiveDate}T17:00:00+08:00`, venue_name: '台東海濱公園', address: '台東市大同路',
+        latitude: 22.7553, longitude: 121.1514,
+        assigned_date: actualActiveDate, stay_duration: 90,
+      },
+    ]);
+  }, [isMounted, actualActiveDate, plannedEvents]);
 
   // 掛載時從 app_stats 讀取累計總讚數
   useEffect(() => {
@@ -454,15 +493,18 @@ export default function ItineraryPage() {
 
   // 按有效時間升序排列：visit_time（使用者自訂）> start_time 時間部分
   // 同時過濾無效地點：缺座標 或 venue_name 含「待定」/ 長度不足 2
-  const currentDayEvents = plannedEvents
-    .filter(e => e.assigned_date === actualActiveDate)
-    .filter(e => {
-      if (e.latitude == null || e.longitude == null) return false;
-      const vn = (e.venue_name ?? '').trim();
-      if (vn.length < 2 || vn.includes('待定')) return false;
-      return true;
-    })
-    .sort((a, b) => getEffectiveSortTime(a).localeCompare(getEffectiveSortTime(b)));
+  // 若為新手導引且當天無真實活動，末尾合併 mockTourEvents 示範資料
+  const currentDayEvents = [
+    ...plannedEvents
+      .filter(e => e.assigned_date === actualActiveDate)
+      .filter(e => {
+        if (e.latitude == null || e.longitude == null) return false;
+        const vn = (e.venue_name ?? '').trim();
+        if (vn.length < 2 || vn.includes('待定')) return false;
+        return true;
+      }),
+    ...mockTourEvents,
+  ].sort((a, b) => getEffectiveSortTime(a).localeCompare(getEffectiveSortTime(b)));
 
   // 衝突警告（derived，每次 render 重算）
   // legDurations：由 ItineraryMap Directions API 回傳的真實車程；未就緒時降級至估算
@@ -517,7 +559,7 @@ export default function ItineraryPage() {
   if (!isMounted) return null;
 
   return (
-    <main className="min-h-screen bg-[#f8f6f0] relative">
+    <main className="min-h-[100dvh] bg-[#f8f6f0] relative">
 
       {/* ── Toast 通知（日期變更防呆） ────────────────────────────────────────── */}
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center pointer-events-none w-full max-w-xs px-4">
@@ -725,7 +767,7 @@ export default function ItineraryPage() {
                         生成按鈕出現在左欄活動清單下方。
         pb-28 lg:pb-0：為手機 Sticky 按鈕留底部空間。
       */}
-      <div className="max-w-7xl mx-auto px-6 mt-4 lg:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 pb-40 lg:pb-0 lg:items-start">
+      <div className="max-w-7xl mx-auto px-6 mt-4 lg:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 lg:pb-0 lg:items-start" style={{ paddingBottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
 
         {/* ── 左欄：活動清單 + 生成按鈕(桌機) + 匯出 + 導購 + Footer
             手機：order-2（地圖下方）  桌機：order-1（左側，可捲動）── */}
@@ -1048,7 +1090,7 @@ export default function ItineraryPage() {
           </div>
 
           {/* ── Footer：按讚回饋 ── */}
-          <div id="tour-footer-anchor" className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
+          <div id="tour-bottom-anchor" className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
 
             {/* 按讚與留言 */}
             <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col gap-4">
@@ -1307,7 +1349,7 @@ export default function ItineraryPage() {
           點擊後：渲染地圖 + 平滑捲動回頂部讓使用者立刻看到地圖。
       ─────────────────────────────────────────────────────────────────────── */}
       {!showMap && currentDayEvents.length > 0 && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none" style={{ paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
           <button
             id="tour-generate-route-btn"
             onClick={handleGenerateMap}
