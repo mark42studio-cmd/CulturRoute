@@ -334,6 +334,26 @@ export default function ItineraryPage() {
     return () => window.removeEventListener('cultrRoute:tourDestroyed', handler);
   }, []);
 
+  // 掛載時從 app_stats 讀取累計總讚數
+  useEffect(() => {
+    supabase
+      .from('app_stats')
+      .select('total_likes')
+      .eq('id', 1)
+      .single()
+      .then(({ data }) => { if (data?.total_likes != null) setLikeCount(data.total_likes); });
+  }, []);
+
+  // ── 動態日期區間：合併旅程設定 + 所有活動日期，自動延伸 Tabs ─────────────────
+  const sortedDates = buildTripDates(tripStartDate, tripEndDate, plannedEvents);
+  const actualActiveDate = sortedDates.includes(activeDate)
+    ? activeDate
+    : (sortedDates.length > 1 ? sortedDates[1] : sortedDates[0] ?? '');
+
+  // 切換日期時清空車程資料並收起地圖，避免舊路線閃現
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setLegDurations([]); setShowMap(false); }, [actualActiveDate]);
+
   // 新手導引假資料注入：tour 未完成 且 當天無有效活動時自動插入兩筆示範資料
   useEffect(() => {
     if (!isMounted || !actualActiveDate) return;
@@ -363,26 +383,6 @@ export default function ItineraryPage() {
       },
     ]);
   }, [isMounted, actualActiveDate, plannedEvents]);
-
-  // 掛載時從 app_stats 讀取累計總讚數
-  useEffect(() => {
-    supabase
-      .from('app_stats')
-      .select('total_likes')
-      .eq('id', 1)
-      .single()
-      .then(({ data }) => { if (data?.total_likes != null) setLikeCount(data.total_likes); });
-  }, []);
-
-  // ── 動態日期區間：合併旅程設定 + 所有活動日期，自動延伸 Tabs ─────────────────
-  const sortedDates = buildTripDates(tripStartDate, tripEndDate, plannedEvents);
-  const actualActiveDate = sortedDates.includes(activeDate)
-    ? activeDate
-    : (sortedDates.length > 1 ? sortedDates[1] : sortedDates[0] ?? '');
-
-  // 切換日期時清空車程資料並收起地圖，避免舊路線閃現
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { setLegDurations([]); setShowMap(false); }, [actualActiveDate]);
 
   // ── 容錯：偵測 assigned_date 不在 sortedDates 內的活動（動態範圍下理論上不存在）
   const unassignedEvents: PlannedEvent[] = plannedEvents.filter(
