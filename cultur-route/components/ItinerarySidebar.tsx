@@ -169,15 +169,20 @@ export default function ItinerarySidebar() {
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
                       <Clock size={11} className="shrink-0 text-violet-400" />
-                      <select
-                        value={event.assigned_date}
-                        onChange={(e) => updateEventDate(event.id, e.target.value)}
-                        className="flex-1 text-xs rounded-lg px-2 py-1 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
-                      >
-                        {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
-                          <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
-                        ))}
-                      </select>
+                      <div className="relative flex-1">
+                        <select
+                          value={event.assigned_date}
+                          onChange={(e) => updateEventDate(event.id, e.target.value)}
+                          className="w-full appearance-none text-xs rounded-lg px-2 py-1 pr-6 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
+                        >
+                          {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
+                            <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
+                          ))}
+                        </select>
+                        <svg className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                          <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                       {event.visit_time && (
                         <span className="text-[11px] text-gray-400 shrink-0">{fmtVisitTime(event.visit_time)}</span>
                       )}
@@ -193,15 +198,20 @@ export default function ItinerarySidebar() {
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
                       <Calendar size={11} className="shrink-0 text-blue-400" />
-                      <select
-                        value={event.assigned_date}
-                        onChange={(e) => updateEventDate(event.id, e.target.value)}
-                        className="flex-1 text-xs rounded-lg px-2 py-1 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
-                      >
-                        {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
-                          <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
-                        ))}
-                      </select>
+                      <div className="relative flex-1">
+                        <select
+                          value={event.assigned_date}
+                          onChange={(e) => updateEventDate(event.id, e.target.value)}
+                          className="w-full appearance-none text-xs rounded-lg px-2 py-1 pr-6 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
+                        >
+                          {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
+                            <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
+                          ))}
+                        </select>
+                        <svg className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                          <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 )}

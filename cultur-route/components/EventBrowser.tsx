@@ -8,6 +8,7 @@ import EventDetailModal from '@/components/EventDetailModal';
 import { CalendarRange, CalendarX, Sparkles, Clock } from 'lucide-react';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { Event } from '@/types';
+import HomeOnboardingModal, { HOME_ONBOARDING_KEY } from '@/components/HomeOnboardingModal';
 
 // 台灣時區安全的日期轉換：將任意 ISO 字串轉換為台北時間的 YYYY-MM-DD
 // 必須用 toLocaleDateString 而非 substring(0,10)，因為 Supabase 回傳 UTC 時間
@@ -34,6 +35,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   const [viewMode, setViewMode] = useState<'all' | 'performance' | 'lecture' | 'exhibition'>('all');
   const [quickToastId, setQuickToastId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showHomeOnboarding, setShowHomeOnboarding] = useState(false);
 
   // useMemo 確保每次 render 不重新計算（日期在同一天內不會改變）
   const TODAY = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }), []);
@@ -67,6 +69,12 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   };
 
   useEffect(() => { setIsMounted(true); }, []);
+
+  useEffect(() => {
+    if (window.innerWidth >= 768) return;
+    if (localStorage.getItem(HOME_ONBOARDING_KEY)) return;
+    setShowHomeOnboarding(true);
+  }, []);
 
   const isFiltering = startDate && endDate;
   let currentEvents = initialEvents;
@@ -351,6 +359,14 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     </div>
 
     <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+    {showHomeOnboarding && (
+      <HomeOnboardingModal
+        onClose={() => {
+          localStorage.setItem(HOME_ONBOARDING_KEY, 'true');
+          setShowHomeOnboarding(false);
+        }}
+      />
+    )}
     </>
   );
 }
