@@ -116,3 +116,33 @@ export async function deleteEvent(id: string): Promise<void> {
   revalidatePath('/')
   revalidatePath('/admin')
 }
+
+// ── Affiliate Links ───────────────────────────────────────────────────────────
+
+export type AffiliateLink = {
+  id: string
+  key: string
+  label: string
+  url: string | null
+  icon: string
+  is_active: boolean
+}
+
+export async function getAffiliateLinks(): Promise<AffiliateLink[]> {
+  const { data, error } = await sb()
+    .from('affiliate_links')
+    .select('*')
+    .order('key')
+  if (error) throw new Error(error.message)
+  return (data ?? []) as AffiliateLink[]
+}
+
+export async function upsertAffiliateLink(
+  link: Omit<AffiliateLink, 'id'>
+): Promise<void> {
+  const { error } = await sb()
+    .from('affiliate_links')
+    .upsert([link], { onConflict: 'key' })
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin')
+}

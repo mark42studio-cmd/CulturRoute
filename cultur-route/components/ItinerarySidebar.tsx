@@ -1,10 +1,18 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import { Calendar, X, Trash2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import type { PlannedEvent } from '@/types';
+
+type AffiliateLink = { key: string; label: string; url: string | null; icon: string }
+
+const DEFAULT_LINKS: AffiliateLink[] = [
+  { key: 'accommodation', label: '尋找台東熱門住宿', url: null, icon: '🏨' },
+  { key: 'rental',        label: '預約租車／機車',   url: null, icon: '🛵' },
+]
 
 // ── 側邊欄日期格式工具 ──────────────────────────────────────────────────────────
 
@@ -74,6 +82,22 @@ export default function ItinerarySidebar() {
     tripStartDate, tripEndDate,
     flashEventId, flashDayAdded, clearFlash,
   } = useItineraryStore();
+
+  const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>(DEFAULT_LINKS);
+
+  useEffect(() => {
+    const client = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    client
+      .from('affiliate_links')
+      .select('key, label, url, icon')
+      .eq('is_active', true)
+      .then(({ data }) => {
+        if (data && data.length > 0) setAffiliateLinks(data as AffiliateLink[]);
+      });
+  }, []);
 
   // 必須在所有 hook 之後才能 early return，避免違反 Rules of Hooks
   useEffect(() => {
@@ -249,9 +273,36 @@ export default function ItinerarySidebar() {
               </div>
             ))
           )}
-        </div>
 
-        {/* 別忘了在檔案最上面確認有 import Link from 'next/link'; */}
+          {/* 旅行推薦區塊：有活動時才顯示 */}
+          {plannedEvents.length > 0 && affiliateLinks.length > 0 && (
+            <div className="mt-2 rounded-2xl border border-orange-100 bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 p-4 shadow-md">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">🎒</span>
+                <p className="text-xs font-bold text-orange-700 leading-snug">
+                  行程規劃好了？順便搞定交通與住宿！
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                {affiliateLinks.map(link => (
+                  <a
+                    key={link.key}
+                    href={link.url ?? '#'}
+                    target={link.url ? '_blank' : '_self'}
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-2.5 rounded-xl border border-orange-200 bg-white/80 px-3 py-2.5 text-xs font-bold text-orange-800 shadow-sm backdrop-blur-sm transition-all hover:border-orange-400 hover:bg-white hover:shadow-md hover:-translate-y-0.5"
+                  >
+                    <span className="text-base shrink-0">{link.icon}</span>
+                    <span className="flex-1">{link.label}</span>
+                    <svg className="ml-auto shrink-0 text-orange-300 group-hover:text-orange-500 transition-colors" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* 面板底部 */}
         {plannedEvents.length > 0 && (

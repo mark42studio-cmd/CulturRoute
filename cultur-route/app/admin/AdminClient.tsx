@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useTransition, useMemo } from 'react'
+import { useState, useTransition, useMemo, useEffect } from 'react'
 import {
   Search, MapPin, Utensils, Save, Link as LinkIcon, Image as ImageIcon,
-  Eye, EyeOff, Edit2, X, Loader2, AlertCircle, CheckCircle, Trash2,
+  Eye, EyeOff, Edit2, X, Loader2, AlertCircle, CheckCircle, Trash2, ExternalLink, Plus,
 } from 'lucide-react'
 import {
   togglePublished, geocodeAddress, updateEventFields, insertPlace, insertFood, deleteEvent,
+  getAffiliateLinks, upsertAffiliateLink, type AffiliateLink,
 } from './actions'
 
 // ---- Types ----
@@ -22,7 +23,7 @@ export type AdminEvent = {
   image_captured: string | null
 }
 
-type Tab = 'events' | 'places' | 'foods'
+type Tab = 'events' | 'places' | 'foods' | 'affiliate'
 type SortMode = 'default' | 'name' | 'issues'
 
 type EditState = {
@@ -86,6 +87,41 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
   // Filter state
   const [filterYear, setFilterYear] = useState<string>('all')
   const [filterMonth, setFilterMonth] = useState<string>('all')
+
+  // Affiliate Links state
+  const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([])
+  const [affiliateLoading, setAffiliateLoading] = useState(false)
+  const [affiliateSaving, setAffiliateSaving] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (activeTab !== 'affiliate') return
+    setAffiliateLoading(true)
+    getAffiliateLinks()
+      .then(setAffiliateLinks)
+      .catch(err => showToast('err', err.message))
+      .finally(() => setAffiliateLoading(false))
+  }, [activeTab])
+
+  function handleAffiliateChange(key: string, field: keyof AffiliateLink, value: string | boolean | null) {
+    setAffiliateLinks(prev => prev.map(l => l.key === key ? { ...l, [field]: value } : l))
+  }
+
+  async function handleAffiliateSave(link: AffiliateLink) {
+    setAffiliateSaving(prev => new Set(prev).add(link.key))
+    try {
+      await upsertAffiliateLink({ key: link.key, label: link.label, url: link.url, icon: link.icon, is_active: link.is_active })
+      showToast('ok', `已儲存「${link.label}」`)
+    } catch (err: any) {
+      showToast('err', err.message)
+    } finally {
+      setAffiliateSaving(prev => { const n = new Set(prev); n.delete(link.key); return n })
+    }
+  }
+
+  function handleAddAffiliateLink() {
+    const key = `link_${Date.now()}`
+    setAffiliateLinks(prev => [...prev, { id: '', key, label: '新連結', url: null, icon: '🔗', is_active: true }])
+  }
 
   // Places/Foods state
   const [activeSubTab, setActiveSubTab] = useState<'places' | 'foods'>('places')
@@ -405,9 +441,10 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
         {/* Main Tabs */}
         <div className="flex gap-3 border-b border-gray-200 pb-4 flex-wrap">
           {[
-            { id: 'events', label: '🚑 活動急診室' },
-            { id: 'places', label: '📍 景點管理' },
-            { id: 'foods',  label: '🍜 美食管理' },
+            { id: 'events',    label: '🚑 活動急診室' },
+            { id: 'places',    label: '📍 景點管理' },
+            { id: 'foods',     label: '🍜 美食管理' },
+            { id: 'affiliate', label: '🔗 分潤連結' },
           ].map(({ id, label }) => (
             <button
               key={id}
@@ -754,6 +791,130 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
             </div>
           </div>
         )}
+        {/* === Affiliate Links Tab === */}
+        {activeTab === 'affiliate' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-gray-800">分潤連結管理</h2>
+                <p className="text-xs text-gray-400 mt-0.5">管理行程側邊欄中的推薦連結，支援住宿、租車、票務等類型</p>
+              </div>
+              <button
+                onClick={handleAddAffiliateLink}
+                className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm transition-colors shadow-sm"
+              >
+                <Plus size={15} /> 新增連結
+              </button>
+            </div>
+
+            {affiliateLoading ? (
+              <div className="flex items-center justify-center py-16 text-gray-400 gap-2">
+                <Loader2 size={16} className="animate-spin" /> 載入中...
+              </div>
+            ) : affiliateLinks.length === 0 ? (
+              <div className="text-center py-16 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl">
+                <p className="text-2xl mb-2">🔗</p>
+                <p>尚無分潤連結</p>
+                <p className="text-xs mt-1">請先在 Supabase 建立 <code className="bg-gray-100 px-1 rounded">affiliate_links</code> 資料表，再點擊「新增連結」</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {affiliateLinks.map(link => {
+                  const isSavingThis = affiliateSaving.has(link.key)
+                  return (
+                    <div
+                      key={link.key}
+                      className={`bg-white border rounded-2xl p-5 shadow-sm transition-all ${link.is_active ? 'border-amber-200' : 'border-gray-100 opacity-60'}`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Icon */}
+                        <div className="shrink-0">
+                          <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">圖示</label>
+                          <input
+                            type="text"
+                            value={link.icon}
+                            onChange={e => handleAffiliateChange(link.key, 'icon', e.target.value)}
+                            className="w-14 text-center text-2xl border border-gray-200 rounded-xl px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                          />
+                        </div>
+
+                        {/* Label + URL */}
+                        <div className="flex-1 space-y-2.5">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">顯示文字</label>
+                              <input
+                                type="text"
+                                value={link.label}
+                                onChange={e => handleAffiliateChange(link.key, 'label', e.target.value)}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-bold text-amber-600 mb-1 uppercase tracking-wider flex items-center gap-1">
+                                <ExternalLink size={10} /> 分潤連結 URL
+                              </label>
+                              <input
+                                type="url"
+                                placeholder="https://..."
+                                value={link.url ?? ''}
+                                onChange={e => handleAffiliateChange(link.key, 'url', e.target.value || null)}
+                                className="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm bg-amber-50/30 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">識別碼：</label>
+                              <code className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-lg font-mono">{link.key}</code>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <div
+                                  onClick={() => handleAffiliateChange(link.key, 'is_active', !link.is_active)}
+                                  className={`relative w-9 h-5 rounded-full transition-colors ${link.is_active ? 'bg-green-500' : 'bg-gray-300'}`}
+                                >
+                                  <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${link.is_active ? 'translate-x-4' : 'translate-x-0'}`} />
+                                </div>
+                                <span className="text-xs font-bold text-gray-500">{link.is_active ? '啟用中' : '已停用'}</span>
+                              </label>
+                              <button
+                                onClick={() => handleAffiliateSave(link)}
+                                disabled={isSavingThis}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
+                              >
+                                {isSavingThis ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+                                儲存
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700 leading-relaxed">
+              <p className="font-bold mb-1">📋 Supabase 資料表設定提醒</p>
+              <p>如尚未建立資料表，請在 Supabase SQL Editor 執行以下指令：</p>
+              <pre className="mt-2 bg-white border border-blue-100 rounded-lg p-3 font-mono text-[11px] text-gray-600 overflow-x-auto whitespace-pre-wrap">{`create table affiliate_links (
+  id uuid default gen_random_uuid() primary key,
+  key text unique not null,
+  label text not null,
+  url text,
+  icon text default '🔗',
+  is_active boolean default true
+);
+insert into affiliate_links (key, label, icon) values
+  ('accommodation', '尋找台東熱門住宿', '🏨'),
+  ('rental', '預約租車／機車', '🛵');`}</pre>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* === Edit Modal === */}
