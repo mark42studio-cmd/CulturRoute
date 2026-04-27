@@ -1,18 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import { Calendar, X, Trash2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import type { PlannedEvent } from '@/types';
-
-type AffiliateLink = { key: string; label: string; url: string | null; icon: string }
-
-const DEFAULT_LINKS: AffiliateLink[] = [
-  { key: 'accommodation', label: '尋找台東熱門住宿', url: null, icon: '🏨' },
-  { key: 'rental',        label: '預約租車／機車',   url: null, icon: '🛵' },
-]
+import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
 
 // ── 側邊欄日期格式工具 ──────────────────────────────────────────────────────────
 
@@ -83,21 +76,10 @@ export default function ItinerarySidebar() {
     flashEventId, flashDayAdded, clearFlash,
   } = useItineraryStore();
 
-  const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>(DEFAULT_LINKS);
-
-  useEffect(() => {
-    const client = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    client
-      .from('affiliate_links')
-      .select('key, label, url, icon')
-      .eq('is_active', true)
-      .then(({ data }) => {
-        if (data && data.length > 0) setAffiliateLinks(data as AffiliateLink[]);
-      });
-  }, []);
+  const allLinks = useAffiliateLinks();
+  const sidebarLinks = allLinks.filter(
+    l => (l.key === 'transport' || l.key === 'accommodation') && l.url,
+  );
 
   // 必須在所有 hook 之後才能 early return，避免違反 Rules of Hooks
   useEffect(() => {
@@ -274,8 +256,8 @@ export default function ItinerarySidebar() {
             ))
           )}
 
-          {/* 旅行推薦區塊：有活動時才顯示 */}
-          {plannedEvents.length > 0 && affiliateLinks.length > 0 && (
+          {/* 旅行推薦區塊：有活動且有有效分潤連結時才顯示 */}
+          {plannedEvents.length > 0 && sidebarLinks.length > 0 && (
             <div className="mt-2 rounded-2xl border border-orange-100 bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 p-4 shadow-md">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-base">🎒</span>
@@ -284,11 +266,11 @@ export default function ItinerarySidebar() {
                 </p>
               </div>
               <div className="flex flex-col gap-2">
-                {affiliateLinks.map(link => (
+                {sidebarLinks.map(link => (
                   <a
                     key={link.key}
-                    href={link.url ?? '#'}
-                    target={link.url ? '_blank' : '_self'}
+                    href={link.url!}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center gap-2.5 rounded-xl border border-orange-200 bg-white/80 px-3 py-2.5 text-xs font-bold text-orange-800 shadow-sm backdrop-blur-sm transition-all hover:border-orange-400 hover:bg-white hover:shadow-md hover:-translate-y-0.5"
                   >

@@ -21,6 +21,7 @@ import type { PlannedEvent } from '@/types';
 import { submitEvent } from '../actions/submitEvent';
 import { ITINERARY_TOUR_KEY_V3 } from '@/lib/tourConfig';
 import OnboardingModal from '@/components/OnboardingModal';
+import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
 
 const MapComponent = dynamic(
   () => import('@/components/ItineraryMap'),
@@ -46,6 +47,12 @@ const FALLBACK_URLS = {
   ticket:        'https://www.klook.com/zh-TW/search/?query=台東+門票優惠',
   accommodation: 'https://www.booking.com/searchresults/zh-tw.html?ss=台東市',
 };
+
+const RESOURCE_CARD_CONFIG = [
+  { key: 'transport',     icon: '🏍️', title: '台東租車 / 租機車', subtitle: '在地特惠方案，輕鬆移動各景點', bg: 'bg-amber-50 border-amber-100',  iconBg: 'bg-amber-200'  },
+  { key: 'accommodation', icon: '🏨', title: '台東特色住宿',       subtitle: '海景民宿、溫泉飯店精選推薦', bg: 'bg-blue-50 border-blue-100',    iconBg: 'bg-blue-200'   },
+  { key: 'tickets',       icon: '🎟️', title: '活動購票優惠',       subtitle: '早鳥折扣、套票方案一次掌握', bg: 'bg-violet-50 border-violet-100', iconBg: 'bg-violet-200' },
+] as const;
 
 // ── 工具函式 ──────────────────────────────────────────────────────────────────
 
@@ -283,6 +290,8 @@ export default function ItineraryPage() {
   const [likeCount,         setLikeCount]         = useState<number>(0);
   const [feedbackText,      setFeedbackText]      = useState('');
   const [feedbackSent,      setFeedbackSent]      = useState(false);
+
+  const affiliateLinks = useAffiliateLinks();
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [feedbackError,     setFeedbackError]     = useState(false);
   const [showSubmitModal,   setShowSubmitModal]   = useState(false);
@@ -1094,35 +1103,33 @@ export default function ItineraryPage() {
           </div>
 
           {/* ── 導購區塊（手機：匯出下方；桌機：左欄）── */}
-          <div className="rounded-2xl border border-stone-200 bg-white p-5">
-            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">台東行前準備</p>
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-amber-50 border border-amber-100 cursor-not-allowed opacity-70">
-                <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center shrink-0 text-lg">🏍️</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-stone-700 text-sm">台東租車 / 租機車</p>
-                  <p className="text-xs text-stone-400">在地特惠方案，輕鬆移動各景點</p>
-                </div>
-                <span className="text-[10px] text-amber-600 font-bold border border-amber-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
-              </div>
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100 cursor-not-allowed opacity-70">
-                <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center shrink-0 text-lg">🏨</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-stone-700 text-sm">台東特色住宿</p>
-                  <p className="text-xs text-stone-400">海景民宿、溫泉飯店精選推薦</p>
-                </div>
-                <span className="text-[10px] text-blue-600 font-bold border border-blue-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
-              </div>
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-violet-50 border border-violet-100 cursor-not-allowed opacity-70">
-                <div className="w-10 h-10 rounded-full bg-violet-200 flex items-center justify-center shrink-0 text-lg">🎟️</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-stone-700 text-sm">活動購票優惠</p>
-                  <p className="text-xs text-stone-400">早鳥折扣、套票方案一次掌握</p>
-                </div>
-                <span className="text-[10px] text-violet-600 font-bold border border-violet-300 px-2 py-0.5 rounded-full shrink-0">即將上線</span>
+          {RESOURCE_CARD_CONFIG.some(c => affiliateLinks.find(l => l.key === c.key)?.url) && (
+            <div className="rounded-2xl border border-stone-200 bg-white p-5">
+              <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">台東行前準備</p>
+              <div className="flex flex-col gap-3">
+                {RESOURCE_CARD_CONFIG.map(card => {
+                  const link = affiliateLinks.find(l => l.key === card.key);
+                  if (!link?.url) return null;
+                  return (
+                    <a
+                      key={card.key}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex items-center gap-4 p-4 rounded-xl border hover:opacity-80 transition-opacity ${card.bg}`}
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg ${card.iconBg}`}>{card.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-stone-700 text-sm">{card.title}</p>
+                        <p className="text-xs text-stone-400">{card.subtitle}</p>
+                      </div>
+                      <ExternalLink size={14} className="shrink-0 text-stone-300" />
+                    </a>
+                  );
+                })}
               </div>
             </div>
-          </div>
+          )}
 
           {/* ── Footer：按讚回饋 ── */}
           <div id="tour-bottom-anchor" className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
