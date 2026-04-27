@@ -29,6 +29,34 @@ const fmtVisitTime = (hhmm: string): string => {
 const isSidebarExhibition = (event: PlannedEvent): boolean =>
   !!(event.end_date && event.end_date > event.start_time.substring(0, 10));
 
+const CHINESE_DAY_NAMES = ['一','二','三','四','五','六','七','八','九','十'];
+
+function localDate(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function buildTripDateOptions(start: string, end: string, assigned: string): string[] {
+  if (!start || !end) return assigned ? [assigned] : [];
+  const dates: string[] = [];
+  const [sy, sm, sd] = start.split('-').map(Number);
+  for (let n = 0; n < 62; n++) {
+    const d = new Date(sy, sm - 1, sd + n);
+    const s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (s > end) break;
+    dates.push(s);
+  }
+  if (assigned && !dates.includes(assigned)) { dates.push(assigned); dates.sort(); }
+  return dates;
+}
+
+function formatDayOption(dateStr: string, tripStart: string): string {
+  const [, m, d] = dateStr.split('-').map(Number);
+  const n = Math.round((localDate(dateStr).getTime() - localDate(tripStart).getTime()) / 86400000) + 1;
+  const ord = n >= 1 && n <= 10 ? CHINESE_DAY_NAMES[n - 1] : String(n);
+  return `預計前往：${m}月${d}日(第${ord}天)`;
+}
+
 const STAY_OPTIONS = [
   { value: 30,  label: '30 分鐘' },
   { value: 60,  label: '1 小時' },
@@ -42,7 +70,8 @@ export default function ItinerarySidebar() {
   const pathname = usePathname();
   const {
     plannedEvents, isSidebarOpen, toggleSidebar,
-    removeEvent, updateStayDuration,
+    removeEvent, updateStayDuration, updateEventDate,
+    tripStartDate, tripEndDate,
     flashEventId, flashDayAdded, clearFlash,
   } = useItineraryStore();
 
@@ -140,18 +169,40 @@ export default function ItinerarySidebar() {
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
                       <Clock size={11} className="shrink-0 text-violet-400" />
-                      <span>
-                        預計前往：{fmtMonthDay(event.assigned_date)}
-                        {event.visit_time ? `　${fmtVisitTime(event.visit_time)}` : ''}
-                      </span>
+                      <select
+                        value={event.assigned_date}
+                        onChange={(e) => updateEventDate(event.id, e.target.value)}
+                        className="flex-1 text-xs rounded-lg px-2 py-1 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
+                      >
+                        {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
+                          <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
+                        ))}
+                      </select>
+                      {event.visit_time && (
+                        <span className="text-[11px] text-gray-400 shrink-0">{fmtVisitTime(event.visit_time)}</span>
+                      )}
                     </div>
                   </div>
                 ) : (
-                  /* 單次活動：維持原有單行格式 */
-                  <div className="text-xs text-gray-500">
-                    {new Date(event.start_time).toLocaleDateString('zh-TW', {
-                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-                    })}
+                  /* 單次活動：活動日期 + 預計前往選擇器 */
+                  <div className="flex flex-col gap-0.5">
+                    <div className="text-xs text-gray-500">
+                      {new Date(event.start_time).toLocaleDateString('zh-TW', {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                      })}
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
+                      <Calendar size={11} className="shrink-0 text-blue-400" />
+                      <select
+                        value={event.assigned_date}
+                        onChange={(e) => updateEventDate(event.id, e.target.value)}
+                        className="flex-1 text-xs rounded-lg px-2 py-1 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
+                      >
+                        {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
+                          <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 )}
                 <div className="text-xs text-blue-600 font-medium line-clamp-1 bg-blue-50 px-2 py-1 rounded w-fit">
