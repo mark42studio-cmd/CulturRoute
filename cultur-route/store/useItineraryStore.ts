@@ -57,6 +57,22 @@ export const useItineraryStore = create<ItineraryStore>()(
       addEvent: (event, options) => set((state) => {
         if (state.plannedEvents.find(e => e.id === event.id)) return state;
 
+        // 防呆：行程日期未設定時，自動初始化為本地今天
+        let effectiveTripStart = state.tripStartDate;
+        let effectiveTripEnd = state.tripEndDate;
+        let autoInitialized = false;
+        if (!effectiveTripStart) {
+          const now = new Date();
+          const today = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0'),
+          ].join('-');
+          effectiveTripStart = today;
+          effectiveTripEnd = today;
+          autoInitialized = true;
+        }
+
         const eventStartDate = getLocalYYYYMMDD(event.start_time);
 
         // 展覽判斷：end_date 或 end_time 與 start_time 不在同一天
@@ -65,10 +81,11 @@ export const useItineraryStore = create<ItineraryStore>()(
           (event.end_time ? getLocalYYYYMMDD(event.end_time) : null);
         const isMultiDayExhibition = !!(exhibitionEnd && exhibitionEnd > eventStartDate);
 
-        let assigned_date = eventStartDate;
+        // 自動初始化時，直接排到今天（Day 1）
+        let assigned_date = autoInitialized ? effectiveTripStart : eventStartDate;
 
-        if (isMultiDayExhibition && state.tripStartDate) {
-          const tripStart = state.tripStartDate;
+        if (isMultiDayExhibition && effectiveTripStart) {
+          const tripStart = effectiveTripStart;
 
           if (options?.addToToday) {
             // 快速選擇今天 → 排到 Day 1（抵達日），若在展期內直接採用
@@ -89,7 +106,7 @@ export const useItineraryStore = create<ItineraryStore>()(
             if (
               day2Str >= eventStartDate &&
               day2Str <= exhibitionEnd! &&
-              (!state.tripEndDate || day2Str <= state.tripEndDate)
+              (!effectiveTripEnd || day2Str <= effectiveTripEnd)
             ) {
               // Day 2 在展期內且不超出行程 → 優先排 Day 2
               assigned_date = day2Str;
@@ -112,6 +129,7 @@ export const useItineraryStore = create<ItineraryStore>()(
             },
           ],
           isSidebarOpen: true,
+          ...(autoInitialized ? { tripStartDate: effectiveTripStart, tripEndDate: effectiveTripEnd } : {}),
         };
       }),
       
