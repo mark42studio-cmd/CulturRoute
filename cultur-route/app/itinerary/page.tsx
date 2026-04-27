@@ -716,7 +716,8 @@ export default function ItineraryPage() {
               <div className="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Calendar size={24} />
               </div>
-              <h2 className="text-sm font-bold text-gray-600 mb-1">當天尚無活動</h2>
+              <h2 className="text-sm font-bold text-gray-600 mb-1">☁️ 留白，是台東最美的行程</h2>
+              <p className="text-xs text-gray-400 mb-2 leading-relaxed">來台東就是要慢活！今天不用急著塞滿景點，去海邊聽聽海浪、找間順眼的咖啡店，享受沒有計畫的自在吧。</p>
               {nearestDateWithEvents && nearestDateWithEvents !== actualActiveDate ? (
                 <div className="mt-3 space-y-2">
                   <button

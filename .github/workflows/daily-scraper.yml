@@ -2,8 +2,8 @@ name: CulturRoute Daily Scraper
 
 on:
   schedule:
-    # 台灣時間 週一 & 週四 03:00 = UTC 週日 & 週三 19:00
-    - cron: "0 19 * * 0,3"
+    # 執行時間：台灣時間每週一、四 01:00 (對應 UTC 時間週日、週三 17:00)
+    - cron: "0 17 * * 0,3"
   workflow_dispatch:
 
 jobs:
