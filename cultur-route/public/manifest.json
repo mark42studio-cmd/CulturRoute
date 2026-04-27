@@ -1,6 +1,6 @@
 {
-  "name": "CulturRoute 臺東藝文",
-  "short_name": "CulturRoute",
+  "name": "CultureRoute 臺東藝文",
+  "short_name": "CultureRoute",
   "description": "聚合台東在地藝文、節慶與展覽，為你策展專屬的台東文化路徑。",
   "start_url": "/",
   "display": "standalone",

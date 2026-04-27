@@ -88,7 +88,7 @@ export default function EventDetailModal({ event, onClose }: Props) {
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-teal-900 flex items-center justify-center">
-              <span className="text-white/20 font-black text-4xl tracking-widest">CulturRoute</span>
+              <span className="text-white/20 font-black text-4xl tracking-widest">CultureRoute</span>
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

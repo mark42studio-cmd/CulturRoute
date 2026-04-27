@@ -398,7 +398,7 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
       <div className="max-w-5xl mx-auto p-6 md:p-10 space-y-8">
 
         <header>
-          <h1 className="text-3xl font-bold mb-1">CulturRoute 後台管理</h1>
+          <h1 className="text-3xl font-bold mb-1">CultureRoute 後台管理</h1>
           <p className="text-gray-400 text-sm">資料急診室 · 景點美食建檔</p>
         </header>
 

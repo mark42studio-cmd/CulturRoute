@@ -8,7 +8,7 @@ export const homeSteps: DriveStep[] = [
   {
     element: '#tour-home-header',
     popover: {
-      title: '👋 歡迎來到 CulturRoute！',
+      title: '👋 歡迎來到 CultureRoute！',
       description:
         '台東在地藝文活動一站彙整。輸入你的停留日期，探索專屬台東的文化路徑。',
       side: 'bottom',

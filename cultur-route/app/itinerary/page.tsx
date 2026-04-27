@@ -1294,7 +1294,7 @@ export default function ItineraryPage() {
               borderRight: '1px solid rgba(255,255,255,0.12)',
             }}>
               <div style={{ fontSize: '10px', letterSpacing: '0.45em', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', marginBottom: '16px' }}>
-                CulturRoute · 臺東藝文路徑
+                CultureRoute · 臺東藝文路徑
               </div>
               <div style={{ fontSize: '64px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.01em', lineHeight: 0.88, marginBottom: '20px' }}>
                 探索<br />臺東

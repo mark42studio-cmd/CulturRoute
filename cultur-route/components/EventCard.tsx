@@ -77,7 +77,7 @@ const DefaultPoster = ({ title, vibe_tags }: { title: string; vibe_tags: string[
         className="absolute bottom-3 right-4 text-[10px] font-bold tracking-widest uppercase opacity-40"
         style={{ color: p.text }}
       >
-        CulturRoute
+        CultureRoute
       </span>
     </div>
   );

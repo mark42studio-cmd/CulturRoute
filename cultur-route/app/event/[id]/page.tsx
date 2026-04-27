@@ -62,7 +62,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-slate-800 flex items-center justify-center">
-            <span className="text-white/30 font-bold text-xl tracking-widest uppercase">CulturRoute</span>
+            <span className="text-white/30 font-bold text-xl tracking-widest uppercase">CultureRoute</span>
           </div>
         )}
         

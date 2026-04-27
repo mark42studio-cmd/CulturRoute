@@ -54,7 +54,7 @@ export const generateICS = (events: PlannedEvent[]): string => {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//CulturRoute//台東藝文行程//ZH',
+    'PRODID:-//CultureRoute//台東藝文行程//ZH',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
   ];
@@ -104,7 +104,7 @@ export const downloadICS = (events: PlannedEvent[]): void => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `CulturRoute_台東行程_${new Date().toISOString().substring(0, 10)}.ics`;
+  a.download = `CultureRoute_台東行程_${new Date().toISOString().substring(0, 10)}.ics`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -134,7 +134,7 @@ const generateItineraryICS = (events: PlannedEvent[]): string => {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//CulturRoute//台東藝文行程//ZH',
+    'PRODID:-//CultureRoute//台東藝文行程//ZH',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
   ];
@@ -207,7 +207,7 @@ const generateItineraryICS = (events: PlannedEvent[]): string => {
 
 /**
  * 觸發行程 .ics 檔案下載（以使用者規劃時間為準）
- * 檔名：CulturRoute-Itinerary.ics
+ * 檔名：CultureRoute-Itinerary.ics
  *
  * 手機相容性：
  *  - target="_blank" 提高手機瀏覽器觸發下載的成功率
@@ -219,7 +219,7 @@ export const downloadItineraryICS = (events: PlannedEvent[]): void => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'CulturRoute-Itinerary.ics';
+  a.download = 'CultureRoute-Itinerary.ics';
   a.target = '_blank';   // 手機瀏覽器提高下載成功率的關鍵屬性
   document.body.appendChild(a);
   a.click();
@@ -287,14 +287,14 @@ export const downloadReportImage = async (
   element: HTMLElement,
   onStart?: () => void,
   onEnd?: () => void,
-  filename = `CulturRoute_台東明信片_${new Date().toISOString().substring(0, 10)}.png`,
+  filename = `CultureRoute_台東明信片_${new Date().toISOString().substring(0, 10)}.png`,
   /** iOS 專用：將 blob URL 回傳給呼叫端，由呼叫端在頁面內渲染 <img> 供長按儲存 */
   onIOSPreview?: (url: string) => void,
 ): Promise<void> => {
   onStart?.();
   try {
     const { default: html2canvas } = await import('html2canvas').catch((err) => {
-      console.error('[CulturRoute] html2canvas 套件載入失敗:', err);
+      console.error('[CultureRoute] html2canvas 套件載入失敗:', err);
       throw new Error('html2canvas 套件未安裝，請執行：npm install html2canvas');
     });
 
@@ -339,7 +339,7 @@ export const downloadReportImage = async (
       setTimeout(() => URL.revokeObjectURL(url), 10_000);
     }
   } catch (err) {
-    console.error('[CulturRoute] 明信片生成失敗:', err);
+    console.error('[CultureRoute] 明信片生成失敗:', err);
     alert('下載失敗，請稍後再試。\n詳細錯誤請查看瀏覽器 Console（F12）。');
   } finally {
     onEnd?.();

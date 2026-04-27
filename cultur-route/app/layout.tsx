@@ -24,8 +24,8 @@ const notoSerifTC = Noto_Serif_TC({
 
 export const metadata: Metadata = {
   title: {
-    default: "CulturRoute 臺東藝文｜探索此時此地的文化路徑",
-    template: "%s｜CulturRoute 臺東藝文",
+    default: "CultureRoute 臺東藝文｜探索此時此地的文化路徑",
+    template: "%s｜CultureRoute 臺東藝文",
   },
   description: "聚合台東在地藝文、節慶與展覽，為你策展專屬的台東文化路徑。",
   manifest: "/manifest.json",
@@ -37,10 +37,10 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CulturRoute",
+    title: "CultureRoute",
   },
   openGraph: {
-    title: "CulturRoute 臺東藝文｜探索此時此地的文化路徑",
+    title: "CultureRoute 臺東藝文｜探索此時此地的文化路徑",
     description: "聚合台東在地藝文、節慶與展覽，為你策展專屬的台東文化路徑。",
     locale: "zh_TW",
     type: "website",

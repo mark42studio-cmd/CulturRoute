@@ -1,5 +1,5 @@
 /**
- * CulturRoute 統一輸入校驗 Schema（Zod）
+ * CultureRoute 統一輸入校驗 Schema（Zod）
  *
  * 所有 API Route 與 Server Action 在碰觸 Supabase 前，必須通過此處的 Schema 驗證。
  * 新增 API 端點時，請在此檔對應分區加入 Schema，並在端點中呼叫 validate()。

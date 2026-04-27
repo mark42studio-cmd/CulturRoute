@@ -26,7 +26,7 @@ export function proxy(req: NextRequest) {
   return new NextResponse('Unauthorized', {
     status: 401,
     headers: {
-      'WWW-Authenticate': 'Basic realm="CulturRoute Admin"',
+      'WWW-Authenticate': 'Basic realm="CultureRoute Admin"',
     },
   })
 }
