@@ -91,11 +91,11 @@ export const itinerarySteps: DriveStep[] = [
     },
   },
   {
-    element: '#tour-generate-route-anchor',
+    element: '#tour-footer-anchor',
     popover: {
       title: '✨ 最後一步：生成專屬路線！',
       description:
-        '排好行程了嗎？千萬別忘了點擊這裡，系統才會幫你畫出完整的地圖與交通路線喔！',
+        '排好行程了嗎？千萬別忘了點擊「螢幕最下方」的按鈕，系統才會幫你畫出完整的地圖與交通路線喔！',
       side: 'top',
       align: 'center',
     },

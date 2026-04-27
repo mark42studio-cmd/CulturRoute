@@ -93,10 +93,10 @@ const formatExhibitionRange = (startISO: string, endDate: string): string => {
  */
 const getIsHardScheduled = (event: PlannedEvent): boolean => {
   const assigned = event.assigned_date;
-  const eStart   = event.start_time.substring(0, 10);
-  // 優先用 end_date（跨日展覽），其次取 end_time 日期，最後退回 start 當天
+  const eStart   = toTaipeiDate(event.start_time);
+  // 優先用 end_date（跨日展覽），其次取 end_time 台灣日期，最後退回 start 當天
   const eEnd     = event.end_date
-    ?? (event.end_time ? event.end_time.substring(0, 10) : eStart);
+    ?? (event.end_time ? toTaipeiDate(event.end_time) : eStart);
   return assigned < eStart || assigned > eEnd;
 };
 
@@ -157,6 +157,20 @@ const toTaipeiHHMM = (iso: string): string => {
   const h = parts.find(p => p.type === 'hour')?.value   ?? '00';
   const m = parts.find(p => p.type === 'minute')?.value ?? '00';
   return `${h}:${m}`;
+};
+
+/** ISO 字串 → 台灣時區的 YYYY-MM-DD，規避 UTC 午夜前後跨日誤判 */
+const toTaipeiDate = (iso: string): string => {
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return iso.substring(0, 10);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(date);
+  const y = parts.find(p => p.type === 'year')?.value  ?? '';
+  const mo = parts.find(p => p.type === 'month')?.value ?? '';
+  const d = parts.find(p => p.type === 'day')?.value   ?? '';
+  return `${y}-${mo}-${d}`;
 };
 
 /**
@@ -347,10 +361,10 @@ export default function ItineraryPage() {
       return;
     }
 
-    // 展覽：驗證目標日期落在展期範圍內
-    const eventStartStr = event.start_time.substring(0, 10);
+    // 展覽：驗證目標日期落在展期範圍內（台灣時區日期，避免清晨跨日誤判）
+    const eventStartStr = toTaipeiDate(event.start_time);
     const eventEndStr   = event.end_date
-      ?? (event.end_time ? event.end_time.substring(0, 10) : eventStartStr);
+      ?? (event.end_time ? toTaipeiDate(event.end_time) : eventStartStr);
 
     if (newDateStr < eventStartStr || newDateStr > eventEndStr) {
       showToast('該日期不在展覽期間內');
@@ -439,8 +453,15 @@ export default function ItineraryPage() {
   };
 
   // 按有效時間升序排列：visit_time（使用者自訂）> start_time 時間部分
+  // 同時過濾無效地點：缺座標 或 venue_name 含「待定」/ 長度不足 2
   const currentDayEvents = plannedEvents
     .filter(e => e.assigned_date === actualActiveDate)
+    .filter(e => {
+      if (e.latitude == null || e.longitude == null) return false;
+      const vn = (e.venue_name ?? '').trim();
+      if (vn.length < 2 || vn.includes('待定')) return false;
+      return true;
+    })
     .sort((a, b) => getEffectiveSortTime(a).localeCompare(getEffectiveSortTime(b)));
 
   // 衝突警告（derived，每次 render 重算）
@@ -704,7 +725,7 @@ export default function ItineraryPage() {
                         生成按鈕出現在左欄活動清單下方。
         pb-28 lg:pb-0：為手機 Sticky 按鈕留底部空間。
       */}
-      <div className="max-w-7xl mx-auto px-6 mt-4 lg:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 pb-28 lg:pb-0 lg:items-start">
+      <div className="max-w-7xl mx-auto px-6 mt-4 lg:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 pb-40 lg:pb-0 lg:items-start">
 
         {/* ── 左欄：活動清單 + 生成按鈕(桌機) + 匯出 + 導購 + Footer
             手機：order-2（地圖下方）  桌機：order-1（左側，可捲動）── */}
@@ -1027,7 +1048,7 @@ export default function ItineraryPage() {
           </div>
 
           {/* ── Footer：按讚回饋 ── */}
-          <div className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
+          <div id="tour-footer-anchor" className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
 
             {/* 按讚與留言 */}
             <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col gap-4">
