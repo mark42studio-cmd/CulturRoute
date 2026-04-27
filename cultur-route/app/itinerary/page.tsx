@@ -266,7 +266,7 @@ const calculateItineraryGaps = (items: PlannedEvent[], realTravelMins: number[] 
 export default function ItineraryPage() {
   const {
     plannedEvents, removeEvent, reorderEvents,
-    updateEventDate, updateVisitTime, tripStartDate, tripEndDate,
+    updateEventDate, updateVisitTime, tripStartDate, tripEndDate, setTripDates,
   } = useItineraryStore();
 
   const [isMounted,        setIsMounted]        = useState(false);
@@ -319,12 +319,17 @@ export default function ItineraryPage() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // 手機版新手：掛載後判斷是否開啟 OnboardingModal
+  // 手機版新手：掛載後判斷是否開啟 OnboardingModal，並在無日期時預設今天
   useEffect(() => {
     if (isDesktop === null || isDesktop) return;
     if (!localStorage.getItem(ITINERARY_TOUR_KEY_V3)) {
+      if (!tripStartDate) {
+        const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+        setTripDates(today, today);
+      }
       setShowOnboarding(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDesktop]);
 
   // 導引結束（driver.js 完成/略過）時清除 mock 假資料
