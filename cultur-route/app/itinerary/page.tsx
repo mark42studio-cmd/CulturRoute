@@ -42,12 +42,6 @@ const EXHIBITION_TIME_OPTIONS = [
   '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00',
 ];
 
-const FALLBACK_URLS = {
-  rental:        'https://www.klook.com/zh-TW/search/?query=台東+租機車',
-  ticket:        'https://www.klook.com/zh-TW/search/?query=台東+門票優惠',
-  accommodation: 'https://www.booking.com/searchresults/zh-tw.html?ss=台東市',
-};
-
 const RESOURCE_CARD_CONFIG = [
   { key: 'transport',     icon: '🏍️', title: '台東租車 / 租機車', subtitle: '在地特惠方案，輕鬆移動各景點', bg: 'bg-amber-50 border-amber-100',  iconBg: 'bg-amber-200'  },
   { key: 'accommodation', icon: '🏨', title: '台東特色住宿',       subtitle: '海景民宿、溫泉飯店精選推薦', bg: 'bg-blue-50 border-blue-100',    iconBg: 'bg-blue-200'   },
@@ -581,14 +575,6 @@ export default function ItineraryPage() {
     if (showMap) setLegDurations([]);
   };
 
-  // 分潤彙總（取第一個非 null URL）
-  const aggRental = plannedEvents.find(e => e.affiliate_links?.rental?.url)?.affiliate_links?.rental
-                 ?? { label: '租車/租機車', url: null };
-  const aggTicket = plannedEvents.find(e => e.affiliate_links?.ticket?.url)?.affiliate_links?.ticket
-                 ?? { label: '售票連結', url: null };
-  const aggAccommodation = plannedEvents.find(e => e.affiliate_links?.accommodation?.url)?.affiliate_links?.accommodation
-                        ?? { label: '周邊住宿', url: null };
-
   const handleOnboardingClose = () => {
     localStorage.setItem(ITINERARY_TOUR_KEY_V3, 'true');
     setShowOnboarding(false);
@@ -679,32 +665,31 @@ export default function ItineraryPage() {
               )}
 
               {/* 旅遊資源推薦 */}
-              <div className="border-t-2 border-dashed border-gray-100 pt-6">
-                <h3 className="font-bold text-gray-700 mb-1 flex items-center gap-2">
-                  <Car size={16} className="text-blue-600" />旅遊資源推薦
-                </h3>
-                <p className="text-xs text-gray-400 mb-4 pl-6">點擊連結將在新分頁開啟，協助您提前預訂交通與住宿</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <a href={aggRental.url ?? FALLBACK_URLS.rental} target="_blank" rel="noopener noreferrer"
-                     className="group flex items-center gap-3 bg-sky-50 hover:bg-sky-100 active:bg-sky-200 text-sky-700 px-4 py-3.5 rounded-xl font-bold text-sm transition-colors border border-sky-100 shadow-sm hover:shadow-md">
-                    <Car size={17} className="shrink-0" />
-                    <span className="flex-1 leading-tight">🚗 前往 Klook<br /><span className="font-normal text-xs text-sky-500">預約台東租車</span></span>
-                    <ExternalLink size={13} className="shrink-0 text-sky-400 group-hover:text-sky-600 transition-colors" />
-                  </a>
-                  <a href={aggTicket.url ?? FALLBACK_URLS.ticket} target="_blank" rel="noopener noreferrer"
-                     className="group flex items-center gap-3 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-700 px-4 py-3.5 rounded-xl font-bold text-sm transition-colors border border-amber-100 shadow-sm hover:shadow-md">
-                    <Ticket size={17} className="shrink-0" />
-                    <span className="flex-1 leading-tight">🎫 查看 Klook<br /><span className="font-normal text-xs text-amber-500">最新門票優惠</span></span>
-                    <ExternalLink size={13} className="shrink-0 text-amber-400 group-hover:text-amber-600 transition-colors" />
-                  </a>
-                  <a href={aggAccommodation.url ?? FALLBACK_URLS.accommodation} target="_blank" rel="noopener noreferrer"
-                     className="group flex items-center gap-3 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-700 px-4 py-3.5 rounded-xl font-bold text-sm transition-colors border border-indigo-100 shadow-sm hover:shadow-md">
-                    <BedDouble size={17} className="shrink-0" />
-                    <span className="flex-1 leading-tight">🏠 查看 Booking.com<br /><span className="font-normal text-xs text-indigo-400">鄰近住宿</span></span>
-                    <ExternalLink size={13} className="shrink-0 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
-                  </a>
+              {RESOURCE_CARD_CONFIG.some(c => affiliateLinks.find(l => l.key === c.key)?.url) && (
+                <div className="border-t-2 border-dashed border-gray-100 pt-6">
+                  <h3 className="font-bold text-gray-700 mb-1 flex items-center gap-2">
+                    <Car size={16} className="text-blue-600" />旅遊資源推薦
+                  </h3>
+                  <p className="text-xs text-gray-400 mb-4 pl-6">點擊連結將在新分頁開啟，協助您提前預訂交通與住宿</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {RESOURCE_CARD_CONFIG.map(card => {
+                      const link = affiliateLinks.find(l => l.key === card.key);
+                      if (!link?.url) return null;
+                      return (
+                        <a key={card.key} href={link.url} target="_blank" rel="noopener noreferrer"
+                           className={`group flex items-center gap-4 p-4 rounded-xl border shadow-sm hover:opacity-80 transition-opacity ${card.bg}`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg ${card.iconBg}`}>{card.icon}</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-stone-700 text-sm">{card.title}</p>
+                            <p className="text-xs text-stone-400">{card.subtitle}</p>
+                          </div>
+                          <ExternalLink size={14} className="shrink-0 text-stone-300 group-hover:text-stone-600 transition-colors" />
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* ── 溫馨提醒（截圖範圍內，下載圖片時同步保留）──────────────── */}
               {plannedEvents.length > 0 && (
@@ -1189,6 +1174,35 @@ export default function ItineraryPage() {
                 </div>
               )}
             </div>
+
+            {/* 行程小助手導購推薦 */}
+            {RESOURCE_CARD_CONFIG.some(c => affiliateLinks.find(l => l.key === c.key)?.url) && (
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-bold text-stone-400 uppercase tracking-widest px-1">台東行前準備</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {RESOURCE_CARD_CONFIG.map(card => {
+                    const link = affiliateLinks.find(l => l.key === card.key);
+                    if (!link?.url) return null;
+                    return (
+                      <a
+                        key={card.key}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center gap-4 p-4 rounded-xl border shadow-sm hover:opacity-80 transition-opacity ${card.bg}`}
+                      >
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg ${card.iconBg}`}>{card.icon}</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-stone-700 text-sm">{card.title}</p>
+                          <p className="text-xs text-stone-400">{card.subtitle}</p>
+                        </div>
+                        <ExternalLink size={14} className="shrink-0 text-stone-300" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* 活動上架申請 */}
             <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-wrap items-center justify-between gap-4">
