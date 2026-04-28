@@ -46,6 +46,9 @@ export const metadata: Metadata = {
     locale: "zh_TW",
     type: "website",
   },
+  other: {
+    "agd-partner-manual-verification": "",
+  },
 };
 
 export default function RootLayout({

@@ -33,6 +33,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   } = useItineraryStore();
   const [isMounted, setIsMounted] = useState(false);
   const [viewMode, setViewMode] = useState<'all' | 'performance' | 'lecture' | 'exhibition'>('all');
+  const [districtFilter, setDistrictFilter] = useState<'all' | 'city' | 'sea' | 'mountain' | 'south' | 'island'>('all');
   const [quickToastId, setQuickToastId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showHomeOnboarding, setShowHomeOnboarding] = useState(false);
@@ -66,6 +67,35 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     if (viewMode === 'lecture')     return events.filter(isLecture);
     if (viewMode === 'exhibition')  return events.filter(isExhibition);
     return events;
+  };
+
+  const DISTRICT_KEYWORDS = {
+    city:     ['台東市', '更生路', '正氣路', '中興路', '博愛路', '林森路', '四維路', '馬蘭', '豐年', '東海'],
+    sea:      ['成功鎮', '長濱鄉', '東河鄉', '都蘭', '加路蘭', '三仙台', '月眉', '小野柳'],
+    mountain: ['鹿野鄉', '關山鎮', '池上鄉', '海端鄉', '延平鄉', '卑南鄉', '初鹿', '知本', '利吉', '鹿野', '關山', '池上'],
+    south:    ['太麻里鄉', '大武鄉', '達仁鄉', '金峰鄉', '太麻里', '大武', '達仁', '金峰', '金崙', '嘉蘭'],
+    island:   ['綠島', '蘭嶼'],
+  } as const;
+
+  const getEventDistrict = (event: Event): keyof typeof DISTRICT_KEYWORDS => {
+    // 正規化：臺 → 台，消除全形/字體差異
+    const text = `${event.address ?? ''} ${event.venue_name}`.replace(/臺/g, '台');
+    // 離島優先：綠島/蘭嶼關鍵字最具辨識性，最先判定
+    if (DISTRICT_KEYWORDS.island.some(kw => text.includes(kw)))   return 'island';
+    // 市區優先：只要包含「台東市」就絕對歸類為市區
+    if (text.includes('台東市')) return 'city';
+    // 依地理特徵排序比對（南迴 → 山線 → 海線 → 市區）
+    if (DISTRICT_KEYWORDS.south.some(kw => text.includes(kw)))    return 'south';
+    if (DISTRICT_KEYWORDS.mountain.some(kw => text.includes(kw))) return 'mountain';
+    if (DISTRICT_KEYWORDS.sea.some(kw => text.includes(kw)))      return 'sea';
+    if (DISTRICT_KEYWORDS.city.some(kw => text.includes(kw)))     return 'city';
+    // fallback：地址模糊無法判定，預設歸入市區避免活動消失
+    return 'city';
+  };
+
+  const applyDistrictFilter = (events: Event[]): Event[] => {
+    if (districtFilter === 'all') return events;
+    return events.filter(e => getEventDistrict(e) === districtFilter);
   };
 
   useEffect(() => { setIsMounted(true); }, []);
@@ -106,6 +136,9 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       return eStart > endDate && eStart <= sevenDaysAfterStr;
     });
   }
+
+  // 地區篩選（套用在所有其他篩選之後）
+  currentEvents = applyDistrictFilter(currentEvents);
 
   const isOngoing = (event: Event): boolean => {
     const eStart = dateOnlyTaipei(event.start_time);
@@ -304,6 +337,36 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           {isFiltering && (
             <button onClick={() => setTripDates('', '')} className="px-4 py-2 text-xs text-stone-400 hover:text-stone-600 tracking-wider border border-stone-300 hover:border-stone-500 transition-colors">清除</button>
           )}
+        </div>
+
+        {/* ── 地區篩選器 ── */}
+        <div className="mt-4 flex items-center gap-3">
+          <span className="text-[10px] font-medium text-stone-400 uppercase tracking-[0.2em] shrink-0">地區</span>
+          <div className="flex gap-2 overflow-x-auto pb-0.5">
+            {(
+              [
+                { key: 'all',      label: '全部' },
+                { key: 'city',     label: '市區' },
+                { key: 'sea',      label: '海線' },
+                { key: 'mountain', label: '山線' },
+                { key: 'south',    label: '南迴線' },
+                { key: 'island',   label: '離島' },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setDistrictFilter(key)}
+                className={[
+                  'px-3 py-1 text-xs tracking-wide border transition-all duration-200 whitespace-nowrap',
+                  districtFilter === key
+                    ? 'bg-teal-800 text-white border-teal-800'
+                    : 'bg-transparent text-stone-500 border-stone-300 hover:border-teal-700 hover:text-teal-700',
+                ].join(' ')}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

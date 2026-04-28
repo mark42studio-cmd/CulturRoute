@@ -24,6 +24,7 @@ interface Cluster {
 export default function EventsMap({ events }: { events: Event[] }) {
   const { hoveredEventId, setHoveredEventId } = useItineraryStore();
   const [openClusterKey, setOpenClusterKey] = useState<string | null>(null);
+  const [openSingleKey, setOpenSingleKey] = useState<string | null>(null);
 
   // ── 有效座標過濾（memoized，避免每次 render 觸發 clusters 重算）─────────────
   const mapped = useMemo(
@@ -66,20 +67,25 @@ export default function EventsMap({ events }: { events: Event[] }) {
         disableDefaultUI={false}
         style={{ width: '100%', height: '100%' }}
         reuseMaps
-        onClick={() => setOpenClusterKey(null)}
+        onClick={() => { setOpenClusterKey(null); setOpenSingleKey(null); }}
       >
         {clusters.map((cluster) => {
-          const isMulti   = cluster.events.length > 1;
-          const sole      = cluster.events[0];
-          const isHovered = !isMulti && sole.id === hoveredEventId;
-          const isOpen    = openClusterKey === cluster.key;
+          const isMulti      = cluster.events.length > 1;
+          const sole         = cluster.events[0];
+          const isHovered    = !isMulti && sole.id === hoveredEventId;
+          const isOpen       = openClusterKey === cluster.key;
+          const isSingleOpen = !isMulti && openSingleKey === cluster.key;
+          const isActive     = isHovered || isSingleOpen;
 
           return (
             <Fragment key={cluster.key}>
 
               <AdvancedMarker
                 position={{ lat: cluster.lat, lng: cluster.lng }}
-                onClick={isMulti ? () => setOpenClusterKey(isOpen ? null : cluster.key) : undefined}
+                onClick={isMulti
+                  ? () => setOpenClusterKey(isOpen ? null : cluster.key)
+                  : () => setOpenSingleKey(isSingleOpen ? null : cluster.key)
+                }
               >
                 {isMulti ? (
                   /* ── 群集泡泡：inline style 保底，避免 Tailwind JIT 掃不到 ── */
@@ -115,7 +121,7 @@ export default function EventsMap({ events }: { events: Event[] }) {
                     className={[
                       'relative flex flex-col items-center cursor-pointer select-none',
                       'transition-all duration-300 origin-bottom',
-                      isHovered ? 'scale-150 z-20' : 'scale-100 z-10',
+                      isActive ? 'scale-150 z-20' : 'scale-100 z-10',
                     ].join(' ')}
                   >
                     {/* Hover tooltip */}
@@ -125,7 +131,7 @@ export default function EventsMap({ events }: { events: Event[] }) {
                       'bg-white text-slate-800 text-[11px] font-bold',
                       'px-3 py-1.5 rounded-xl shadow-lg border border-slate-100 pointer-events-none',
                       'transition-all duration-300',
-                      isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1',
+                      isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1',
                     ].join(' ')}>
                       {sole.venue_name || sole.title}
                       <span className="
@@ -141,11 +147,11 @@ export default function EventsMap({ events }: { events: Event[] }) {
                         width:           '32px',
                         height:          '32px',
                         borderRadius:    '50%',
-                        backgroundColor: isHovered ? '#f97316' : '#2563eb',
+                        backgroundColor: isActive ? '#f97316' : '#2563eb',
                         display:         'flex',
                         alignItems:      'center',
                         justifyContent:  'center',
-                        boxShadow:       isHovered
+                        boxShadow:       isActive
                           ? '0 0 0 4px rgba(253,186,116,0.6), 0 6px 16px rgba(249,115,22,0.5)'
                           : '0 2px 8px rgba(0,0,0,0.25)',
                         transition:      'background-color 0.3s, box-shadow 0.3s',
@@ -161,7 +167,7 @@ export default function EventsMap({ events }: { events: Event[] }) {
                       marginTop:   '-1px',
                       borderLeft:  '4px solid transparent',
                       borderRight: '4px solid transparent',
-                      borderTop:   `6px solid ${isHovered ? '#f97316' : '#2563eb'}`,
+                      borderTop:   `6px solid ${isActive ? '#f97316' : '#2563eb'}`,
                       transition:  'border-top-color 0.3s',
                     }} />
                   </div>
@@ -194,6 +200,34 @@ export default function EventsMap({ events }: { events: Event[] }) {
                         </a>
                       ))}
                     </div>
+                  </div>
+                </InfoWindow>
+              )}
+
+              {/* ── 單一活動 InfoWindow ── */}
+              {!isMulti && isSingleOpen && (
+                <InfoWindow
+                  position={{ lat: cluster.lat, lng: cluster.lng }}
+                  onCloseClick={() => setOpenSingleKey(null)}
+                >
+                  <div style={{ minWidth: '180px', maxWidth: '240px' }}>
+                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b', marginBottom: '6px', lineHeight: 1.4 }}>
+                      {sole.title}
+                    </p>
+                    {sole.venue_name && (
+                      <p style={{ fontSize: '11px', color: '#64748b', marginBottom: '8px' }}>📍 {sole.venue_name}</p>
+                    )}
+                    {(sole.description || sole.long_description) && (
+                      <p style={{ fontSize: '11px', color: '#475569', lineHeight: 1.5, marginBottom: '10px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {sole.description || sole.long_description}
+                      </p>
+                    )}
+                    <a
+                      href={`/event/${sole.id}`}
+                      style={{ fontSize: '12px', color: '#0d9488', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      查看詳情 →
+                    </a>
                   </div>
                 </InfoWindow>
               )}
