@@ -75,6 +75,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     mountain: ['鹿野鄉', '關山鎮', '池上鄉', '海端鄉', '延平鄉', '卑南鄉', '初鹿', '知本', '利吉', '鹿野', '關山', '池上'],
     south:    ['太麻里鄉', '大武鄉', '達仁鄉', '金峰鄉', '太麻里', '大武', '達仁', '金峰', '金崙', '嘉蘭'],
     island:   ['綠島', '蘭嶼'],
+    other:    [] as string[], // 地址模糊、無法判定地區的活動，不歸入任何篩選類別
   } as const;
 
   const getEventDistrict = (event: Event): keyof typeof DISTRICT_KEYWORDS => {
@@ -89,8 +90,8 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     if (DISTRICT_KEYWORDS.mountain.some(kw => text.includes(kw))) return 'mountain';
     if (DISTRICT_KEYWORDS.sea.some(kw => text.includes(kw)))      return 'sea';
     if (DISTRICT_KEYWORDS.city.some(kw => text.includes(kw)))     return 'city';
-    // fallback：地址模糊無法判定，預設歸入市區避免活動消失
-    return 'city';
+    // fallback：地址模糊無法判定，歸入 other，不出現在任何地區篩選結果中
+    return 'other';
   };
 
   const applyDistrictFilter = (events: Event[]): Event[] => {
