@@ -6,6 +6,7 @@ import { Calendar, X, Trash2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import type { PlannedEvent } from '@/types';
 import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
+import { trackAffiliateClick } from '@/lib/gtag';
 
 // ── 側邊欄日期格式工具 ──────────────────────────────────────────────────────────
 
@@ -77,9 +78,18 @@ export default function ItinerarySidebar() {
   } = useItineraryStore();
 
   const allLinks = useAffiliateLinks();
-  const sidebarLinks = allLinks.filter(
-    l => (l.key === 'transport' || l.key === 'accommodation') && l.url,
-  );
+
+  const SIDEBAR_LINK_CONFIG = [
+    { key: 'transport',     icon: '🏍️', label: '台東租車 / 租機車', iconBg: 'bg-amber-100'  },
+    { key: 'accommodation', icon: '🏨', label: '台東特色住宿',       iconBg: 'bg-blue-100'   },
+    { key: 'tickets',       icon: '🎟️', label: '活動購票優惠',       iconBg: 'bg-violet-100' },
+  ] as const;
+
+  const HUMOR_SUBTITLES: Record<string, string> = {
+    transport:     '請租車，我們沒有山豬可以騎 🐗',
+    accommodation: '石板屋不是人人都能住 🏠',
+    tickets:       '台東專屬好康的啦！ 🎫',
+  };
 
   // 必須在所有 hook 之後才能 early return，避免違反 Rules of Hooks
   useEffect(() => {
@@ -256,31 +266,47 @@ export default function ItinerarySidebar() {
             ))
           )}
 
-          {/* 旅行推薦區塊：有活動且有有效分潤連結時才顯示 */}
-          {plannedEvents.length > 0 && sidebarLinks.length > 0 && (
-            <div className="mt-2 rounded-2xl border border-orange-100 bg-gradient-to-br from-amber-50 via-orange-50 to-sky-50 p-4 shadow-md">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-base">🎒</span>
-                <p className="text-xs font-bold text-orange-700 leading-snug">
-                  行程規劃好了？順便搞定交通與住宿！
-                </p>
-              </div>
-              <div className="flex flex-col gap-2">
-                {sidebarLinks.map(link => (
-                  <a
-                    key={link.key}
-                    href={link.url!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-2.5 rounded-xl border border-orange-200 bg-white/80 px-3 py-2.5 text-xs font-bold text-orange-800 shadow-sm backdrop-blur-sm transition-all hover:border-orange-400 hover:bg-white hover:shadow-md hover:-translate-y-0.5"
-                  >
-                    <span className="text-base shrink-0">{link.icon}</span>
-                    <span className="flex-1">{link.label}</span>
-                    <svg className="ml-auto shrink-0 text-orange-300 group-hover:text-orange-500 transition-colors" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </a>
-                ))}
+          {/* 旅行推薦區塊：有活動時永遠顯示，URL 未設定時呈現 disabled 佔位 */}
+          {plannedEvents.length > 0 && (
+            <div className="mt-2 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">出發前搞定這些</p>
+              <div className="flex flex-col gap-3">
+                {SIDEBAR_LINK_CONFIG.map(cfg => {
+                  const dbLink = allLinks.find(l => l.key === cfg.key);
+                  const url = dbLink?.url;
+                  const label = dbLink?.label ?? cfg.label;
+                  const humor = HUMOR_SUBTITLES[cfg.key];
+                  if (url) {
+                    return (
+                      <a
+                        key={cfg.key}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackAffiliateClick(cfg.key, label, url)}
+                        className="group flex flex-row items-center p-3 bg-white border border-gray-100 rounded-xl hover:shadow-sm transition-all duration-200"
+                      >
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-base ${cfg.iconBg}`}>{cfg.icon}</div>
+                        <div className="flex flex-col ml-3 text-left flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 leading-tight">{label}</p>
+                          <p className="text-xs text-gray-500 leading-snug mt-0.5 whitespace-normal break-words">{humor}</p>
+                        </div>
+                        <svg className="ml-2 shrink-0 text-gray-300 group-hover:text-blue-500 transition-colors" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </a>
+                    );
+                  }
+                  return (
+                    <div key={cfg.key} className="flex flex-row items-center p-3 bg-white border border-gray-100 rounded-xl opacity-50 cursor-not-allowed">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-base ${cfg.iconBg}`}>{cfg.icon}</div>
+                      <div className="flex flex-col ml-3 text-left flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 leading-tight">{cfg.label}</p>
+                        <p className="text-xs text-gray-400 leading-snug mt-0.5 whitespace-normal break-words">{humor}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

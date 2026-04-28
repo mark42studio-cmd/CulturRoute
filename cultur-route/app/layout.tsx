@@ -4,6 +4,7 @@ import Image from "next/image";
 import "./globals.css";
 import ItinerarySidebar from '@/components/ItinerarySidebar';
 import TourGuide from '@/components/TourGuide';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,7 +56,8 @@ export default function RootLayout({
   return (
     <html lang="zh-TW" className={`${geistSans.variable} ${geistMono.variable} ${notoSerifTC.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+
         {/* 🌟 把側邊欄元件放在這裡，children 的上面 */}
         <ItinerarySidebar />
         <TourGuide />

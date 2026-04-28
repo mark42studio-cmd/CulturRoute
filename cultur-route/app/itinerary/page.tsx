@@ -43,10 +43,16 @@ const EXHIBITION_TIME_OPTIONS = [
 ];
 
 const RESOURCE_CARD_CONFIG = [
-  { key: 'transport',     icon: '🏍️', title: '台東租車 / 租機車', subtitle: '在地特惠方案，輕鬆移動各景點', bg: 'bg-amber-50 border-amber-100',  iconBg: 'bg-amber-200'  },
-  { key: 'accommodation', icon: '🏨', title: '台東特色住宿',       subtitle: '海景民宿、溫泉飯店精選推薦', bg: 'bg-blue-50 border-blue-100',    iconBg: 'bg-blue-200'   },
-  { key: 'tickets',       icon: '🎟️', title: '活動購票優惠',       subtitle: '早鳥折扣、套票方案一次掌握', bg: 'bg-violet-50 border-violet-100', iconBg: 'bg-violet-200' },
+  { key: 'transport',     icon: '🏍️', title: '台東租車 / 租機車', iconBg: 'bg-amber-100'  },
+  { key: 'accommodation', icon: '🏨', title: '台東特色住宿',       iconBg: 'bg-blue-100'   },
+  { key: 'tickets',       icon: '🎟️', title: '活動購票優惠',       iconBg: 'bg-violet-100' },
 ] as const;
+
+const HUMOR_SUBTITLES: Record<string, string> = {
+  transport:     '請租車，我們沒有山豬可以騎 🐗',
+  accommodation: '石板屋不是人人都能住 🏠',
+  tickets:       '台東專屬好康的啦！ 🎫',
+};
 
 // ── 工具函式 ──────────────────────────────────────────────────────────────────
 
@@ -665,31 +671,42 @@ export default function ItineraryPage() {
               )}
 
               {/* 旅遊資源推薦 */}
-              {RESOURCE_CARD_CONFIG.some(c => affiliateLinks.find(l => l.key === c.key)?.url) && (
-                <div className="border-t-2 border-dashed border-gray-100 pt-6">
-                  <h3 className="font-bold text-gray-700 mb-1 flex items-center gap-2">
-                    <Car size={16} className="text-blue-600" />旅遊資源推薦
-                  </h3>
-                  <p className="text-xs text-gray-400 mb-4 pl-6">點擊連結將在新分頁開啟，協助您提前預訂交通與住宿</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {RESOURCE_CARD_CONFIG.map(card => {
-                      const link = affiliateLinks.find(l => l.key === card.key);
-                      if (!link?.url) return null;
+              <div className="border-t-2 border-dashed border-gray-100 pt-6">
+                <h3 className="font-bold text-gray-700 mb-1 flex items-center gap-2">
+                  <Car size={16} className="text-blue-600" />旅遊資源推薦
+                </h3>
+                <p className="text-xs text-gray-400 mb-4 pl-6">點擊連結將在新分頁開啟，協助您提前預訂交通與住宿</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {RESOURCE_CARD_CONFIG.map(card => {
+                    const link = affiliateLinks.find(l => l.key === card.key);
+                    const url = link?.url;
+                    const title = link?.label ?? card.title;
+                    const humor = HUMOR_SUBTITLES[card.key];
+                    if (url) {
                       return (
-                        <a key={card.key} href={link.url} target="_blank" rel="noopener noreferrer"
-                           className={`group flex items-center gap-4 p-4 rounded-xl border shadow-sm hover:opacity-80 transition-opacity ${card.bg}`}>
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg ${card.iconBg}`}>{card.icon}</div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-stone-700 text-sm">{card.title}</p>
-                            <p className="text-xs text-stone-400">{card.subtitle}</p>
+                        <a key={card.key} href={url} target="_blank" rel="noopener noreferrer"
+                           className="group flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 gap-3 h-full w-full">
+                          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <p className="text-sm sm:text-base font-bold text-gray-800 break-words leading-tight">{title}</p>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 break-words leading-snug">{humor}</p>
                           </div>
-                          <ExternalLink size={14} className="shrink-0 text-stone-300 group-hover:text-stone-600 transition-colors" />
+                          <ExternalLink size={14} className="flex-shrink-0 ml-2 text-gray-300 group-hover:text-blue-500 transition-colors" />
                         </a>
                       );
-                    })}
-                  </div>
+                    }
+                    return (
+                      <div key={card.key} className="flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl opacity-50 cursor-not-allowed gap-3 h-full w-full">
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <p className="text-sm sm:text-base font-bold text-gray-800 break-words leading-tight">{card.title}</p>
+                          <p className="text-xs sm:text-sm text-gray-400 mt-0.5 break-words leading-snug">{humor}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
 
               {/* ── 溫馨提醒（截圖範圍內，下載圖片時同步保留）──────────────── */}
               {plannedEvents.length > 0 && (
@@ -1088,33 +1105,39 @@ export default function ItineraryPage() {
           </div>
 
           {/* ── 導購區塊（手機：匯出下方；桌機：左欄）── */}
-          {RESOURCE_CARD_CONFIG.some(c => affiliateLinks.find(l => l.key === c.key)?.url) && (
-            <div className="rounded-2xl border border-stone-200 bg-white p-5">
-              <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">台東行前準備</p>
-              <div className="flex flex-col gap-3">
-                {RESOURCE_CARD_CONFIG.map(card => {
-                  const link = affiliateLinks.find(l => l.key === card.key);
-                  if (!link?.url) return null;
+          <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5">
+            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">台東行前準備</p>
+            <div className="flex flex-col gap-3">
+              {RESOURCE_CARD_CONFIG.map(card => {
+                const link = affiliateLinks.find(l => l.key === card.key);
+                const url = link?.url;
+                const title = link?.label ?? card.title;
+                const humor = HUMOR_SUBTITLES[card.key];
+                if (url) {
                   return (
-                    <a
-                      key={card.key}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex items-center gap-4 p-4 rounded-xl border hover:opacity-80 transition-opacity ${card.bg}`}
-                    >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg ${card.iconBg}`}>{card.icon}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-stone-700 text-sm">{card.title}</p>
-                        <p className="text-xs text-stone-400">{card.subtitle}</p>
+                    <a key={card.key} href={url} target="_blank" rel="noopener noreferrer"
+                       className="group flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 gap-3 h-full w-full">
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <p className="text-sm sm:text-base font-bold text-gray-800 break-words leading-tight">{title}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-0.5 break-words leading-snug">{humor}</p>
                       </div>
-                      <ExternalLink size={14} className="shrink-0 text-stone-300" />
+                      <ExternalLink size={14} className="flex-shrink-0 ml-2 text-gray-300 group-hover:text-blue-500 transition-colors" />
                     </a>
                   );
-                })}
-              </div>
+                }
+                return (
+                  <div key={card.key} className="flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl opacity-50 cursor-not-allowed gap-3 h-full w-full">
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <p className="text-sm sm:text-base font-bold text-gray-800 break-words leading-tight">{card.title}</p>
+                      <p className="text-xs sm:text-sm text-gray-400 mt-0.5 break-words leading-snug">{humor}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
 
           {/* ── Footer：按讚回饋 ── */}
           <div id="tour-bottom-anchor" className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
@@ -1174,35 +1197,6 @@ export default function ItineraryPage() {
                 </div>
               )}
             </div>
-
-            {/* 行程小助手導購推薦 */}
-            {RESOURCE_CARD_CONFIG.some(c => affiliateLinks.find(l => l.key === c.key)?.url) && (
-              <div className="flex flex-col gap-3">
-                <p className="text-xs font-bold text-stone-400 uppercase tracking-widest px-1">台東行前準備</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {RESOURCE_CARD_CONFIG.map(card => {
-                    const link = affiliateLinks.find(l => l.key === card.key);
-                    if (!link?.url) return null;
-                    return (
-                      <a
-                        key={card.key}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`flex items-center gap-4 p-4 rounded-xl border shadow-sm hover:opacity-80 transition-opacity ${card.bg}`}
-                      >
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg ${card.iconBg}`}>{card.icon}</div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-stone-700 text-sm">{card.title}</p>
-                          <p className="text-xs text-stone-400">{card.subtitle}</p>
-                        </div>
-                        <ExternalLink size={14} className="shrink-0 text-stone-300" />
-                      </a>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* 活動上架申請 */}
             <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-wrap items-center justify-between gap-4">
