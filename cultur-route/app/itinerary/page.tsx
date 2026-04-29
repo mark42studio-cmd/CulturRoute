@@ -16,6 +16,7 @@ import {
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, Fragment, useRef, useState } from 'react';
 import { downloadICS, downloadReportImage, downloadItineraryICS, buildGoogleCalendarUrl } from '@/lib/itinerary-export';
+import { getLocalYYYYMMDD, buildTripDateRange } from '@/lib/tripDates';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import type { PlannedEvent } from '@/types';
 import { submitEvent } from '../actions/submitEvent';
@@ -56,13 +57,6 @@ const HUMOR_SUBTITLES: Record<string, string> = {
 
 // ── 工具函式 ──────────────────────────────────────────────────────────────────
 
-const getLocalYYYYMMDD = (dateStr: string | Date): string => {
-  const d = new Date(dateStr);
-  const year  = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day   = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 /**
  * Task 2：標籤格式 → MM/DD (週X) 第N天
@@ -109,33 +103,6 @@ const getIsHardScheduled = (event: PlannedEvent): boolean => {
   return assigned < eStart || assigned > eEnd;
 };
 
-/**
- * 動態日期範圍：合併旅程設定日期 + 所有已加入活動的 assigned_date，
- * 取 min/max 後生成連續日期列（上限 60 天），確保 Tab 永遠不會遺漏任何活動。
- */
-const buildTripDates = (start: string, end: string, events: PlannedEvent[]): string[] => {
-  const seeds: string[] = [...events.map(e => e.assigned_date).filter(Boolean)];
-  if (start) seeds.push(start);
-  if (end)   seeds.push(end);
-  if (seeds.length === 0) return [getLocalYYYYMMDD(new Date())];
-
-  const minDate = seeds.reduce((a, b) => (a < b ? a : b));
-  const maxDate = seeds.reduce((a, b) => (a > b ? a : b));
-
-  const [sy, sm, sd] = minDate.split('-').map(Number);
-  const [ey, em, ed] = maxDate.split('-').map(Number);
-  let curr = new Date(sy, sm - 1, sd);
-  const endDate = new Date(ey, em - 1, ed);
-
-  const dates: string[] = [];
-  let count = 0;
-  while (curr <= endDate && count < 60) {
-    dates.push(getLocalYYYYMMDD(curr));
-    curr.setDate(curr.getDate() + 1);
-    count++;
-  }
-  return dates.length > 0 ? dates : [getLocalYYYYMMDD(new Date())];
-};
 
 /**
  * 判斷活動是否為「靜態展覽」（與 EventBrowser.tsx 邏輯一致）：
@@ -359,10 +326,10 @@ export default function ItineraryPage() {
   }, []);
 
   // ── 動態日期區間：合併旅程設定 + 所有活動日期，自動延伸 Tabs ─────────────────
-  const sortedDates = buildTripDates(tripStartDate, tripEndDate, plannedEvents);
+  const sortedDates = buildTripDateRange(tripStartDate, tripEndDate, plannedEvents.map(e => e.assigned_date));
   const actualActiveDate = sortedDates.includes(activeDate)
     ? activeDate
-    : (sortedDates.length > 1 ? sortedDates[1] : sortedDates[0] ?? '');
+    : (sortedDates[0] ?? '');
 
   // 切換日期時清空車程資料並收起地圖，避免舊路線閃現
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -524,20 +491,20 @@ export default function ItineraryPage() {
     }
   };
 
-  // 按有效時間升序排列：visit_time（使用者自訂）> start_time 時間部分
-  // 同時過濾無效地點：缺座標 或 venue_name 含「待定」/ 長度不足 2
+  // 當天所有活動（無地理篩選）：供清單顯示、DnD 排序、時間衝突計算使用
   // 若為新手導引且當天無真實活動，末尾合併 mockTourEvents 示範資料
   const currentDayEvents = [
-    ...plannedEvents
-      .filter(e => e.assigned_date === actualActiveDate)
-      .filter(e => {
-        if (e.latitude == null || e.longitude == null) return false;
-        const vn = (e.venue_name ?? '').trim();
-        if (vn.length < 2 || vn.includes('待定')) return false;
-        return true;
-      }),
+    ...plannedEvents.filter(e => e.assigned_date === actualActiveDate),
     ...mockTourEvents,
   ].sort((a, b) => getEffectiveSortTime(a).localeCompare(getEffectiveSortTime(b)));
+
+  // 地圖專用子集：過濾掉缺座標或地點名稱無效的活動
+  const isMapReady = (e: PlannedEvent) => {
+    if (e.latitude == null || e.longitude == null) return false;
+    const vn = (e.venue_name ?? '').trim();
+    return vn.length >= 2 && !vn.includes('待定');
+  };
+  const currentDayMapEvents = currentDayEvents.filter(isMapReady);
 
   // 衝突警告（derived，每次 render 重算）
   // legDurations：由 ItineraryMap Directions API 回傳的真實車程；未就緒時降級至估算
@@ -1046,7 +1013,7 @@ export default function ItineraryPage() {
           )}
 
           {/* ── 桌機專用：生成路線按鈕（手機版用底部 Sticky，此處 lg 才顯示）── */}
-          {!showMap && currentDayEvents.length > 0 && (
+          {!showMap && currentDayMapEvents.length > 0 && (
             <button
               id="tour-generate-route-btn"
               onClick={handleGenerateMap}
@@ -1224,7 +1191,7 @@ export default function ItineraryPage() {
           >
             {showMap ? (
               <MapComponent
-                events={currentDayEvents}
+                events={currentDayMapEvents}
                 selectedEventId={selectedEventId}
                 onLegDurationsChange={setLegDurations}
               />
@@ -1244,7 +1211,7 @@ export default function ItineraryPage() {
                     👉 請在左側調整活動順序與時間後<br />點擊生成路線
                   </p>
                 </div>
-                {currentDayEvents.length === 0 && (
+                {currentDayMapEvents.length === 0 && (
                   <p className="text-slate-300 text-xs">請先從首頁加入活動至今日行程</p>
                 )}
               </div>
@@ -1398,7 +1365,7 @@ export default function ItineraryPage() {
           僅在地圖尚未生成 且 當天有活動時顯示。
           點擊後：渲染地圖 + 平滑捲動回頂部讓使用者立刻看到地圖。
       ─────────────────────────────────────────────────────────────────────── */}
-      {!showMap && currentDayEvents.length > 0 && (
+      {!showMap && currentDayMapEvents.length > 0 && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none" style={{ paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
           <button
             id="tour-generate-route-btn"
