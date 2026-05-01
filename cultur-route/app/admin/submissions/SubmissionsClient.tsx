@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { approveSubmission, rejectSubmission } from './actions'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
@@ -34,16 +35,30 @@ export default function SubmissionsClient({ items }: { items: PendingEvent[] }) 
     })
   }
 
+  const backLink = (
+    <Link
+      href="/admin"
+      className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 border border-gray-200 rounded-lg px-4 py-2 bg-white transition-colors mb-6"
+    >
+      ⬅️ 返回主後台
+    </Link>
+  )
+
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-gray-400">
-        <span className="text-5xl mb-4">📭</span>
-        <p className="font-semibold">目前沒有待審核的申請</p>
-      </div>
+      <>
+        {backLink}
+        <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+          <span className="text-5xl mb-4">📭</span>
+          <p className="font-semibold">目前沒有待審核的申請</p>
+        </div>
+      </>
     )
   }
 
   return (
+    <>
+      {backLink}
     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {items.map(item => {
         const result = results[item.id]
@@ -108,6 +123,7 @@ export default function SubmissionsClient({ items }: { items: PendingEvent[] }) 
         )
       })}
     </div>
+    </>
   )
 }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition, useMemo, useEffect } from 'react'
+import Link from 'next/link'
 import {
   Search, MapPin, Utensils, Save, Link as LinkIcon, Image as ImageIcon,
   Eye, EyeOff, Edit2, X, Loader2, AlertCircle, CheckCircle, Trash2, ExternalLink, Plus,
@@ -454,6 +455,12 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
               {label}
             </button>
           ))}
+          <Link
+            href="/admin/submissions"
+            className="px-5 py-2.5 rounded-xl font-bold text-sm transition-colors bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 shadow-sm"
+          >
+            📝 活動投稿審核
+          </Link>
         </div>
 
         {/* === Events Tab === */}
