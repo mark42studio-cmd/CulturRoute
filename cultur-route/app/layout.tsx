@@ -59,7 +59,7 @@ export default function RootLayout({
   return (
     <html lang="zh-TW" className={`${geistSans.variable} ${geistMono.variable} ${notoSerifTC.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+        <GoogleAnalytics gaId="G-09SQ3LJ9GM" />
 
         {/* 🌟 把側邊欄元件放在這裡，children 的上面 */}
         <ItinerarySidebar />
