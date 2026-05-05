@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['10.5.0.2', 'localhost:3000'],
   images: {
     remotePatterns: [
       // ── 允許所有 HTTPS 外部圖片 ──────────────────────────────────

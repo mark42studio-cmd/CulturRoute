@@ -34,12 +34,20 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#f8f6f0]">
-      <header id="tour-home-header" className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">
-          CultureRoute 臺東藝文 - 你若來台東
-          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-3 align-middle font-normal tracking-normal">測試版</span>
-        </h1>
-        <p className="text-slate-500 text-lg">探索此時此地的文化路徑</p>
+      <header id="tour-home-header" className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            CultureRoute 臺東藝文 - 你若來台東
+            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-3 align-middle font-normal tracking-normal">測試版</span>
+          </h1>
+          <p className="text-slate-500 text-lg">探索此時此地的文化路徑</p>
+        </div>
+        <a
+          href="/submit-event"
+          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-colors"
+        >
+          🎊 我有活動想要上架
+        </a>
       </header>
 
       {/* 🌟 把抓到的資料交給 Client Component 去處理互動與篩選 */}
