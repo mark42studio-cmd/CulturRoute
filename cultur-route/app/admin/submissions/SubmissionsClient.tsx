@@ -3,13 +3,16 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
-import { approveSubmission, rejectSubmission } from './actions'
+import { useRouter } from 'next/navigation'
+import { rejectSubmission } from './actions'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 
 type PendingEvent = {
   id: string
-  name: string
-  time: string
+  title: string
+  raw_date: string | null
+  start_date: string | null
+  end_date: string | null
   location: string
   description: string
   image_url: string | null
@@ -18,14 +21,31 @@ type PendingEvent = {
 }
 
 export default function SubmissionsClient({ items }: { items: PendingEvent[] }) {
+  const router = useRouter()
   const [results, setResults] = useState<Record<string, string>>({})
+  const [loadingId, setLoadingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const handleApprove = (id: string) => {
-    startTransition(async () => {
-      const res = await approveSubmission(id)
-      setResults(prev => ({ ...prev, [id]: res.error ? `error:${res.error}` : 'approved' }))
-    })
+  const handleApprove = async (id: string) => {
+    setLoadingId(id)
+    try {
+      const res = await fetch('/api/submissions/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ submission_id: id }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        setResults(prev => ({ ...prev, [id]: `error:${data.error ?? '核准失敗'}` }))
+      } else {
+        setResults(prev => ({ ...prev, [id]: 'approved' }))
+        router.refresh()
+      }
+    } catch {
+      setResults(prev => ({ ...prev, [id]: 'error:網路錯誤，請重試' }))
+    } finally {
+      setLoadingId(null)
+    }
   }
 
   const handleReject = (id: string) => {
@@ -70,11 +90,16 @@ export default function SubmissionsClient({ items }: { items: PendingEvent[] }) 
             key={item.id}
             className={`bg-white rounded-2xl border shadow-sm flex flex-col overflow-hidden transition-opacity ${isDone ? 'opacity-60' : ''}`}
           >
-            <ImageCell src={item.image_url} alt={item.name} />
+            <ImageCell src={item.image_url} alt={item.title} />
 
             <div className="p-4 flex flex-col gap-2 flex-1">
-              <h3 className="font-bold text-gray-900 text-base leading-snug">{item.name}</h3>
-              <p className="text-xs text-gray-500">⏰ {item.time}</p>
+              <h3 className="font-bold text-gray-900 text-base leading-snug">{item.title}</h3>
+              <p className="text-xs text-gray-500">⏰ {item.raw_date ?? '—'}</p>
+              {(item.start_date || item.end_date) && (
+                <p className="text-xs text-blue-400">
+                  🗓 {item.start_date ?? '?'}{item.end_date && item.end_date !== item.start_date ? ` ～ ${item.end_date}` : ''}
+                </p>
+              )}
               <p className="text-xs text-gray-500">📍 {item.location}</p>
               <p className="text-sm text-gray-600 line-clamp-3 mt-1">{item.description}</p>
               {item.comments && (
@@ -82,7 +107,7 @@ export default function SubmissionsClient({ items }: { items: PendingEvent[] }) 
                   💬 {item.comments}
                 </p>
               )}
-              <p className="text-[10px] text-gray-300 mt-auto pt-2">
+              <p className="text-[10px] text-gray-300 mt-auto pt-2" suppressHydrationWarning>
                 {new Date(item.created_at).toLocaleString('zh-TW')}
               </p>
             </div>
@@ -102,10 +127,10 @@ export default function SubmissionsClient({ items }: { items: PendingEvent[] }) 
                 <>
                   <button
                     onClick={() => handleApprove(item.id)}
-                    disabled={isPending}
+                    disabled={loadingId === item.id || isPending}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-500 text-white text-sm font-bold rounded-xl hover:bg-green-600 transition-colors disabled:opacity-40"
                   >
-                    {isPending ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle size={13} />}
+                    {loadingId === item.id ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle size={13} />}
                     核准
                   </button>
                   <button

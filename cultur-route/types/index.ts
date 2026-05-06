@@ -35,6 +35,7 @@ export interface Event {
   ticket_url?: string;
   source_url?: string;
   affiliate_links?: AffiliateLinks;
+  region?: string;             // 後端寫入的地區標籤，例：'海線' / '山線' / '市區' / '南迴' / '離島'
 }
 
 /** 加入行程後的活動（附帶使用者指定的日期與預計停留時間） */

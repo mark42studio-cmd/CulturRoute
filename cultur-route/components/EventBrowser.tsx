@@ -70,27 +70,36 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   };
 
   const DISTRICT_KEYWORDS = {
-    city:     ['台東市', '更生路', '正氣路', '中興路', '博愛路', '林森路', '四維路', '馬蘭', '豐年', '東海'],
-    sea:      ['成功鎮', '長濱鄉', '東河鄉', '都蘭', '加路蘭', '三仙台', '月眉', '小野柳'],
-    mountain: ['鹿野鄉', '關山鎮', '池上鄉', '海端鄉', '延平鄉', '卑南鄉', '初鹿', '知本', '利吉', '鹿野', '關山', '池上'],
-    south:    ['太麻里鄉', '大武鄉', '達仁鄉', '金峰鄉', '太麻里', '大武', '達仁', '金峰', '金崙', '嘉蘭'],
+    city:     ['台東市', '臺東市', '卑南', '設計中心', '鐵花', '美術館', '藝文中心', '美學館', '波浪屋', '史前'],
+    sea:      ['東河', '成功', '長濱', '三仙台', '都蘭', '加路蘭', '金樽', '比西里岸'],
+    mountain: ['鹿野', '關山', '池上', '延平', '海端', '初鹿', '伯朗大道', '高台'],
+    south:    ['太麻里', '金峰', '大武', '達仁', '多良', '知本'],
     island:   ['綠島', '蘭嶼'],
-    other:    [] as string[], // 地址模糊、無法判定地區的活動，不歸入任何篩選類別
+    other:    [] as string[],
   } as const;
 
+  // DB region 欄位 → filter key 對照表
+  const REGION_DB_MAP: Record<string, keyof typeof DISTRICT_KEYWORDS> = {
+    '市區': 'city', '台東市': 'city', '臺東市': 'city',
+    '海線': 'sea',
+    '山線': 'mountain',
+    '南迴': 'south', '南迴線': 'south',
+    '離島': 'island',
+  };
+
   const getEventDistrict = (event: Event): keyof typeof DISTRICT_KEYWORDS => {
-    // 正規化：臺 → 台，消除全形/字體差異
-    const text = `${event.address ?? ''} ${event.venue_name}`.replace(/臺/g, '台');
-    // 離島優先：綠島/蘭嶼關鍵字最具辨識性，最先判定
-    if (DISTRICT_KEYWORDS.island.some(kw => text.includes(kw)))   return 'island';
-    // 市區優先：只要包含「台東市」就絕對歸類為市區
-    if (text.includes('台東市')) return 'city';
-    // 依地理特徵排序比對（南迴 → 山線 → 海線 → 市區）
-    if (DISTRICT_KEYWORDS.south.some(kw => text.includes(kw)))    return 'south';
-    if (DISTRICT_KEYWORDS.mountain.some(kw => text.includes(kw))) return 'mountain';
-    if (DISTRICT_KEYWORDS.sea.some(kw => text.includes(kw)))      return 'sea';
-    if (DISTRICT_KEYWORDS.city.some(kw => text.includes(kw)))     return 'city';
-    // fallback：地址模糊無法判定，歸入 other，不出現在任何地區篩選結果中
+    // 優先：資料庫 region 欄位
+    if (event.region) {
+      const mapped = REGION_DB_MAP[event.region];
+      if (mapped) return mapped;
+    }
+    // Fallback：關鍵字比對 title + venue_name + address
+    const searchText = `${event.address ?? ''} ${event.venue_name} ${event.title}`.replace(/臺/g, '台');
+    if (DISTRICT_KEYWORDS.island.some(kw => searchText.includes(kw)))   return 'island';
+    if (DISTRICT_KEYWORDS.city.some(kw => searchText.includes(kw)))     return 'city';
+    if (DISTRICT_KEYWORDS.south.some(kw => searchText.includes(kw)))    return 'south';
+    if (DISTRICT_KEYWORDS.mountain.some(kw => searchText.includes(kw))) return 'mountain';
+    if (DISTRICT_KEYWORDS.sea.some(kw => searchText.includes(kw)))      return 'sea';
     return 'other';
   };
 

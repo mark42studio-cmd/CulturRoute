@@ -15,16 +15,17 @@ export async function approveSubmission(id: string): Promise<{ error?: string }>
   const safeId = validate(UuidSchema, id)
 
   const { data: row, error: fetchErr } = await sb()
-    .from('pending_events')
+    .from('submissions')
     .select('*')
     .eq('id', safeId)
     .single()
   if (fetchErr || !row) return { error: '找不到申請記錄' }
 
-  // 嘗試解析時間字串，無法解析時用 30 天後作為佔位（管理員可在 AdminClient 修正）
+  // 優先用 AI 解析的 start_date，退回 raw_date 字串解析，最後佔位 30 天後
   let startTime: string
   try {
-    const parsed = new Date(row.time as string)
+    const src = (row.start_date as string) || (row.raw_date as string)
+    const parsed = new Date(src)
     startTime = isNaN(parsed.getTime())
       ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       : parsed.toISOString()
@@ -35,7 +36,7 @@ export async function approveSubmission(id: string): Promise<{ error?: string }>
   const { error: insertErr } = await sb()
     .from('events')
     .insert([{
-      title:          row.name,
+      title:          row.title,
       start_time:     startTime,
       venue_name:     row.location,
       image_captured: (row.image_url as string) || null,
@@ -48,7 +49,7 @@ export async function approveSubmission(id: string): Promise<{ error?: string }>
     }])
   if (insertErr) return { error: insertErr.message }
 
-  await sb().from('pending_events').update({ status: 'approved' }).eq('id', safeId)
+  await sb().from('submissions').update({ status: 'approved' }).eq('id', safeId)
   revalidatePath('/admin/submissions')
   revalidatePath('/')
   return {}
@@ -57,7 +58,7 @@ export async function approveSubmission(id: string): Promise<{ error?: string }>
 export async function rejectSubmission(id: string): Promise<{ error?: string }> {
   const safeId = validate(UuidSchema, id)
   const { error } = await sb()
-    .from('pending_events')
+    .from('submissions')
     .update({ status: 'rejected' })
     .eq('id', safeId)
   if (error) return { error: error.message }
