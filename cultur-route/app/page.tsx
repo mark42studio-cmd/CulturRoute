@@ -33,8 +33,8 @@ export default async function Home() {
   const upcomingEvents = filterUpcoming(events ?? []);
 
   return (
-    <main className="min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#f8f6f0]">
-      <header id="tour-home-header" className="mb-8 flex items-center justify-between">
+    <main className="min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#f8f6f0] w-full max-w-[100vw] overflow-x-hidden">
+      <header id="tour-home-header" className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between w-full">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             CultureRoute 臺東藝文 - 你若來台東
@@ -44,7 +44,7 @@ export default async function Home() {
         </div>
         <a
           href="/submit-event"
-          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-colors"
+          className="w-full sm:w-auto text-center px-6 py-2.5 rounded-full bg-amber-700 hover:bg-amber-800 text-white text-sm tracking-wide shadow-md transition-all duration-300"
         >
           🎊 我有活動想要上架
         </a>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
@@ -17,11 +17,17 @@ function isValidHttpsUrl(value: string): boolean {
   }
 }
 
-export default function SubmitEventPage() {
+function SubmitEventForm() {
   const router = useRouter();
+  const mounted = useRef(true);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
   const [form, setForm] = useState({
     title: '',
     event_time: '',
@@ -82,6 +88,7 @@ export default function SubmitEventPage() {
       comments: form.comments.trim() || null,
     }]);
 
+    if (!mounted.current) return;
     setLoading(false);
 
     if (error) {
@@ -92,7 +99,7 @@ export default function SubmitEventPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f8f6f0] px-4 py-12">
+    <main className="min-h-screen bg-[#f8f6f0] px-4 py-12" key="submit-event-page">
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center">
@@ -121,7 +128,7 @@ export default function SubmitEventPage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/')}
             className="text-slate-500 hover:text-slate-700 text-sm mb-4 flex items-center gap-1 transition-colors"
           >
             ← 返回
@@ -209,6 +216,14 @@ export default function SubmitEventPage() {
         </form>
       </div>
     </main>
+  );
+}
+
+export default function SubmitEventPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f8f6f0]" />}>
+      <SubmitEventForm />
+    </Suspense>
   );
 }
 

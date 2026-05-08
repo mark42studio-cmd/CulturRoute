@@ -35,7 +35,8 @@
       "Bash(rm -rf \"E:/CulturRoute/cultur-route/.next\")",
       "Bash(rm -rf \"E:/CulturRoute/backend/__pycache__\")",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\weich\" -Filter \"螢幕擷取畫面*\" -Recurse -ErrorAction SilentlyContinue)",
-      "Bash(Select-Object -First 10 FullName)"
+      "Bash(Select-Object -First 10 FullName)",
+      "Bash(git restore *)"
     ]
   }
 }
