@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import { Calendar, X, Trash2, Clock } from 'lucide-react';
@@ -82,6 +82,24 @@ export default function ItinerarySidebar() {
     plannedEvents.map(e => e.assigned_date),
   );
 
+  // 面板 DOM 掛載控制：避免關閉狀態的 fixed 元素停留在 320-640px 造成橫向溢出
+  // panelMounted: 面板是否在 DOM 中；panelVisible: translate 是否為 x-0
+  const [panelMounted, setPanelMounted] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      setPanelMounted(true);
+      // 雙 rAF：確保 DOM 掛載後再切換 translate，觸發 CSS transition
+      requestAnimationFrame(() => requestAnimationFrame(() => setPanelVisible(true)));
+    } else {
+      setPanelVisible(false);
+      // 等動畫完成（300ms）再從 DOM 移除，避免瞬間消失
+      const t = setTimeout(() => setPanelMounted(false), 320);
+      return () => clearTimeout(t);
+    }
+  }, [isSidebarOpen]);
+
   // 必須在所有 hook 之後才能 early return，避免違反 Rules of Hooks
   useEffect(() => {
     if (!flashEventId && !flashDayAdded) return;
@@ -116,10 +134,11 @@ export default function ItinerarySidebar() {
         />
       )}
 
-      {/* 🌟 3. 滑出的側邊欄面板 */}
+      {/* 🌟 3. 滑出的側邊欄面板（關閉後從 DOM 移除，避免 fixed + translateX(100%) 造成橫向溢出） */}
+      {panelMounted && (
       <div
         className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+          panelVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* 面板標題列 */}
@@ -240,6 +259,18 @@ export default function ItinerarySidebar() {
                         <div className="text-xs text-blue-600 font-medium line-clamp-1 bg-blue-50 px-2 py-1 rounded w-fit">
                           {event.venue_name}
                         </div>
+                        {event.ticket_url ? (
+                          <a
+                            href={event.ticket_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-lg transition-colors w-fit"
+                          >
+                            🎟️ 購票去
+                          </a>
+                        ) : (
+                          <p className="text-xs text-stone-400">請再確認是否需要購票</p>
+                        )}
                         <div
                           className={[
                             'flex items-center gap-2 mt-1 rounded-lg px-1.5 py-1 transition-all duration-500',
@@ -293,6 +324,7 @@ export default function ItinerarySidebar() {
           </div>
         )}
       </div>
+      )} {/* end panelMounted */}
     </>
   );
 }

@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
     description:      cleanedDescription,
     long_description: cleanedDescription,
     image_url:        row.image_url ?? null,
+    ticket_url:       row.ticket_url ?? null,
     latitude,
     longitude,
     region,

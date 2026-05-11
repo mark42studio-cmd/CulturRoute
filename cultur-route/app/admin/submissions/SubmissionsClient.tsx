@@ -16,6 +16,7 @@ type PendingEvent = {
   location: string
   description: string
   image_url: string | null
+  ticket_url: string | null
   comments: string | null
   created_at: string
 }
@@ -102,6 +103,16 @@ export default function SubmissionsClient({ items }: { items: PendingEvent[] }) 
               )}
               <p className="text-xs text-gray-500">📍 {item.location}</p>
               <p className="text-sm text-gray-600 line-clamp-3 mt-1">{item.description}</p>
+              {item.ticket_url && (
+                <a
+                  href={item.ticket_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-teal-600 underline break-all"
+                >
+                  🎟️ {item.ticket_url}
+                </a>
+              )}
               {item.comments && (
                 <p className="text-xs text-gray-400 italic border-t border-gray-100 pt-2 mt-1">
                   💬 {item.comments}

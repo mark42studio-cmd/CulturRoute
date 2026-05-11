@@ -51,21 +51,24 @@ export default function EventsMap({ events }: { events: Event[] }) {
   }, [mapped]);
 
   // ── Debug 檢查點（確認資料流量）────────────────────────────────────────────────
-  console.log(
-    `[EventsMap] 總接收: ${events.length} 筆`,
-    `| 有座標: ${mapped.length} 筆`,
-    `| 分群後: ${clusters.length} 個 cluster`,
-  );
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      `[EventsMap] 總接收: ${events.length} 筆`,
+      `| 有座標: ${mapped.length} 筆`,
+      `| 分群後: ${clusters.length} 個 cluster`,
+    );
+  }
 
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''}>
+      <div className="absolute inset-0 overflow-hidden">
       <GoogleMap
         defaultCenter={TAITUNG_CENTER}
         defaultZoom={10}
         mapId={process.env.NEXT_PUBLIC_GOOGLE_MAP_ID}
         gestureHandling="greedy"
         disableDefaultUI={false}
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%', height: '100%', minWidth: '0', outline: 'none' }}
         reuseMaps
         onClick={() => { setOpenClusterKey(null); setOpenSingleKey(null); }}
       >
@@ -236,6 +239,7 @@ export default function EventsMap({ events }: { events: Event[] }) {
           );
         })}
       </GoogleMap>
+      </div>
     </APIProvider>
   );
 }

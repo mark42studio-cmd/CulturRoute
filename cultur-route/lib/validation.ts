@@ -122,6 +122,7 @@ export const UpdateEventFieldsSchema = z.object({
     latitude:       LatitudeSchema.optional(),
     longitude:      LongitudeSchema.optional(),
     image_captured: ImageUrlSchema,
+    ticket_url:     z.string().url('必須為合法 URL').max(500, 'URL 超過長度限制').nullable().optional(),
   }).strict(),  // 拒絕白名單外的欄位，防止 DB 欄位注入
 });
 

@@ -9,6 +9,7 @@ import {
 import {
   togglePublished, geocodeAddress, updateEventFields, insertPlace, insertFood, deleteEvent,
   getAffiliateLinks, upsertAffiliateLink, type AffiliateLink,
+  getIssueReports, resolveIssueReport, type IssueReport,
 } from './actions'
 
 // ---- Types ----
@@ -22,9 +23,10 @@ export type AdminEvent = {
   longitude: number | null
   is_published: boolean
   image_captured: string | null
+  ticket_url: string | null
 }
 
-type Tab = 'events' | 'places' | 'foods' | 'affiliate'
+type Tab = 'events' | 'places' | 'foods' | 'affiliate' | 'reports'
 type SortMode = 'default' | 'name' | 'issues'
 
 type EditState = {
@@ -37,6 +39,7 @@ type EditState = {
   latitude: number | null
   longitude: number | null
   imageCaptured: string
+  ticketUrl: string
   geocodedResult: { latitude: number; longitude: number; formatted: string } | null
 }
 
@@ -103,6 +106,20 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
       .finally(() => setAffiliateLoading(false))
   }, [activeTab])
 
+  // Issue Reports state
+  const [reports, setReports] = useState<IssueReport[]>([])
+  const [reportsLoading, setReportsLoading] = useState(false)
+  const [resolvingId, setResolvingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (activeTab !== 'reports') return
+    setReportsLoading(true)
+    getIssueReports()
+      .then(setReports)
+      .catch(err => showToast('err', err.message))
+      .finally(() => setReportsLoading(false))
+  }, [activeTab])
+
   function handleAffiliateChange(key: string, field: keyof AffiliateLink, value: string | boolean | null) {
     setAffiliateLinks(prev => prev.map(l => l.key === key ? { ...l, [field]: value } : l))
   }
@@ -122,6 +139,19 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
   function handleAddAffiliateLink() {
     const key = `link_${Date.now()}`
     setAffiliateLinks(prev => [...prev, { id: '', key, label: '新連結', url: null, icon: '🔗', is_active: true }])
+  }
+
+  async function handleResolve(id: string) {
+    setResolvingId(id)
+    try {
+      await resolveIssueReport(id)
+      setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'resolved' as const } : r))
+      showToast('ok', '已標記為已解決')
+    } catch (err: any) {
+      showToast('err', err.message)
+    } finally {
+      setResolvingId(null)
+    }
   }
 
   // Places/Foods state
@@ -204,6 +234,7 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
       latitude: event.latitude,
       longitude: event.longitude,
       imageCaptured: event.image_captured ?? '',
+      ticketUrl: event.ticket_url ?? '',
       geocodedResult: null,
     })
   }
@@ -242,6 +273,7 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
           latitude: editState.latitude ?? undefined,
           longitude: editState.longitude ?? undefined,
           image_captured: editState.imageCaptured || null,
+          ticket_url: editState.ticketUrl || null,
         })
         setEvents(prev => prev.map(e =>
           e.id === editState.id
@@ -446,6 +478,7 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
             { id: 'places',    label: '📍 景點管理' },
             { id: 'foods',     label: '🍜 美食管理' },
             { id: 'affiliate', label: '🔗 分潤連結' },
+            { id: 'reports',   label: '⚠️ 報修處理' },
           ].map(({ id, label }) => (
             <button
               key={id}
@@ -922,6 +955,122 @@ insert into affiliate_links (key, label, icon) values
           </div>
         )}
 
+        {/* === Reports Tab === */}
+        {activeTab === 'reports' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-gray-800">報修處理</h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  來自前台使用者的活動問題回報
+                  {!reportsLoading && (
+                    <span className="ml-2 text-amber-600 font-semibold">
+                      · 待處理 {reports.filter(r => r.status === 'pending').length} 件
+                    </span>
+                  )}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setReportsLoading(true)
+                  getIssueReports()
+                    .then(setReports)
+                    .catch(err => showToast('err', err.message))
+                    .finally(() => setReportsLoading(false))
+                }}
+                disabled={reportsLoading}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+              >
+                {reportsLoading ? <Loader2 size={12} className="animate-spin" /> : '↺'}
+                重新整理
+              </button>
+            </div>
+
+            {reportsLoading ? (
+              <div className="flex items-center justify-center py-16 text-gray-400 gap-2">
+                <Loader2 size={16} className="animate-spin" /> 載入中...
+              </div>
+            ) : reports.length === 0 ? (
+              <div className="text-center py-16 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl">
+                <p className="text-3xl mb-2">🎉</p>
+                <p>目前沒有任何報修紀錄</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {reports.map(report => (
+                  <div
+                    key={report.id}
+                    className={`bg-white border rounded-2xl p-5 shadow-sm transition-opacity ${
+                      report.status === 'resolved' ? 'opacity-50 border-gray-100' : 'border-amber-200'
+                    }`}
+                  >
+                    {/* Card Header */}
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {report.status === 'pending' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">
+                            ⏳ 待處理
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                            ✅ 已解決
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-400" suppressHydrationWarning>
+                          {new Date(report.created_at).toLocaleString('zh-TW', {
+                            month: 'short', day: 'numeric',
+                            hour: '2-digit', minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                      {report.status === 'pending' && (
+                        <button
+                          onClick={() => handleResolve(report.id)}
+                          disabled={resolvingId === report.id}
+                          className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
+                        >
+                          {resolvingId === report.id
+                            ? <Loader2 size={12} className="animate-spin" />
+                            : <CheckCircle size={12} />
+                          }
+                          標記為已解決
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Fields */}
+                    <div className="space-y-2">
+                      {report.event_name && (
+                        <div className="flex items-start gap-2">
+                          <span className="shrink-0 text-xs font-bold text-gray-400 w-20 pt-0.5">問題活動</span>
+                          <span className="text-sm font-semibold text-gray-800">{report.event_name}</span>
+                        </div>
+                      )}
+                      <div className="flex items-start gap-2">
+                        <span className="shrink-0 text-xs font-bold text-gray-400 w-20 pt-0.5">問題描述</span>
+                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{report.description}</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="shrink-0 text-xs font-bold text-gray-400 w-20 pt-0.5">聯絡信箱</span>
+                        {report.contact_email ? (
+                          <a
+                            href={`mailto:${report.contact_email}`}
+                            className="text-sm text-blue-600 hover:underline"
+                          >
+                            {report.contact_email}
+                          </a>
+                        ) : (
+                          <span className="text-sm text-gray-300">未提供</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
 
       {/* === Edit Modal === */}
@@ -995,6 +1144,19 @@ insert into affiliate_links (key, label, icon) values
                     無圖片預覽
                   </div>
                 )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-teal-700 mb-1 flex items-center gap-1">
+                  🎟️ 購票連結 (Ticket URL)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://kktix.com/events/..."
+                  value={editState.ticketUrl}
+                  onChange={e => setEditState(s => s ? { ...s, ticketUrl: e.target.value } : s)}
+                  className="w-full border border-teal-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none bg-teal-50/30"
+                />
               </div>
 
               <div className="border border-amber-200 bg-amber-50/40 rounded-xl p-4 space-y-3">

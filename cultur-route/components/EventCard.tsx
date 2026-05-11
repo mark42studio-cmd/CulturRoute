@@ -100,7 +100,7 @@ const EventCard = ({ event, onMouseEnter, onMouseLeave }: EventProps) => {
 
   return (
     <div
-      className="flex flex-col h-full bg-white rounded-3xl relative group overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-in-out"
+      className="flex flex-col h-full w-full min-w-0 bg-white rounded-3xl relative group overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ease-in-out"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
@@ -146,7 +146,7 @@ const EventCard = ({ event, onMouseEnter, onMouseLeave }: EventProps) => {
         </div>
 
         {/* 標題 */}
-        <h3 className="text-xl font-serif font-bold text-stone-800 leading-snug line-clamp-2 group-hover:text-teal-800 transition-colors">
+        <h3 className="text-xl font-serif font-bold text-stone-800 leading-snug line-clamp-2 break-words group-hover:text-teal-800 transition-colors">
           {event.title}
         </h3>
 

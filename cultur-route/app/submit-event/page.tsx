@@ -34,6 +34,7 @@ function SubmitEventForm() {
     location: '',
     description: '',
     image_url: '',
+    ticket_url: '',
     comments: '',
   });
 
@@ -46,6 +47,8 @@ function SubmitEventForm() {
     // 圖片部分為了網站順利請事先壓縮
     if (form.image_url.trim() && !isValidHttpsUrl(form.image_url.trim()))
       e.image_url = '圖片連結必須以 https:// 開頭';
+    if (form.ticket_url.trim() && !isValidHttpsUrl(form.ticket_url.trim()))
+      e.ticket_url = '購票連結必須以 https:// 開頭';
     return e;
   };
 
@@ -85,6 +88,7 @@ function SubmitEventForm() {
       location: form.location.trim(),
       description: form.description.trim(),
       image_url: form.image_url.trim() || null,
+      ticket_url: form.ticket_url.trim() || null,
       comments: form.comments.trim() || null,
     }]);
 
@@ -192,6 +196,16 @@ function SubmitEventForm() {
               onChange={handleChange}
               placeholder="https://example.com/poster.jpg"
               className={inputClass(errors.image_url)}
+            />
+          </Field>
+
+          <Field label="購票連結 (Ticket URL)" error={errors.ticket_url} hint="選填，需為 https:// 開頭，若無售票頁面可略過">
+            <input
+              name="ticket_url"
+              value={form.ticket_url}
+              onChange={handleChange}
+              placeholder="https://kktix.com/events/..."
+              className={inputClass(errors.ticket_url)}
             />
           </Field>
 

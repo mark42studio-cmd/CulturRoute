@@ -71,3 +71,30 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 8px !important;
   padding-top: 10px !important;
 }
+
+/* 約束 Google Maps 容器與 iframe，不使用 100vw（有 padding 時會溢出） */
+.gm-style,
+.gm-style iframe {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.gm-style div,
+canvas {
+  box-sizing: border-box !important;
+}
+
+/* 確保全站沒有任何元件可以撐破 100% 視窗 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  position: relative;
+}

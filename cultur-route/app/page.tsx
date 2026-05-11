@@ -1,5 +1,6 @@
 ﻿import { createClient } from '@supabase/supabase-js';
 import EventBrowser from '@/components/EventBrowser';
+import ReportIssueModal from '@/components/ReportIssueModal';
 import type { Event } from '@/types';
 
 const supabase = createClient(
@@ -33,21 +34,24 @@ export default async function Home() {
   const upcomingEvents = filterUpcoming(events ?? []);
 
   return (
-    <main className="min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#f8f6f0] w-full max-w-[100vw] overflow-x-hidden">
-      <header id="tour-home-header" className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between w-full">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+    <main className="w-full min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#f8f6f0] overflow-x-hidden">
+      <header id="tour-home-header" className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8 w-full">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-3xl font-bold text-slate-800 mb-2 break-words">
             CultureRoute 臺東藝文 - 你若來台東
             <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-3 align-middle font-normal tracking-normal">測試版</span>
           </h1>
           <p className="text-slate-500 text-lg">探索此時此地的文化路徑</p>
         </div>
-        <a
-          href="/submit-event"
-          className="w-full sm:w-auto text-center px-6 py-2.5 rounded-full bg-amber-700 hover:bg-amber-800 text-white text-sm tracking-wide shadow-md transition-all duration-300"
-        >
-          🎊 我有活動想要上架
-        </a>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+          <a
+            href="/submit-event"
+            className="text-center px-6 py-2.5 rounded-full bg-amber-700 hover:bg-amber-800 text-white text-sm tracking-wide shadow-md transition-all duration-300"
+          >
+            🎊 我有活動想要上架
+          </a>
+          <ReportIssueModal />
+        </div>
       </header>
 
       {/* 🌟 把抓到的資料交給 Client Component 去處理互動與篩選 */}

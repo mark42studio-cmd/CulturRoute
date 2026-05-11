@@ -179,12 +179,12 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
 
   // 「多留幾天」區塊專用：卡片多一顆「多留一下」按鈕
   const renderMissedEventGrid = (events: Event[]) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full min-w-0">
       {events.map((event) => (
         <div
           key={event.id}
           onClick={() => setSelectedEvent(event)}
-          className="relative flex flex-col h-full group cursor-pointer"
+          className="relative flex flex-col h-full w-full min-w-0 group cursor-pointer"
         >
           {isOngoing(event) && (
             <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
@@ -218,7 +218,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   );
 
   const renderEventGrid = (events: Event[]) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full min-w-0">
       {events.map((event) => {
         const isAdded = plannedEvents.some(p => p.id === event.id);
         const justAdded = quickToastId === event.id;
@@ -226,7 +226,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           <div
             key={event.id}
             onClick={() => setSelectedEvent(event)}
-            className="relative flex flex-col h-full group cursor-pointer"
+            className="relative flex flex-col h-full w-full min-w-0 group cursor-pointer"
           >
             {/* 進行中 badge */}
             {isOngoing(event) && (
@@ -273,14 +273,14 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
 
   return (
     <>
-    <div className="flex flex-col lg:flex-row-reverse gap-6 items-start">
+    <div className="flex flex-col lg:flex-row-reverse gap-6 lg:items-start w-full">
 
       {/* ── 地圖面板 ──────────────────────────────────────────────────────────
            手機：sticky top-0，高度 40vh，地圖永遠可見
            桌面：右側 400px，sticky top-4，佔滿視窗高度
       ────────────────────────────────────────────────────────────────────── */}
-      <aside className="w-full lg:w-[400px] lg:flex-shrink-0 sticky top-0 z-30 lg:top-4 bg-[#f8f6f0] lg:bg-transparent">
-        <div className="h-[28vh] lg:h-[calc(100vh-2rem)] overflow-hidden border border-stone-200">
+      <aside className="w-full min-w-0 lg:w-[400px] lg:flex-shrink-0 sticky top-0 z-30 lg:top-4 bg-[#f8f6f0] lg:bg-transparent">
+        <div className="relative w-full max-w-full min-w-0 h-[220px] sm:h-[28vh] lg:h-[calc(100vh-2rem)] overflow-hidden border border-stone-200">
           <EventsMapDynamic events={currentEvents} />
         </div>
       </aside>
@@ -291,8 +291,8 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       {!isFiltering && (() => {
         const ongoingCount = initialEvents.filter(isOngoing).length;
         return ongoingCount > 0 ? (
-          <div className="mb-6 flex items-center justify-between border-b border-green-200 pb-4">
-            <div className="flex items-center gap-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 border-b border-green-200 pb-4">
+            <div className="flex items-center gap-2 min-w-0">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
               <span className="text-green-800 text-sm tracking-wide">
                 今日（{TODAY.slice(5).replace('-', '/')}）正有 <span className="font-bold">{ongoingCount}</span> 個活動進行中
@@ -309,15 +309,15 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       })()}
 
       <div id="tour-date-filter" className="mb-10 border-b border-stone-200 pb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <CalendarRange className="text-teal-800" size={18} />
-            <h2 className="text-base font-serif tracking-widest text-stone-700 uppercase">你預計在台東停留的時間？</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+          <div className="flex items-center gap-2 min-w-0">
+            <CalendarRange className="text-teal-800 shrink-0" size={18} />
+            <h2 className="text-sm sm:text-base font-serif tracking-wide sm:tracking-widest text-stone-700 uppercase">你預計在台東停留的時間？</h2>
           </div>
           {!isFiltering && (
             <button
               onClick={() => setTripDates(TODAY, TODAY)}
-              className="flex items-center gap-1.5 text-xs tracking-wider text-teal-800 border border-teal-700 hover:bg-teal-800 hover:text-white px-3 py-2 transition-colors"
+              className="flex items-center gap-1.5 text-xs tracking-wider text-teal-800 border border-teal-700 hover:bg-teal-800 hover:text-white px-3 py-2 transition-colors shrink-0"
             >
               <CalendarRange size={12} />
               快速選今日
@@ -325,7 +325,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-end">
+        <div className="flex flex-col sm:flex-row gap-4 items-end w-full">
           <div className="flex-1 w-full">
             <label className="block text-[10px] font-medium text-stone-400 mb-2 uppercase tracking-[0.2em]">抵達日期</label>
             <input
@@ -350,9 +350,9 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
         </div>
 
         {/* ── 地區篩選器 ── */}
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-4 flex items-center gap-3 w-full max-w-full">
           <span className="text-[10px] font-medium text-stone-400 uppercase tracking-[0.2em] shrink-0">地區</span>
-          <div className="flex gap-2 overflow-x-auto pb-0.5">
+          <div className="-mr-4 pr-4 flex-1 min-w-0 flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
             {(
               [
                 { key: 'all',      label: '全部' },
@@ -367,7 +367,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
                 key={key}
                 onClick={() => setDistrictFilter(key)}
                 className={[
-                  'px-3 py-1 text-xs tracking-wide border transition-all duration-200 whitespace-nowrap',
+                  'shrink-0 px-3 py-1 text-xs tracking-wide border transition-all duration-200 whitespace-nowrap',
                   districtFilter === key
                     ? 'bg-teal-800 text-white border-teal-800'
                     : 'bg-transparent text-stone-500 border-stone-300 hover:border-teal-700 hover:text-teal-700',
@@ -386,28 +386,30 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       </div>
 
       {/* ── 類型膠囊篩選器 ──────────────────────────────────────────────────── */}
-      <div id="tour-event-type-filter" className="mb-8 flex gap-2 flex-wrap">
-        {(
-          [
-            { key: 'all',         label: '✨ 全部' },
-            { key: 'performance', label: '🎭 演出' },
-            { key: 'lecture',     label: '🎤 講座' },
-            { key: 'exhibition',  label: '🏛️ 展覽' },
-          ] as const
-        ).map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setViewMode(key)}
-            className={[
-              'px-4 py-1.5 rounded-full text-sm tracking-wide border transition-all duration-200',
-              viewMode === key
-                ? 'bg-stone-800 text-white border-stone-800'
-                : 'bg-stone-100 text-stone-500 border-stone-200 hover:border-stone-400 hover:text-stone-700',
-            ].join(' ')}
-          >
-            {label}
-          </button>
-        ))}
+      <div id="tour-event-type-filter" className="mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 w-max min-w-max pb-0.5">
+          {(
+            [
+              { key: 'all',         label: '✨ 全部' },
+              { key: 'performance', label: '🎭 演出' },
+              { key: 'lecture',     label: '🎤 講座' },
+              { key: 'exhibition',  label: '🏛️ 展覽' },
+            ] as const
+          ).map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setViewMode(key)}
+              className={[
+                'shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm tracking-wide border transition-all duration-200',
+                viewMode === key
+                  ? 'bg-stone-800 text-white border-stone-800'
+                  : 'bg-stone-100 text-stone-500 border-stone-200 hover:border-stone-400 hover:text-stone-700',
+              ].join(' ')}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {currentEvents.length === 0 ? (

@@ -63,6 +63,7 @@ export async function updateEventFields(
     latitude?: number
     longitude?: number
     image_captured?: string | null
+    ticket_url?: string | null
   }
 ): Promise<void> {
   // .strict() Schema 確保 fields 只能包含白名單欄位，防止欄位注入
@@ -145,4 +146,33 @@ export async function upsertAffiliateLink(
     .upsert([link], { onConflict: 'key' })
   if (error) throw new Error(error.message)
   revalidatePath('/admin')
+}
+
+// ── Issue Reports ─────────────────────────────────────────────────────────────
+
+export type IssueReport = {
+  id: string
+  contact_email: string | null
+  event_name: string | null
+  description: string
+  status: 'pending' | 'resolved'
+  created_at: string
+}
+
+export async function getIssueReports(): Promise<IssueReport[]> {
+  const { data, error } = await sb()
+    .from('issue_reports')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as IssueReport[]
+}
+
+export async function resolveIssueReport(id: string): Promise<void> {
+  const { id: safeId } = validate(DeleteEventSchema, { id })
+  const { error } = await sb()
+    .from('issue_reports')
+    .update({ status: 'resolved' })
+    .eq('id', safeId)
+  if (error) throw new Error(error.message)
 }
