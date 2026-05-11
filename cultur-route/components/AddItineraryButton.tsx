@@ -9,9 +9,9 @@ export default function AddItineraryButton({ event }: { event: Event }) {
   const isAdded = plannedEvents.some(e => e.id === event.id);
 
   const handleClick = (e: React.MouseEvent) => {
-    // 🌟 關鍵魔法：這行會阻止點擊事件「往上傳遞」給外層的 <Link>，避免跳轉頁面
-    e.preventDefault(); 
-    
+    e.preventDefault();
+    e.stopPropagation();
+
     if (isAdded) {
       removeEvent(event.id);
     } else {

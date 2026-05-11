@@ -1,6 +1,7 @@
 ﻿import { createClient } from '@supabase/supabase-js';
 import EventBrowser from '@/components/EventBrowser';
 import ReportIssueModal from '@/components/ReportIssueModal';
+import SubmitEventModal from '@/components/SubmitEventModal';
 import type { Event } from '@/types';
 
 const supabase = createClient(
@@ -44,12 +45,7 @@ export default async function Home() {
           <p className="text-slate-500 text-lg">探索此時此地的文化路徑</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-          <a
-            href="/submit-event"
-            className="text-center px-6 py-2.5 rounded-full bg-amber-700 hover:bg-amber-800 text-white text-sm tracking-wide shadow-md transition-all duration-300"
-          >
-            🎊 我有活動想要上架
-          </a>
+          <SubmitEventModal />
           <ReportIssueModal />
         </div>
       </header>

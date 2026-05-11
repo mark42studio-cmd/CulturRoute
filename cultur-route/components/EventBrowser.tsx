@@ -255,7 +255,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
             </button>
             {/* 桌機 hover 覆蓋層 */}
             <div
-              className="absolute inset-x-0 bottom-0 h-[55%] bg-white/97 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100"
+              className="absolute inset-x-0 bottom-0 h-[55%] bg-white/97 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col z-20 border-t border-stone-100 pointer-events-none group-hover:pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <h4 className="font-serif font-bold text-stone-800 mb-2 text-base tracking-wide">活動簡介</h4>
