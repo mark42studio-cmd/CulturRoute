@@ -5,6 +5,8 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { X, MapPin, ExternalLink, Ticket, Car, BedDouble, Link2 } from 'lucide-react';
 import AddItineraryButton from '@/components/AddItineraryButton';
+import { buildAgodaUrl } from '@/lib/agoda';
+import { buildKlookUrl } from '@/lib/klook';
 import type { Event } from '@/types';
 
 const EventMapWrapper = dynamic(
@@ -163,33 +165,39 @@ export default function EventDetailModal({ event, onClose }: Props) {
             )}
           </div>
 
-          {/* 分潤連結（有 URL 才顯示） */}
+          {/* 分潤連結 — 住宿永遠顯示（Agoda 動態日期），租車/票務有 URL 才顯示 */}
           {event.affiliate_links && (
-            event.affiliate_links.rental.url ||
-            event.affiliate_links.ticket.url ||
-            event.affiliate_links.accommodation.url
-          ) && (
             <div>
               <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">行程周邊</h3>
               <div className="flex flex-col gap-2">
                 {event.affiliate_links.rental.url && (
-                  <a href={event.affiliate_links.rental.url} target="_blank" rel="noopener noreferrer"
-                     className="flex items-center gap-3 bg-sky-50 hover:bg-sky-100 text-sky-700 px-4 py-3 rounded-xl font-bold text-sm border border-sky-100 transition-colors">
+                  <a
+                    href={buildKlookUrl(event.affiliate_links.rental.url, event.start_time, event.end_time, 'car')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-sky-50 hover:bg-sky-100 text-sky-700 px-4 py-3 rounded-xl font-bold text-sm border border-sky-100 transition-colors"
+                  >
                     <Car size={16} className="shrink-0" />{event.affiliate_links.rental.label}
                   </a>
                 )}
                 {event.affiliate_links.ticket.url && (
-                  <a href={event.affiliate_links.ticket.url} target="_blank" rel="noopener noreferrer"
-                     className="flex items-center gap-3 bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-3 rounded-xl font-bold text-sm border border-amber-100 transition-colors">
+                  <a
+                    href={buildKlookUrl(event.affiliate_links.ticket.url, event.start_time, event.end_time, 'ticket')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-3 rounded-xl font-bold text-sm border border-amber-100 transition-colors"
+                  >
                     <Link2 size={16} className="shrink-0" />{event.affiliate_links.ticket.label}
                   </a>
                 )}
-                {event.affiliate_links.accommodation.url && (
-                  <a href={event.affiliate_links.accommodation.url} target="_blank" rel="noopener noreferrer"
-                     className="flex items-center gap-3 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-xl font-bold text-sm border border-purple-100 transition-colors">
-                    <BedDouble size={16} className="shrink-0" />{event.affiliate_links.accommodation.label}
-                  </a>
-                )}
+                <a
+                  href={buildAgodaUrl(event.start_time)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-xl font-bold text-sm border border-purple-100 transition-colors"
+                >
+                  <BedDouble size={16} className="shrink-0" />{event.affiliate_links.accommodation.label}
+                </a>
               </div>
             </div>
           )}

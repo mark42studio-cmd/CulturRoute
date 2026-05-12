@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic';
 import { ArrowLeft, ExternalLink, Ticket, Car, BedDouble, Link2 } from 'lucide-react';
 import AddItineraryButton from '@/components/AddItineraryButton';
 import EventMapWrapper from '@/components/EventMapWrapper';
+import { buildAgodaUrl } from '@/lib/agoda';
+import { buildKlookUrl } from '@/lib/klook';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -136,15 +138,15 @@ export default async function EventDetailPage({ params }: EventPageProps) {
               GPS: {event.latitude}, {event.longitude}
             </div>
 
-            {/* 行程周邊（分潤連結） — 只要有任一 url 才顯示整個區塊 */}
-            {event.affiliate_links && (event.affiliate_links.rental.url || event.affiliate_links.ticket.url || event.affiliate_links.accommodation.url) && (
+            {/* 行程周邊（分潤連結） — 住宿永遠顯示（Agoda 動態日期），租車/票務有 url 才顯示 */}
+            {event.affiliate_links && (
               <>
                 <hr className="my-6 border-gray-100" />
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">行程周邊</h2>
                 <div className="flex flex-col gap-2">
                   {event.affiliate_links.rental.url && (
                     <a
-                      href={event.affiliate_links.rental.url}
+                      href={buildKlookUrl(event.affiliate_links.rental.url, event.start_time, event.end_time, 'car')}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full flex items-center gap-3 bg-sky-50 hover:bg-sky-100 text-sky-700 px-4 py-3 rounded-xl font-bold text-sm transition-colors border border-sky-100"
@@ -155,7 +157,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                   )}
                   {event.affiliate_links.ticket.url && (
                     <a
-                      href={event.affiliate_links.ticket.url}
+                      href={buildKlookUrl(event.affiliate_links.ticket.url, event.start_time, event.end_time, 'ticket')}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full flex items-center gap-3 bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-3 rounded-xl font-bold text-sm transition-colors border border-amber-100"
@@ -164,17 +166,15 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                       {event.affiliate_links.ticket.label}
                     </a>
                   )}
-                  {event.affiliate_links.accommodation.url && (
-                    <a
-                      href={event.affiliate_links.accommodation.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center gap-3 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-xl font-bold text-sm transition-colors border border-purple-100"
-                    >
-                      <BedDouble size={16} className="shrink-0" />
-                      {event.affiliate_links.accommodation.label}
-                    </a>
-                  )}
+                  <a
+                    href={buildAgodaUrl(event.start_time)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center gap-3 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-xl font-bold text-sm transition-colors border border-purple-100"
+                  >
+                    <BedDouble size={16} className="shrink-0" />
+                    {event.affiliate_links.accommodation.label}
+                  </a>
                 </div>
               </>
             )}

@@ -23,6 +23,8 @@ import { submitEvent } from '../actions/submitEvent';
 import { ITINERARY_TOUR_KEY_V3 } from '@/lib/tourConfig';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
+import { buildAgodaUrl } from '@/lib/agoda';
+import { buildKlookUrl } from '@/lib/klook';
 
 const MapComponent = dynamic(
   () => import('@/components/ItineraryMap'),
@@ -646,12 +648,28 @@ export default function ItineraryPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {RESOURCE_CARD_CONFIG.map(card => {
                     const link = affiliateLinks.find(l => l.key === card.key);
-                    const url = link?.url;
+                    const rawUrl = link?.url ?? null;
                     const title = link?.label ?? card.title;
                     const humor = HUMOR_SUBTITLES[card.key];
-                    if (url) {
+
+                    // Klook: use active tab date. Agoda: use full trip range.
+                    const startTime = `${actualActiveDate}T10:00:00`;
+                    let href: string | null = null;
+                    if (card.key === 'accommodation') {
+                      const tripCheckIn = sortedDates[0] ?? actualActiveDate;
+                      // sortedDates last entry is already the departure day — no +1 needed
+                      const tripCheckOut = sortedDates[sortedDates.length - 1] ?? actualActiveDate;
+                      href = buildAgodaUrl(tripCheckIn, tripCheckOut);
+                      console.log('[行程資源卡 Agoda debug]', { UI顯示日期: actualActiveDate, checkIn: tripCheckIn, checkOut: tripCheckOut, 生成連結: href });
+                    } else if (rawUrl) {
+                      const klookType = card.key === 'transport' ? 'car' : 'ticket';
+                      href = buildKlookUrl(rawUrl, startTime, undefined, klookType);
+                      console.log('[行程資源卡 Klook debug]', { 卡片: card.key, UI顯示日期: actualActiveDate, startTime, 生成連結: href });
+                    }
+
+                    if (href) {
                       return (
-                        <a key={card.key} href={url} target="_blank" rel="noopener noreferrer"
+                        <a key={card.key} href={href} target="_blank" rel="noopener noreferrer"
                            className="group flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 gap-3 h-full w-full">
                           <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
                           <div className="flex flex-col flex-1 min-w-0">
@@ -1077,12 +1095,28 @@ export default function ItineraryPage() {
             <div className="flex flex-col gap-3">
               {RESOURCE_CARD_CONFIG.map(card => {
                 const link = affiliateLinks.find(l => l.key === card.key);
-                const url = link?.url;
+                const rawUrl = link?.url ?? null;
                 const title = link?.label ?? card.title;
                 const humor = HUMOR_SUBTITLES[card.key];
-                if (url) {
+
+                // Klook: use active tab date. Agoda: use full trip range.
+                const startTime = `${actualActiveDate}T10:00:00`;
+                let href: string | null = null;
+                if (card.key === 'accommodation') {
+                  const tripCheckIn = sortedDates[0] ?? actualActiveDate;
+                  // sortedDates last entry is already the departure day — no +1 needed
+                  const tripCheckOut = sortedDates[sortedDates.length - 1] ?? actualActiveDate;
+                  href = buildAgodaUrl(tripCheckIn, tripCheckOut);
+                  console.log('[行程側欄 Agoda debug]', { UI顯示日期: actualActiveDate, checkIn: tripCheckIn, checkOut: tripCheckOut, 生成連結: href });
+                } else if (rawUrl) {
+                  const klookType = card.key === 'transport' ? 'car' : 'ticket';
+                  href = buildKlookUrl(rawUrl, startTime, undefined, klookType);
+                  console.log('[行程側欄 Klook debug]', { 卡片: card.key, UI顯示日期: actualActiveDate, startTime, 生成連結: href });
+                }
+
+                if (href) {
                   return (
-                    <a key={card.key} href={url} target="_blank" rel="noopener noreferrer"
+                    <a key={card.key} href={href} target="_blank" rel="noopener noreferrer"
                        className="group flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 gap-3 h-full w-full">
                       <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
                       <div className="flex flex-col flex-1 min-w-0">
