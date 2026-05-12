@@ -4,6 +4,8 @@ import ReportIssueModal from '@/components/ReportIssueModal';
 import SubmitEventModal from '@/components/SubmitEventModal';
 import type { Event } from '@/types';
 
+export const revalidate = 60;
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

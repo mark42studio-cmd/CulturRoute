@@ -146,7 +146,7 @@ export default function SubmitEventFormContent({
           name="title"
           value={form.title}
           onChange={handleChange}
-          placeholder="例：2026 台東藝術節"
+          placeholder="例：2026 臺東藝穗節"
           className={inputClass(errors.title)}
         />
       </Field>

@@ -122,11 +122,17 @@ export default function SubmissionsClient() {
 
               <div className="p-4 flex flex-col gap-2 flex-1">
                 <h3 className="font-bold text-gray-900 text-base leading-snug">{item.title}</h3>
-                <p className="text-xs text-gray-500">⏰ {item.raw_date ?? '—'}</p>
+                <div className="flex flex-wrap items-start gap-x-1 text-xs text-gray-500">
+                  <span className="shrink-0">⏰</span>
+                  <span className="break-words">{item.raw_date ?? '—'}</span>
+                </div>
                 {(item.start_date || item.end_date) && (
-                  <p className="text-xs text-blue-400">
-                    🗓 {item.start_date ?? '?'}{item.end_date && item.end_date !== item.start_date ? ` ～ ${item.end_date}` : ''}
-                  </p>
+                  <div className="flex flex-wrap items-start gap-x-1 text-xs text-blue-400">
+                    <span className="shrink-0">🗓</span>
+                    <span className="break-words">
+                      {item.start_date ?? '?'}{item.end_date && item.end_date !== item.start_date ? ` ～ ${item.end_date}` : ''}
+                    </span>
+                  </div>
                 )}
                 <p className="text-xs text-gray-500">📍 {item.location}</p>
                 <p className="text-sm text-gray-600 line-clamp-3 mt-1">{item.description}</p>

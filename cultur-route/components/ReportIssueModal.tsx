@@ -145,7 +145,7 @@ export default function ReportIssueModal() {
                     name="event_name"
                     value={form.event_name}
                     onChange={handleChange}
-                    placeholder="例：2026 台東藝術節"
+                    placeholder="例：2026 臺東藝穗節"
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-800 text-sm outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-colors"
                   />
                 </div>
