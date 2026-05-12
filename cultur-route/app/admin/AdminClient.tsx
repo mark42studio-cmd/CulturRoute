@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition, useMemo, useEffect } from 'react'
-import Link from 'next/link'
 import {
   Search, MapPin, Utensils, Save, Link as LinkIcon, Image as ImageIcon,
   Eye, EyeOff, Edit2, X, Loader2, AlertCircle, CheckCircle, Trash2, ExternalLink, Plus,
@@ -11,6 +10,7 @@ import {
   getAffiliateLinks, upsertAffiliateLink, type AffiliateLink,
   getIssueReports, resolveIssueReport, type IssueReport,
 } from './actions'
+import SubmissionsClient from './submissions/SubmissionsClient'
 
 // ---- Types ----
 export type AdminEvent = {
@@ -26,7 +26,7 @@ export type AdminEvent = {
   ticket_url: string | null
 }
 
-type Tab = 'events' | 'places' | 'foods' | 'affiliate' | 'reports'
+type Tab = 'events' | 'places' | 'foods' | 'affiliate' | 'reports' | 'submissions'
 type SortMode = 'default' | 'name' | 'issues'
 
 type EditState = {
@@ -474,11 +474,12 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
         {/* Main Tabs */}
         <div className="flex gap-3 border-b border-gray-200 pb-4 flex-wrap">
           {[
-            { id: 'events',    label: '🚑 活動急診室' },
-            { id: 'places',    label: '📍 景點管理' },
-            { id: 'foods',     label: '🍜 美食管理' },
-            { id: 'affiliate', label: '🔗 分潤連結' },
-            { id: 'reports',   label: '⚠️ 報修處理' },
+            { id: 'events',      label: '🚑 活動急診室' },
+            { id: 'places',      label: '📍 景點管理' },
+            { id: 'foods',       label: '🍜 美食管理' },
+            { id: 'affiliate',   label: '🔗 分潤連結' },
+            { id: 'reports',     label: '⚠️ 報修處理' },
+            { id: 'submissions', label: '📝 活動投稿審核' },
           ].map(({ id, label }) => (
             <button
               key={id}
@@ -488,12 +489,6 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
               {label}
             </button>
           ))}
-          <Link
-            href="/admin/submissions"
-            className="px-5 py-2.5 rounded-xl font-bold text-sm transition-colors bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 shadow-sm"
-          >
-            📝 活動投稿審核
-          </Link>
         </div>
 
         {/* === Events Tab === */}
@@ -872,7 +867,7 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
                           <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">圖示</label>
                           <input
                             type="text"
-                            value={link.icon}
+                            value={link.icon ?? ''}
                             onChange={e => handleAffiliateChange(link.key, 'icon', e.target.value)}
                             className="w-14 text-center text-2xl border border-gray-200 rounded-xl px-2 py-1.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-300"
                           />
@@ -954,6 +949,9 @@ insert into affiliate_links (key, label, icon) values
             </div>
           </div>
         )}
+
+        {/* === Submissions Tab === */}
+        {activeTab === 'submissions' && <SubmissionsClient />}
 
         {/* === Reports Tab === */}
         {activeTab === 'reports' && (

@@ -65,3 +65,11 @@ export async function rejectSubmission(id: string): Promise<{ error?: string }> 
   revalidatePath('/admin/submissions')
   return {}
 }
+
+export async function getSubmissions(): Promise<{ data: Record<string, unknown>[] | null; error?: string }> {
+  const { data, error } = await sb()
+    .from('submissions')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { data, error: error?.message }
+}

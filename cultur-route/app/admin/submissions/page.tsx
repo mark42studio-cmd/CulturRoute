@@ -14,6 +14,7 @@ export default async function SubmissionsPage() {
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
+    .eq('status', 'pending')
     .order('created_at', { ascending: false })
 
   if (error) {
