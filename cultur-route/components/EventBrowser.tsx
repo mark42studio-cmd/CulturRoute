@@ -6,6 +6,7 @@ import EventCard from '@/components/EventCard';
 import AddItineraryButton from '@/components/AddItineraryButton';
 import EventDetailModal from '@/components/EventDetailModal';
 import { CalendarRange, CalendarX, Sparkles, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { Event } from '@/types';
 import HomeOnboardingModal, { HOME_ONBOARDING_KEY } from '@/components/HomeOnboardingModal';
@@ -185,6 +186,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       addEvent(event);
       setQuickToastId(event.id);
       setTimeout(() => setQuickToastId(null), 1500);
+      toast.success('已加入行程 ✓', { description: event.title });
     }
   };
 
@@ -363,7 +365,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
         {/* ── 地區篩選器 ── */}
         <div className="mt-4 flex items-center gap-3 w-full max-w-full">
           <span className="text-[10px] font-medium text-stone-400 uppercase tracking-[0.2em] shrink-0">地區</span>
-          <div className="-mr-4 pr-4 flex-1 min-w-0 flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
+          <div className="-mr-4 pr-4 flex-1 min-w-0 flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide snap-x snap-mandatory">
             {(
               [
                 { key: 'all',      label: '全部' },
@@ -378,7 +380,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
                 key={key}
                 onClick={() => setDistrictFilter(key)}
                 className={[
-                  'shrink-0 px-3 py-1 text-xs tracking-wide border transition-all duration-200 whitespace-nowrap',
+                  'shrink-0 snap-start px-4 py-2 text-sm tracking-wide border transition-all duration-200 whitespace-nowrap rounded-full min-h-[40px]',
                   districtFilter === key
                     ? 'bg-teal-800 text-white border-teal-800'
                     : 'bg-transparent text-stone-500 border-stone-300 hover:border-teal-700 hover:text-teal-700',
@@ -397,7 +399,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       </div>
 
       {/* ── 類型膠囊篩選器 ──────────────────────────────────────────────────── */}
-      <div id="tour-event-type-filter" className="mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+      <div id="tour-event-type-filter" className="mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
         <div className="flex gap-2 w-max min-w-max pb-0.5">
           {(
             [
@@ -411,7 +413,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
               key={key}
               onClick={() => setViewMode(key)}
               className={[
-                'shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm tracking-wide border transition-all duration-200',
+                'shrink-0 snap-start whitespace-nowrap px-4 py-2.5 rounded-full text-sm tracking-wide border transition-all duration-200 min-h-[40px]',
                 viewMode === key
                   ? 'bg-stone-800 text-white border-stone-800'
                   : 'bg-stone-100 text-stone-500 border-stone-200 hover:border-stone-400 hover:text-stone-700',

@@ -1,11 +1,10 @@
-'use client'; // 宣告為 Client Component
+'use client';
+import { toast } from 'sonner';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { Event } from '@/types';
 
 export default function AddItineraryButton({ event }: { event: Event }) {
   const { plannedEvents, addEvent, removeEvent } = useItineraryStore();
-  
-  // 判斷這個活動是不是已經在行程裡了
   const isAdded = plannedEvents.some(e => e.id === event.id);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -14,8 +13,10 @@ export default function AddItineraryButton({ event }: { event: Event }) {
 
     if (isAdded) {
       removeEvent(event.id);
+      toast('已從行程移除', { description: event.title });
     } else {
       addEvent(event);
+      toast.success('已加入行程 ✓', { description: event.title });
     }
   };
 

@@ -4,7 +4,9 @@ import Image from "next/image";
 import "./globals.css";
 import ItinerarySidebar from '@/components/ItinerarySidebar';
 import TourGuide from '@/components/TourGuide';
+import BottomNav from '@/components/BottomNav';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { Toaster } from 'sonner';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -115,7 +117,10 @@ export default function RootLayout({
 
         {children}
 
-        <footer className="mt-auto py-6 flex items-center justify-center gap-2 text-xs text-gray-500">
+        <BottomNav />
+        <Toaster position="top-center" richColors />
+
+        <footer className="mt-auto py-6 mb-16 md:mb-0 flex items-center justify-center gap-2 text-xs text-gray-500">
           <Image src="/icon.png" alt="一圈工作室" width={24} height={24} className="opacity-70" />
           一圈工作室 | mark42studio@gmail.com
         </footer>

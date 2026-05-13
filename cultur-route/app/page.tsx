@@ -37,7 +37,7 @@ export default async function Home() {
   const upcomingEvents = filterUpcoming(events ?? []);
 
   return (
-    <main className="w-full min-h-screen max-w-7xl mx-auto px-4 py-12 bg-[#f8f6f0] overflow-x-hidden">
+    <main className="w-full min-h-screen max-w-7xl mx-auto px-4 pt-12 pb-28 md:pb-12 bg-[#f8f6f0] overflow-x-hidden">
       <header id="tour-home-header" className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8 w-full">
         <div className="flex-1 min-w-0">
           <h1 className="text-3xl font-bold text-slate-800 mb-2 break-words">

@@ -130,7 +130,6 @@ export const useItineraryStore = create<ItineraryStore>()(
               ...(options?.isExtraDayTrigger ? { isExtraDayTrigger: true } : {}),
             },
           ],
-          isSidebarOpen: true,
           ...(autoInitialized ? { tripStartDate: effectiveTripStart, tripEndDate: effectiveTripEnd } : {}),
         };
       }),

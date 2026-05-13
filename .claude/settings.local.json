@@ -39,7 +39,8 @@
       "Bash(git restore *)",
       "Bash(Remove-Item *)",
       "Bash(Get-ChildItem -Path \"E:\\\\CulturRoute\\\\cultur-route\\\\components\" -Recurse -Filter \"*.tsx\")",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem *)"
     ]
   }
 }

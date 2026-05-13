@@ -22,6 +22,7 @@ import type { PlannedEvent } from '@/types';
 import { submitEvent } from '../actions/submitEvent';
 import { ITINERARY_TOUR_KEY_V3 } from '@/lib/tourConfig';
 import OnboardingModal from '@/components/OnboardingModal';
+import MobileTimeline from '@/components/MobileTimeline';
 import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
 import { buildAgodaUrl } from '@/lib/agoda';
 import { buildKlookUrl } from '@/lib/klook';
@@ -581,23 +582,23 @@ export default function ItineraryPage() {
 
       {/* ── 完整行程報告 Modal ─────────────────────────────────────────────── */}
       {showReport && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-start justify-center p-4 overflow-y-auto backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8">
             {/* ↓ ref 掛在此 div，截圖範圍 = 標題列 + 內容，不含 Footer 按鈕 */}
             <div ref={reportCardRef}>
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl z-10">
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FileText size={20} className="text-blue-600" />
+            <div className="flex items-center justify-between p-6 border-b border-stone-100 sticky top-0 bg-white rounded-t-2xl z-10">
+              <h2 className="text-lg font-medium tracking-wide text-stone-800 flex items-center gap-2.5">
+                <FileText size={18} className="text-stone-400" />
                 完整行程報告
               </h2>
-              <button onClick={() => setShowReport(false)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
-                <X size={20} />
+              <button onClick={() => setShowReport(false)} className="p-2 text-stone-400 hover:bg-stone-100 rounded-full transition-colors">
+                <X size={18} />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-8">
               {plannedEvents.length === 0 ? (
-                <p className="text-center text-gray-400 py-12">行程清單為空，請先從首頁加入活動。</p>
+                <p className="text-center text-stone-400 py-12">行程清單為空，請先從首頁加入活動。</p>
               ) : (
                 sortedDates.map((date, dayIndex) => {
                   const dayEvents = plannedEvents
@@ -605,26 +606,41 @@ export default function ItineraryPage() {
                     .sort((a, b) => getEffectiveSortTime(a).localeCompare(getEffectiveSortTime(b)));
                   return (
                     <div key={date}>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                          {dayIndex + 1}
-                        </div>
-                        <h3 className="font-bold text-gray-800">{formatTabLabel(date, dayIndex)}</h3>
+                      {/* 天數標題：精緻 DAY N 標籤 + 日期文字 */}
+                      <div className="flex items-center gap-3 mb-5">
+                        <span className="bg-stone-100 text-stone-600 px-2.5 py-1 rounded text-xs font-medium tracking-widest uppercase shrink-0">
+                          Day {dayIndex + 1}
+                        </span>
+                        <h3 className="font-medium text-stone-800">{formatTabLabel(date, dayIndex)}</h3>
+                        <div className="flex-1 h-px bg-stone-100" />
                       </div>
+
                       {dayEvents.length === 0 ? (
-                        <p className="text-gray-400 text-sm pl-11">— 這天尚無安排</p>
+                        <p className="text-stone-400 text-sm pl-2 italic">— 這天尚無安排</p>
                       ) : (
-                        <div className="ml-3.5 pl-8 border-l-2 border-gray-100 space-y-3">
+                        /* 垂直時間軸：極淡灰線 + 空心圓節點 */
+                        <div className="ml-1 pl-7 border-l border-stone-200 space-y-3">
                           {dayEvents.map(event => (
-                            <div key={event.id} className="relative -ml-px pl-5">
-                              <div className="absolute -left-1.5 top-3.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow-sm" />
-                              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                <h4 className="font-bold text-gray-800 text-sm mb-2">{event.title}</h4>
-                                <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                                  <span className="flex items-center gap-1.5"><MapPin size={11} className="text-blue-500" />{event.venue_name}</span>
-                                  <span className="flex items-center gap-1.5"><Clock size={11} className="text-green-500" />預計停留 {STAY_LABELS[event.stay_duration ?? 90] ?? '1.5 小時'}</span>
+                            <div key={event.id} className="relative">
+                              {/* 空心節點 */}
+                              <div className="absolute -left-[1.3rem] top-4 w-2.5 h-2.5 rounded-full border-2 border-stone-300 bg-white" />
+                              {/* 活動卡片 */}
+                              <div className="bg-white rounded-xl p-4 border border-stone-100 shadow-sm">
+                                <h4 className="font-medium text-stone-900 text-sm leading-snug mb-2">{event.title}</h4>
+                                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                                  {event.venue_name && (
+                                    <span className="flex items-center gap-1.5 text-xs text-stone-500">
+                                      <MapPin size={11} className="text-stone-400 shrink-0" />
+                                      {event.venue_name}
+                                    </span>
+                                  )}
+                                  <span className="flex items-center gap-1.5 text-xs text-stone-500">
+                                    <Clock size={11} className="text-stone-400 shrink-0" />
+                                    停留 {STAY_LABELS[event.stay_duration ?? 90] ?? '1.5 小時'}
+                                  </span>
                                   {event.ticket_url && (
-                                    <a href={event.ticket_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-amber-600 font-bold hover:underline">
+                                    <a href={event.ticket_url} target="_blank" rel="noopener noreferrer"
+                                       className="flex items-center gap-1 text-xs text-stone-600 underline underline-offset-2 hover:text-stone-900 transition-colors">
                                       <Ticket size={11} /> 購票
                                     </a>
                                   )}
@@ -640,24 +656,22 @@ export default function ItineraryPage() {
               )}
 
               {/* 旅遊資源推薦 */}
-              <div className="border-t-2 border-dashed border-gray-100 pt-6">
-                <h3 className="font-bold text-gray-700 mb-1 flex items-center gap-2">
-                  <Car size={16} className="text-blue-600" />旅遊資源推薦
+              <div className="border-t border-dashed border-stone-200 pt-6">
+                <h3 className="font-medium text-stone-700 mb-1 flex items-center gap-2">
+                  <Car size={15} className="text-stone-400" />旅遊資源推薦
                 </h3>
-                <p className="text-xs text-gray-400 mb-4 pl-6">點擊連結將在新分頁開啟，協助您提前預訂交通與住宿</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <p className="text-xs text-stone-400 mb-4 pl-5">點擊連結將在新分頁開啟，協助您提前預訂交通與住宿</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {RESOURCE_CARD_CONFIG.map(card => {
                     const link = affiliateLinks.find(l => l.key === card.key);
                     const rawUrl = link?.url ?? null;
                     const title = link?.label ?? card.title;
                     const humor = HUMOR_SUBTITLES[card.key];
 
-                    // Klook: use active tab date. Agoda: use full trip range.
                     const startTime = `${actualActiveDate}T10:00:00`;
                     let href: string | null = null;
                     if (card.key === 'accommodation') {
-                      const tripCheckIn = sortedDates[0] ?? actualActiveDate;
-                      // sortedDates last entry is already the departure day — no +1 needed
+                      const tripCheckIn  = sortedDates[0] ?? actualActiveDate;
                       const tripCheckOut = sortedDates[sortedDates.length - 1] ?? actualActiveDate;
                       href = buildAgodaUrl(tripCheckIn, tripCheckOut);
                       console.log('[行程資源卡 Agoda debug]', { UI顯示日期: actualActiveDate, checkIn: tripCheckIn, checkOut: tripCheckOut, 生成連結: href });
@@ -670,22 +684,22 @@ export default function ItineraryPage() {
                     if (href) {
                       return (
                         <a key={card.key} href={href} target="_blank" rel="noopener noreferrer"
-                           className="group flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all duration-200 gap-3 h-full w-full">
-                          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
-                          <div className="flex flex-col flex-1 min-w-0">
-                            <p className="text-sm sm:text-base font-bold text-gray-800 break-words leading-tight">{title}</p>
-                            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 break-words leading-snug">{humor}</p>
+                           className="group flex items-center gap-3 p-3.5 bg-white border border-stone-100 rounded-xl hover:border-stone-200 hover:shadow-sm transition-all duration-200">
+                          <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base ${card.iconBg}`}>{card.icon}</div>
+                          <div className="flex flex-col min-w-0">
+                            <p className="text-sm font-medium text-stone-800 leading-tight truncate">{title}</p>
+                            <p className="text-xs text-stone-400 mt-0.5 leading-snug">{humor}</p>
                           </div>
-                          <ExternalLink size={14} className="flex-shrink-0 ml-2 text-gray-300 group-hover:text-blue-500 transition-colors" />
+                          <ExternalLink size={13} className="shrink-0 ml-auto text-stone-300 group-hover:text-stone-500 transition-colors" />
                         </a>
                       );
                     }
                     return (
-                      <div key={card.key} className="flex flex-row items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl opacity-50 cursor-not-allowed gap-3 h-full w-full">
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${card.iconBg}`}>{card.icon}</div>
-                        <div className="flex flex-col flex-1 min-w-0">
-                          <p className="text-sm sm:text-base font-bold text-gray-800 break-words leading-tight">{card.title}</p>
-                          <p className="text-xs sm:text-sm text-gray-400 mt-0.5 break-words leading-snug">{humor}</p>
+                      <div key={card.key} className="flex items-center gap-3 p-3.5 bg-white border border-stone-100 rounded-xl opacity-40 cursor-not-allowed">
+                        <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base ${card.iconBg}`}>{card.icon}</div>
+                        <div className="flex flex-col min-w-0">
+                          <p className="text-sm font-medium text-stone-800 leading-tight truncate">{card.title}</p>
+                          <p className="text-xs text-stone-400 mt-0.5 leading-snug">{humor}</p>
                         </div>
                       </div>
                     );
@@ -695,25 +709,25 @@ export default function ItineraryPage() {
 
               {/* ── 溫馨提醒（截圖範圍內，下載圖片時同步保留）──────────────── */}
               {plannedEvents.length > 0 && (
-                <div className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <span className="text-lg shrink-0 leading-none mt-0.5">💡</span>
-                  <p className="text-sm text-yellow-800 leading-relaxed">
-                    <span className="font-bold">溫馨提醒：</span>
-                    出發前請記得確認並預訂台東的
-                    <span className="font-bold">住宿</span>與
-                    <span className="font-bold">交通（火車/租車）</span>服務喔！
+                <div className="flex items-start gap-3 bg-stone-50 border border-stone-200 rounded-xl p-4">
+                  <span className="text-base shrink-0 leading-none mt-0.5">💡</span>
+                  <p className="text-sm text-stone-600 leading-relaxed">
+                    <span className="font-medium">出發前提醒：</span>
+                    記得確認並預訂台東的
+                    <span className="font-medium">住宿</span>與
+                    <span className="font-medium">交通（火車 / 租車）</span>。
                   </p>
                 </div>
               )}
             </div>
             </div>{/* ↑ 關閉 reportCardRef wrapper */}
 
-            {/* ── Modal Footer：Grid 2 列：第 1 列「下載明信片」滿寬；第 2 列兩個日曆並排 */}
-            <div className="bg-white border-t border-gray-100 px-4 py-4 grid grid-cols-2 gap-2 rounded-b-2xl">
+            {/* ── Modal Footer */}
+            <div className="bg-stone-50/60 border-t border-stone-100 px-5 py-4 grid grid-cols-2 gap-2 rounded-b-2xl">
               <button
                 onClick={handleDownloadImage}
                 disabled={isCapturing || plannedEvents.length === 0}
-                className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm border border-gray-200 text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                className="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm border border-stone-200 text-stone-600 hover:bg-stone-100 active:bg-stone-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isCapturing ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />}
                 {isCapturing ? '製作中...' : '下載明信片'}
@@ -721,7 +735,7 @@ export default function ItineraryPage() {
               <button
                 onClick={handleAddToCalendar}
                 disabled={plannedEvents.length === 0}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <CalendarPlus size={14} className="shrink-0" />
                 Google 日曆
@@ -729,7 +743,7 @@ export default function ItineraryPage() {
               <button
                 onClick={() => downloadItineraryICS(plannedEvents)}
                 disabled={plannedEvents.length === 0}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-bold text-sm bg-stone-600 hover:bg-stone-700 active:bg-stone-800 text-white shadow-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm bg-stone-600 hover:bg-stone-500 active:bg-stone-700 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <CalendarPlus size={14} className="shrink-0" />
                 Apple 日曆
@@ -751,8 +765,8 @@ export default function ItineraryPage() {
             </h1>
           </div>
 
-          {/* 日期 Tab Bar：snap 水平滑動 + 右側漸層遮罩 */}
-          <div id="tour-itinerary-tabs" className="flex-1 min-w-0 relative">
+          {/* 日期 Tab Bar：snap 水平滑動 + 右側漸層遮罩（手機隱藏） */}
+          <div id="tour-itinerary-tabs" className="hidden md:flex flex-1 min-w-0 relative">
             <div
               className="flex bg-[#ede9e0] p-1 rounded-xl overflow-x-auto scroll-smooth snap-x"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -804,8 +818,13 @@ export default function ItineraryPage() {
             手機：order-2（地圖下方）  桌機：order-1（左側，可捲動）── */}
         <div id="tour-itinerary-events" className="order-2 lg:order-1 lg:col-span-1 flex flex-col gap-4 pb-4">
 
-          {/* 當天活動（或空狀態） */}
-          {currentDayEvents.length === 0 ? (
+          {/* ── 手機：垂直時間軸 + DnD（MobileTimeline 元件）─────────────────── */}
+          {isDesktop === false && (
+            <MobileTimeline sortedDates={sortedDates} formatTabLabel={formatTabLabel} />
+          )}
+
+          {/* ── 桌機：單日 DnD 活動清單 ──────────────────────────────────────── */}
+          {isDesktop !== false && (currentDayEvents.length === 0 ? (
             <div className="bg-white rounded-2xl p-8 text-center border-2 border-dashed border-gray-200">
               <div className="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Calendar size={24} />
@@ -980,7 +999,7 @@ export default function ItineraryPage() {
                 )}
               </Droppable>
             </DragDropContext>
-          )}
+          ))}
 
           {/* Task 4：待處理活動池（旅程縮短後超出範圍的活動） */}
           {unassignedEvents.length > 0 && (
@@ -1052,7 +1071,7 @@ export default function ItineraryPage() {
               <button
                 onClick={() => setShowReport(true)}
                 disabled={plannedEvents.length === 0}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-stone-200 disabled:text-stone-400 text-white text-sm font-bold rounded-xl transition-colors disabled:cursor-not-allowed shadow-md"
+                className="hidden md:flex w-full items-center justify-center gap-2 px-4 py-3.5 bg-stone-800 hover:bg-stone-900 disabled:bg-stone-200 disabled:text-stone-400 text-white text-sm font-bold rounded-xl transition-colors disabled:cursor-not-allowed shadow-md"
               >
                 <FileText size={15} />
                 生成活動總覽
@@ -1141,56 +1160,53 @@ export default function ItineraryPage() {
           </div>
 
           {/* ── Footer：按讚回饋 ── */}
-          <div id="tour-bottom-anchor" className="border-t border-[#e8e4da] bg-[#f0ede6] rounded-2xl p-6 flex flex-col gap-6 mt-2">
+          <div id="tour-bottom-anchor" className="mt-2 flex flex-col gap-4">
 
             {/* 按讚與留言 */}
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-col gap-4">
+            <div className="bg-white rounded-2xl border border-stone-100 p-7 flex flex-col gap-6">
 
-              {/* 標題列：標題左，累計讚數右 */}
-              <div className="flex items-center justify-between">
-                <h4 className="text-gray-800 font-bold text-sm">喜歡行程小助手嗎？</h4>
-                {likeCount > 0 && (
-                  <span className="text-xs text-gray-400">
-                    目前累積喜歡人數：<span className="font-semibold text-rose-400">{likeCount.toLocaleString()}</span>
-                  </span>
-                )}
+              {/* 標題列 */}
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h4 className="text-stone-800 font-medium tracking-wide">喜歡行程小助手嗎？</h4>
+                  {likeCount > 0 && (
+                    <p className="text-xs text-stone-400 mt-1">
+                      {likeCount.toLocaleString()} 人喜歡
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={handleLike}
+                  disabled={isLiked}
+                  className={[
+                    'flex items-center gap-1.5 text-sm shrink-0 transition-colors',
+                    isLiked
+                      ? 'text-rose-400 cursor-default'
+                      : 'text-stone-400 hover:text-rose-400',
+                  ].join(' ')}
+                >
+                  <span className="text-base leading-none">{isLiked ? '❤️' : '♡'}</span>
+                  <span>{isLiked ? '已喜歡' : '喜歡'}</span>
+                </button>
               </div>
 
-              <button
-                onClick={handleLike}
-                disabled={isLiked}
-                className={[
-                  'flex items-center gap-2 w-fit px-4 py-2 rounded-full border transition-colors shadow-sm',
-                  isLiked
-                    ? 'bg-rose-50 border-rose-300 text-rose-600 cursor-default'
-                    : 'bg-white border-gray-200 text-gray-600 hover:bg-rose-50 hover:text-rose-600',
-                ].join(' ')}
-              >
-                <span>{isLiked ? '❤️' : '👍'}</span>
-                <span className="text-sm font-medium">
-                  {isLiked ? '已按讚！謝謝你' : '給助手一個讚'}
-                </span>
-              </button>
-
               {feedbackSent ? (
-                <div className="text-sm text-green-600 font-medium bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                  已收到你的建議，感謝回饋！
-                </div>
+                <p className="text-sm text-stone-400 italic">已收到你的建議，感謝回饋。</p>
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   <textarea
                     value={feedbackText}
                     onChange={(e) => setFeedbackText(e.target.value)}
-                    placeholder="有什麼建議？告訴我們..."
-                    className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none h-24"
+                    placeholder="有什麼建議嗎？"
+                    className="w-full text-sm p-4 border border-stone-200 bg-stone-50/60 rounded-xl outline-none focus:ring-1 focus:ring-stone-400 resize-none h-24 placeholder:text-stone-300 text-stone-700"
                   />
                   {feedbackError && (
-                    <p className="text-xs text-red-500">送出失敗，請稍後再試。</p>
+                    <p className="text-xs text-stone-400">送出失敗，請稍後再試。</p>
                   )}
                   <button
                     onClick={handleFeedbackSubmit}
                     disabled={!feedbackText.trim() || isFeedbackLoading}
-                    className="self-end flex items-center gap-1.5 px-4 py-1.5 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="self-end flex items-center gap-1.5 text-sm text-stone-400 hover:text-stone-800 underline underline-offset-4 decoration-stone-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:no-underline"
                   >
                     {isFeedbackLoading && <Loader2 size={13} className="animate-spin" />}
                     匿名送出
@@ -1200,16 +1216,16 @@ export default function ItineraryPage() {
             </div>
 
             {/* 活動上架申請 */}
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 flex flex-wrap items-center justify-between gap-4">
+            <div className="bg-white rounded-2xl border border-stone-100 p-7 flex flex-wrap items-end justify-between gap-5">
               <div>
-                <h4 className="text-gray-800 font-bold text-sm">有活動想在台東曝光？</h4>
-                <p className="text-xs text-gray-400 mt-0.5">歡迎在地業者、社群主辦方送件申請上架</p>
+                <h4 className="text-stone-800 font-medium tracking-wide">有活動想在台東曝光？</h4>
+                <p className="text-xs text-stone-400 mt-1.5 leading-relaxed">歡迎在地業者、社群主辦方申請上架</p>
               </div>
               <button
                 onClick={() => { setShowSubmitModal(true); setSubmitStatus('idle'); }}
-                className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white text-sm font-bold rounded-full hover:bg-amber-600 transition-colors shadow-sm"
+                className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-stone-700 active:bg-stone-800 text-white text-sm rounded-full transition-colors"
               >
-                🎉 我有活動想要上架
+                申請上架
               </button>
             </div>
 
@@ -1218,7 +1234,7 @@ export default function ItineraryPage() {
 
         {/* ── 右欄：地圖（純地圖，不含其他區塊）
             手機：order-1（最頂部）  桌機：order-2（右側，sticky 固定）── */}
-        <div id="tour-itinerary-map" className="order-1 lg:order-2 lg:col-span-2 lg:sticky lg:top-[80px]">
+        <div id="tour-itinerary-map" className="hidden lg:block order-1 lg:order-2 lg:col-span-2 lg:sticky lg:top-[80px]">
           <div
             ref={mapContainerRef}
             className={`${showMap ? 'h-[60vh]' : 'h-[250px]'} lg:h-[calc(100vh-100px)] rounded-3xl border border-gray-200 overflow-hidden relative shadow-inner transition-[height] duration-500 ease-in-out`}
@@ -1400,7 +1416,7 @@ export default function ItineraryPage() {
           點擊後：渲染地圖 + 平滑捲動回頂部讓使用者立刻看到地圖。
       ─────────────────────────────────────────────────────────────────────── */}
       {!showMap && currentDayMapEvents.length > 0 && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none" style={{ paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
+        <div className="lg:hidden fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none" style={{ paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: '16px' }}>
           <button
             id="tour-generate-route-btn"
             onClick={handleGenerateMap}
