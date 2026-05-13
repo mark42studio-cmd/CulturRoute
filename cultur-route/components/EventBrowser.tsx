@@ -52,7 +52,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   const PERFORMANCE_TAGS = ['演出', '表演', '音樂', '音樂會', '演唱會', '舞蹈', '戲劇', '劇場'];
   const isPerformance = (event: Event): boolean => {
     if (isExhibition(event)) return false;
-    return event.vibe_tags?.some(t => PERFORMANCE_TAGS.includes(t)) ?? false;
+    return event.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
   };
 
   // 講座：vibe_tags 含講座/工作坊/論壇等標籤，且非展覽
@@ -150,6 +150,17 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   // 地區篩選（套用在所有其他篩選之後）
   currentEvents = applyDistrictFilter(currentEvents);
 
+  // 排序：演出優先 > 結束日期升冪（越快結束越前面，製造急迫感）
+  currentEvents = [...currentEvents].sort((a, b) => {
+    const aIsPerf = a.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
+    const bIsPerf = b.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
+    if (aIsPerf && !bIsPerf) return -1;
+    if (!aIsPerf && bIsPerf) return 1;
+    const aEnd = a.end_time ? new Date(a.end_time).getTime() : Infinity;
+    const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity;
+    return aEnd - bEnd;
+  });
+
   const isOngoing = (event: Event): boolean => {
     const eStart = dateOnlyTaipei(event.start_time);
     const eEnd   = event.end_date ?? (event.end_time ? dateOnlyTaipei(event.end_time) : eStart);
@@ -203,7 +214,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           >
             <h4 className="font-serif font-bold text-stone-800 mb-1.5 text-base tracking-wide">活動簡介</h4>
             <p className="text-stone-500 text-sm leading-relaxed line-clamp-2 mb-2">{event.long_description || event.description || '暫無詳細簡介。'}</p>
-            <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊卡片查看詳情 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
+            <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide cursor-pointer" onClick={() => setSelectedEvent(event)}>點擊卡片查看詳情 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
             <button
               onClick={(e) => handleStayLonger(e, event)}
               className="mt-3 w-full py-2 font-medium text-sm tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 border border-teal-800 text-teal-800 hover:bg-teal-800 hover:text-white"
@@ -260,7 +271,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
             >
               <h4 className="font-serif font-bold text-stone-800 mb-2 text-base tracking-wide">活動簡介</h4>
               <p className="text-stone-500 text-sm leading-relaxed line-clamp-3 mb-2">{event.long_description || event.description || '暫無詳細簡介。'}</p>
-              <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide">點擊卡片查看詳情 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
+              <div className="text-teal-800 text-sm flex items-center mb-auto tracking-wide cursor-pointer" onClick={() => setSelectedEvent(event)}>點擊卡片查看詳情 <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span></div>
               <AddItineraryButton event={event} />
             </div>
           </div>

@@ -35,6 +35,8 @@ interface ItineraryStore {
   /** 將整趟行程的 tripEndDate 延長一天，並觸發 flashDayAdded + 開啟 Sidebar */
   addTripDay: () => void;
   clearFlash: () => void;
+  /** 清空所有已加入的行程 */
+  clearPlannedEvents: () => void;
   /** 設定展覽/長期活動的使用者自訂前往時間（HH:MM），用於時間軸排序 */
   updateVisitTime: (eventId: string, time: string) => void;
 }
@@ -194,6 +196,8 @@ export const useItineraryStore = create<ItineraryStore>()(
       }),
 
       clearFlash: () => set({ flashEventId: null, flashDayAdded: false }),
+
+      clearPlannedEvents: () => set({ plannedEvents: [] }),
 
       updateVisitTime: (eventId, time) => set((state) => ({
         plannedEvents: state.plannedEvents.map(e =>

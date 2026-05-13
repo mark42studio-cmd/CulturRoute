@@ -74,6 +74,7 @@ export default function ItinerarySidebar() {
     removeEvent, updateStayDuration, updateEventDate,
     tripStartDate, tripEndDate,
     flashEventId, flashDayAdded, clearFlash,
+    clearPlannedEvents,
   } = useItineraryStore();
 
   const tripDates = buildTripDateRange(
@@ -147,10 +148,26 @@ export default function ItinerarySidebar() {
             <Calendar size={20} className="text-blue-600" />
             我的文化行程
           </h2>
-          <button onClick={toggleSidebar} className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">
-            <X size={18} />
-            <span className="text-xs">我再看看</span>
-          </button>
+          <div className="flex items-center gap-1">
+            {plannedEvents.length > 0 && (
+              <button
+                onClick={() => {
+                  if (window.confirm('確定要清除所有已安排的行程嗎？')) {
+                    clearPlannedEvents();
+                  }
+                }}
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="全部清除"
+              >
+                <Trash2 size={13} />
+                全部清除
+              </button>
+            )}
+            <button onClick={toggleSidebar} className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">
+              <X size={18} />
+              <span className="text-xs">我再看看</span>
+            </button>
+          </div>
         </div>
 
         {/* 新增一天 flash banner */}

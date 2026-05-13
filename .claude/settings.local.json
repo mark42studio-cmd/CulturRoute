@@ -37,7 +37,9 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\weich\" -Filter \"螢幕擷取畫面*\" -Recurse -ErrorAction SilentlyContinue)",
       "Bash(Select-Object -First 10 FullName)",
       "Bash(git restore *)",
-      "Bash(Remove-Item *)"
+      "Bash(Remove-Item *)",
+      "Bash(Get-ChildItem -Path \"E:\\\\CulturRoute\\\\cultur-route\\\\components\" -Recurse -Filter \"*.tsx\")",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

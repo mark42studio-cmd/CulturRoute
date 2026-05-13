@@ -165,8 +165,8 @@ export default function EventDetailModal({ event, onClose }: Props) {
             )}
           </div>
 
-          {/* 分潤連結 — 住宿永遠顯示（Agoda 動態日期），租車/票務有 URL 才顯示 */}
-          {event.affiliate_links && (
+          {/* 行程周邊區塊暫時隱藏 */}
+          {/* {event.affiliate_links && (
             <div>
               <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">行程周邊</h3>
               <div className="flex flex-col gap-2">
@@ -200,7 +200,7 @@ export default function EventDetailModal({ event, onClose }: Props) {
                 </a>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
