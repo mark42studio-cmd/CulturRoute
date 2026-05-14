@@ -318,6 +318,15 @@ export default function ItineraryPage() {
     return () => window.removeEventListener('cultrRoute:tourDestroyed', handler);
   }, []);
 
+  // 手機版：TourGuide FAB 點擊時觸發 OnboardingModal（只處理 itinerary context）
+  useEffect(() => {
+    const handler = (e: Event) => {
+      if ((e as CustomEvent).detail?.context === 'itinerary') setShowOnboarding(true);
+    };
+    window.addEventListener('cultrRoute:showOnboarding', handler);
+    return () => window.removeEventListener('cultrRoute:showOnboarding', handler);
+  }, []);
+
   // 掛載時從 app_stats 讀取累計總讚數
   useEffect(() => {
     supabase
@@ -564,7 +573,7 @@ export default function ItineraryPage() {
 
       {/* ── 手機版新手歡迎彈窗 ──────────────────────────────────────────────── */}
       {showOnboarding && isDesktop === false && (
-        <OnboardingModal onClose={handleOnboardingClose} />
+        <OnboardingModal context="itinerary" onClose={handleOnboardingClose} />
       )}
 
       {/* ── Toast 通知（日期變更防呆） ────────────────────────────────────────── */}
@@ -1416,7 +1425,7 @@ export default function ItineraryPage() {
           點擊後：渲染地圖 + 平滑捲動回頂部讓使用者立刻看到地圖。
       ─────────────────────────────────────────────────────────────────────── */}
       {!showMap && currentDayMapEvents.length > 0 && (
-        <div className="lg:hidden fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none" style={{ paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: '16px' }}>
+        <div className="hidden md:block lg:hidden fixed bottom-16 md:bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#f8f6f0] via-[#f8f6f0]/95 to-transparent pointer-events-none" style={{ paddingTop: '16px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: '16px' }}>
           <button
             id="tour-generate-route-btn"
             onClick={handleGenerateMap}

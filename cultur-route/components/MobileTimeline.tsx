@@ -22,7 +22,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
-import { Clock, MapPin, Calendar, GripVertical, Pencil, ChevronDown } from 'lucide-react';
+import { Clock, MapPin, Calendar, GripVertical, Pencil, ChevronDown, X, Trash2, Plus } from 'lucide-react';
 import EventDetailModal from '@/components/EventDetailModal';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { PlannedEvent } from '@/types';
@@ -75,9 +75,10 @@ interface DayDropZoneProps {
   children: React.ReactNode;
   itemIds: string[];
   isEmpty: boolean;
+  onRemove: () => void;
 }
 
-function DayDropZone({ dateStr, label, children, itemIds, isEmpty }: DayDropZoneProps) {
+function DayDropZone({ dateStr, label, children, itemIds, isEmpty, onRemove }: DayDropZoneProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: dateStr,
     data: { type: 'container', dateStr },
@@ -85,8 +86,15 @@ function DayDropZone({ dateStr, label, children, itemIds, isEmpty }: DayDropZone
 
   return (
     <div>
-      <div className="sticky top-[64px] z-20 bg-[#f8f6f0]/95 backdrop-blur-sm py-2.5 mb-3 border-b border-stone-200">
+      <div className="sticky top-[64px] z-20 bg-[#f8f6f0]/95 backdrop-blur-sm py-2.5 mb-3 border-b border-stone-200 flex justify-between items-center">
         <span className="text-sm font-bold text-slate-700">{label}</span>
+        <button
+          onClick={onRemove}
+          className="text-stone-300 hover:text-red-400 transition-colors cursor-pointer p-1"
+          aria-label="刪除此天"
+        >
+          <Trash2 size={14} />
+        </button>
       </div>
       <SortableContext id={dateStr} items={itemIds} strategy={verticalListSortingStrategy}>
         <div
@@ -118,9 +126,10 @@ interface CardProps {
   index: number;
   onOpen: (event: PlannedEvent) => void;
   onEditTime: (event: PlannedEvent) => void;
+  onRemove: (id: string) => void;
 }
 
-function SortableEventCard({ event, index, onOpen, onEditTime }: CardProps) {
+function SortableEventCard({ event, index, onOpen, onEditTime, onRemove }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: event.id,
     data: { type: 'item', dateStr: event.assigned_date, event },
@@ -144,7 +153,7 @@ function SortableEventCard({ event, index, onOpen, onEditTime }: CardProps) {
       </div>
 
       {/* 活動卡片 */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex items-stretch overflow-hidden">
+      <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm flex items-stretch overflow-hidden">
         {/* 拖曳把手（左側，touch-none 防止與滑動頁面衝突） */}
         <button
           {...listeners}
@@ -158,7 +167,7 @@ function SortableEventCard({ event, index, onOpen, onEditTime }: CardProps) {
 
         {/* 主內容區（點擊開啟詳情） */}
         <button
-          className="p-3 flex flex-col gap-1 flex-1 min-w-0 text-left"
+          className="p-3 pr-7 flex flex-col gap-1 flex-1 min-w-0 text-left"
           onClick={() => onOpen(event)}
         >
           <h3 className="font-bold text-gray-800 text-sm leading-snug line-clamp-2">{event.title}</h3>
@@ -184,6 +193,15 @@ function SortableEventCard({ event, index, onOpen, onEditTime }: CardProps) {
               <span className="truncate">{event.venue_name}</span>
             </div>
           )}
+        </button>
+
+        {/* 刪除按鈕 */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onRemove(event.id); }}
+          className="absolute top-2 right-2 text-stone-300 hover:text-red-500 transition-colors p-1"
+          aria-label="移除活動"
+        >
+          <X size={14} />
         </button>
       </div>
     </div>
@@ -440,19 +458,50 @@ interface MobileTimelineProps {
 }
 
 export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTimelineProps) {
-  const { plannedEvents, updateEventDate, updateVisitTime, updateStayDuration } = useItineraryStore();
+  const {
+    plannedEvents, updateEventDate, updateVisitTime, updateStayDuration, removeEvent,
+    addTripDay, prependTripDay, removeTripDay, tripStartDate, tripEndDate,
+  } = useItineraryStore();
   const [activeId,         setActiveId]         = useState<UniqueIdentifier | null>(null);
   const [detailEvent,      setDetailEvent]      = useState<PlannedEvent | null>(null);
   const [editingTimeEvent, setEditingTimeEvent] = useState<PlannedEvent | null>(null);
 
   const handleEditTime = (event: PlannedEvent) => {
     if (isPerformance(event)) {
-      toast.error('演出活動為固定時間，無法修改', {
+      toast('演出活動為固定時間，無法修改', {
         description: '演出的開始時間由主辦方決定，請依官方時間安排行程。',
       });
       return;
     }
     setEditingTimeEvent(event);
+  };
+
+  const handleRemoveDay = (dateStr: string) => {
+    const dayEvents = dayEventMap[dateStr] ?? [];
+    if (dayEvents.length > 0) {
+      toast('請先清空該日活動再刪除天數');
+      return;
+    }
+    const isFirst = sortedDates[0] === dateStr;
+    const isLast  = sortedDates[sortedDates.length - 1] === dateStr;
+    if (!isFirst && !isLast) {
+      toast('僅能移除行程的第一天或最後一天');
+      return;
+    }
+    removeTripDay(dateStr);
+    toast('✓ 已刪除該天行程');
+  };
+
+  const handleAddDay = () => {
+    if (!tripEndDate) return;
+    addTripDay();
+    toast('✓ 已成功延長一天行程');
+  };
+
+  const handlePrependDay = () => {
+    if (!tripStartDate) return;
+    prependTripDay();
+    toast('✓ 已為您提前一天行程');
   };
 
   const sensors = useSensors(
@@ -518,7 +567,7 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
     } else {
       // ── 跨天移動：演出鎖定防護 ─────────────────────────────────────────────
       if (isPerformance(event)) {
-        toast.error('此為限定演出，無法隨意更改日期喔！', {
+        toast('此為限定演出，無法隨意更改日期喔！', {
           description: '演出活動的時間是固定的，請選擇正確的日期加入行程。',
         });
         return;
@@ -542,6 +591,17 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
 
   return (
     <>
+      {/* 提前一天 */}
+      {tripStartDate && (
+        <button
+          onClick={handlePrependDay}
+          className="w-full mb-6 py-3 flex items-center justify-center gap-2 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 hover:text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all cursor-pointer"
+        >
+          <Plus size={15} />
+          <span className="text-sm">提前一天</span>
+        </button>
+      )}
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -559,6 +619,7 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
                 label={formatTabLabel(dateStr, dayIndex)}
                 itemIds={itemIds}
                 isEmpty={dayEvents.length === 0}
+                onRemove={() => handleRemoveDay(dateStr)}
               >
                 {dayEvents.map((evt, idx) => (
                   <SortableEventCard
@@ -567,6 +628,7 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
                     index={idx}
                     onOpen={setDetailEvent}
                     onEditTime={handleEditTime}
+                    onRemove={removeEvent}
                   />
                 ))}
               </DayDropZone>
@@ -578,6 +640,17 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
           {activeEvent && <FloatingCard event={activeEvent} />}
         </DragOverlay>
       </DndContext>
+
+      {/* 新增一天 */}
+      {tripEndDate && (
+        <button
+          onClick={handleAddDay}
+          className="w-full mt-6 py-3 flex items-center justify-center gap-2 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 hover:text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all cursor-pointer"
+        >
+          <Plus size={15} />
+          <span className="text-sm">新增一天</span>
+        </button>
+      )}
 
       {/* 活動詳情 Bottom Sheet（手機）/ Modal（桌機） */}
       {detailEvent && (

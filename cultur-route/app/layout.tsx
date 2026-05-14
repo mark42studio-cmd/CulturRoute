@@ -118,7 +118,17 @@ export default function RootLayout({
         {children}
 
         <BottomNav />
-        <Toaster position="top-center" richColors />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            classNames: {
+              toast: 'group !bg-stone-900 !text-white !border-none !shadow-2xl !rounded-2xl !px-4 !py-3',
+              title: '!text-white !font-medium !text-sm',
+              description: '!text-stone-400 !text-xs',
+              icon: '!text-stone-300 [&>svg]:!text-stone-300 [&>svg]:!fill-stone-300',
+            },
+          }}
+        />
 
         <footer className="mt-auto py-6 mb-16 md:mb-0 flex items-center justify-center gap-2 text-xs text-gray-500">
           <Image src="/icon.png" alt="一圈工作室" width={24} height={24} className="opacity-70" />

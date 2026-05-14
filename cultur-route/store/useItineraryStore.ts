@@ -32,8 +32,12 @@ interface ItineraryStore {
   updateStayDuration: (eventId: string, minutes: number) => void;
   /** 直接累加 minutes 至指定活動的 stay_duration（上限 240），並觸發 flash + 開啟 Sidebar */
   extendStayDuration: (eventId: string, minutes: number) => void;
-  /** 將整趟行程的 tripEndDate 延長一天，並觸發 flashDayAdded + 開啟 Sidebar */
+  /** 將整趟行程的 tripEndDate 延長一天 */
   addTripDay: () => void;
+  /** 將整趟行程的 tripStartDate 提前一天 */
+  prependTripDay: () => void;
+  /** 移除指定日期（只能是 tripStartDate 或 tripEndDate），調整行程範圍 */
+  removeTripDay: (dateStr: string) => void;
   clearFlash: () => void;
   /** 清空所有已加入的行程 */
   clearPlannedEvents: () => void;
@@ -189,9 +193,43 @@ export const useItineraryStore = create<ItineraryStore>()(
         ].join('-');
         return {
           tripEndDate: nextStr,
-          flashDayAdded: true,
-          isSidebarOpen: true,
         };
+      }),
+
+      prependTripDay: () => set((state) => {
+        if (!state.tripStartDate) return state;
+        const [y, m, d] = state.tripStartDate.split('-').map(Number);
+        const prev = new Date(y, m - 1, d - 1);
+        const prevStr = [
+          prev.getFullYear(),
+          String(prev.getMonth() + 1).padStart(2, '0'),
+          String(prev.getDate()).padStart(2, '0'),
+        ].join('-');
+        return { tripStartDate: prevStr };
+      }),
+
+      removeTripDay: (dateStr) => set((state) => {
+        if (dateStr === state.tripEndDate) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          const prev = new Date(y, m - 1, d - 1);
+          const prevStr = [
+            prev.getFullYear(),
+            String(prev.getMonth() + 1).padStart(2, '0'),
+            String(prev.getDate()).padStart(2, '0'),
+          ].join('-');
+          return prevStr >= state.tripStartDate ? { tripEndDate: prevStr } : state;
+        }
+        if (dateStr === state.tripStartDate) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          const next = new Date(y, m - 1, d + 1);
+          const nextStr = [
+            next.getFullYear(),
+            String(next.getMonth() + 1).padStart(2, '0'),
+            String(next.getDate()).padStart(2, '0'),
+          ].join('-');
+          return nextStr <= state.tripEndDate ? { tripStartDate: nextStr } : state;
+        }
+        return state;
       }),
 
       clearFlash: () => set({ flashEventId: null, flashDayAdded: false }),

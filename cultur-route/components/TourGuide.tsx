@@ -82,14 +82,16 @@ export default function TourGuide() {
   }, [pathname, hasTour, isDesktop, isItinerary, getFilteredSteps, tourKey]);
 
   const startTour = useCallback(() => {
-    if (window.innerWidth < 768) return;
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      const context = isItinerary ? 'itinerary' : 'explore';
+      window.dispatchEvent(new CustomEvent('cultrRoute:showOnboarding', { detail: { context } }));
+      return;
+    }
     const effectiveKey = isItinerary ? ITINERARY_TOUR_KEY_V3 : tourKey;
     buildTour(getFilteredSteps(), effectiveKey).drive();
   }, [isItinerary, getFilteredSteps, tourKey]);
 
   if (!hasTour) return null;
-  // 行程頁手機版由 OnboardingModal 接手，不顯示 driver.js 按鈕
-  if (isItinerary && isDesktop === false) return null;
 
   return (
     <button
@@ -97,7 +99,7 @@ export default function TourGuide() {
       id="tour-help-btn"
       aria-label="開啟使用導引"
       title="使用導引"
-      className="fixed bottom-6 left-6 z-40 bg-white text-[#1B2E26] border border-stone-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-medium"
+      className="fixed right-4 bottom-24 md:bottom-6 z-50 bg-white text-[#1B2E26] border border-stone-200 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-medium"
     >
       <CircleHelp size={16} className="shrink-0" />
       <span className="hidden sm:inline">使用導引</span>

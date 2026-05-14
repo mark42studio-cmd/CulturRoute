@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { Event } from '@/types';
 import HomeOnboardingModal, { HOME_ONBOARDING_KEY } from '@/components/HomeOnboardingModal';
+import OnboardingModal from '@/components/OnboardingModal';
 
 // 台灣時區安全的日期轉換：將任意 ISO 字串轉換為台北時間的 YYYY-MM-DD
 // 必須用 toLocaleDateString 而非 substring(0,10)，因為 Supabase 回傳 UTC 時間
@@ -38,6 +39,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   const [quickToastId, setQuickToastId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showHomeOnboarding, setShowHomeOnboarding] = useState(false);
+  const [showExploreGuide,   setShowExploreGuide]   = useState(false);
 
   // useMemo 確保每次 render 不重新計算（日期在同一天內不會改變）
   const TODAY = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }), []);
@@ -117,6 +119,14 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     setShowHomeOnboarding(true);
   }, []);
 
+  useEffect(() => {
+    const handler = (e: globalThis.Event) => {
+      if ((e as CustomEvent).detail?.context === 'explore') setShowExploreGuide(true);
+    };
+    window.addEventListener('cultrRoute:showOnboarding', handler);
+    return () => window.removeEventListener('cultrRoute:showOnboarding', handler);
+  }, []);
+
   const isFiltering = startDate && endDate;
   let currentEvents = initialEvents;
   let missedEvents: Event[] = [];
@@ -186,7 +196,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       addEvent(event);
       setQuickToastId(event.id);
       setTimeout(() => setQuickToastId(null), 1500);
-      toast.success('已加入行程 ✓', { description: event.title });
+      toast('✓ 已加入行程', { description: event.title });
     }
   };
 
@@ -304,19 +314,11 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       {!isFiltering && (() => {
         const ongoingCount = initialEvents.filter(isOngoing).length;
         return ongoingCount > 0 ? (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 border-b border-green-200 pb-4">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
-              <span className="text-green-800 text-sm tracking-wide">
-                今日（{TODAY.slice(5).replace('-', '/')}）正有 <span className="font-bold">{ongoingCount}</span> 個活動進行中
-              </span>
-            </div>
-            <button
-              onClick={() => setTripDates(TODAY, TODAY)}
-              className="text-xs tracking-wider text-green-700 border border-green-300 hover:bg-green-700 hover:text-white px-3 py-1.5 transition-colors shrink-0"
-            >
-              只看今日
-            </button>
+          <div className="mb-6 flex items-center gap-2 min-w-0 border-b border-green-200 pb-4">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+            <span className="text-green-800 text-sm tracking-wide">
+              今日（{TODAY.slice(5).replace('-', '/')}）正有 <span className="font-bold">{ongoingCount}</span> 個活動進行中
+            </span>
           </div>
         ) : null;
       })()}
@@ -454,6 +456,9 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           setShowHomeOnboarding(false);
         }}
       />
+    )}
+    {showExploreGuide && (
+      <OnboardingModal context="explore" onClose={() => setShowExploreGuide(false)} />
     )}
     </>
   );

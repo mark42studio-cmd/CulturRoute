@@ -3,35 +3,63 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
+export type OnboardingContext = 'explore' | 'itinerary';
+
 interface Props {
+  context: OnboardingContext;
   onClose: () => void;
 }
 
-const STEPS = [
+const exploreSteps = [
   {
     emoji: '🌊',
     gradient: 'from-sky-400 to-teal-600',
-    tag: '歡迎來到台東',
-    title: '準備出發台東！',
-    desc: '我們已自動把行程日期設為「從今天開始」，快來開始排你的台東文化之旅吧！',
+    tag: '步驟 1 — 探索',
+    title: '探索在地藝文',
+    desc: '滑動查看推薦活動，找到你感興趣的文化路徑。',
   },
   {
-    emoji: '👆',
+    emoji: '➕',
     gradient: 'from-emerald-500 to-teal-700',
-    tag: '自由排序',
-    title: '長按卡片，拖拉調整',
-    desc: '長按活動卡片並上下拖拉，即可調整當天的參觀順序，打造最順路的山海行程！',
+    tag: '步驟 2 — 加入行程',
+    title: '一鍵加入行程',
+    desc: '點擊卡片看詳情，或直接按下右下角的「+」即可加入專屬行程。',
   },
   {
-    emoji: '🗺️',
+    emoji: '🏷️',
     gradient: 'from-amber-400 to-orange-500',
-    tag: '生成路線',
-    title: '一鍵生成地圖路線',
-    desc: '排好順序後，點擊畫面最下方的「時間確認，生成路線圖」，一鍵規劃最佳移動路線。',
+    tag: '步驟 3 — 篩選',
+    title: '分類快速篩選',
+    desc: '利用上方的滑動標籤，快速切換市區、海線或演出、展覽。',
   },
 ];
 
-export default function OnboardingModal({ onClose }: Props) {
+const itinerarySteps = [
+  {
+    emoji: '✋',
+    gradient: 'from-sky-400 to-teal-600',
+    tag: '步驟 1 — 排序',
+    title: '拖曳排序行程',
+    desc: '長按活動卡片即可上下拖曳排序，或跨天移動（限定演出除外）。',
+  },
+  {
+    emoji: '🕐',
+    gradient: 'from-emerald-500 to-teal-700',
+    tag: '步驟 2 — 時間',
+    title: '彈性修改時間',
+    desc: '點擊卡片上的綠色時間文字，可以獨立修改預計停留時間。',
+  },
+  {
+    emoji: '🗑️',
+    gradient: 'from-rose-400 to-pink-600',
+    tag: '步驟 3 — 管理',
+    title: '輕鬆管理活動',
+    desc: '若改變心意，點擊卡片右上角的「X」即可將活動移出行程。',
+  },
+];
+
+export default function OnboardingModal({ context, onClose }: Props) {
+  const STEPS = context === 'explore' ? exploreSteps : itinerarySteps;
   const [step, setStep] = useState(0);
   const isLast = step === STEPS.length - 1;
   const current = STEPS[step];

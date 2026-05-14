@@ -16,7 +16,7 @@ export default function AddItineraryButton({ event }: { event: Event }) {
       toast('已從行程移除', { description: event.title });
     } else {
       addEvent(event);
-      toast.success('已加入行程 ✓', { description: event.title });
+      toast('✓ 已加入行程', { description: event.title });
     }
   };
 
