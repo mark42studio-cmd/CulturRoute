@@ -39,6 +39,8 @@ export default function SubmitEventFormContent({
     image_url: '',
     ticket_url: '',
     comments: '',
+    category: '',
+    time_type: '',
   });
 
   useEffect(() => {
@@ -49,6 +51,8 @@ export default function SubmitEventFormContent({
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.title.trim()) e.title = '請填寫活動名稱';
+    if (!form.category) e.category = '請選擇活動類型';
+    if (!form.time_type) e.time_type = '請選擇活動時間類型';
     if (!form.event_time.trim()) e.event_time = '請填寫活動時間';
     if (!form.location.trim()) e.location = '請填寫活動地點';
     if (!form.description.trim()) e.description = '請填寫活動介紹';
@@ -59,7 +63,7 @@ export default function SubmitEventFormContent({
     return e;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
     setErrors(prev => ({ ...prev, [e.target.name]: '' }));
   };
@@ -96,6 +100,8 @@ export default function SubmitEventFormContent({
       image_url: form.image_url.trim() || null,
       ticket_url: form.ticket_url.trim() || null,
       comments: form.comments.trim() || null,
+      category: form.category || null,
+      time_type: form.time_type || null,
     }]);
 
     if (!mounted.current) return;
@@ -151,7 +157,47 @@ export default function SubmitEventFormContent({
         />
       </Field>
 
-      <Field label="活動時間" required error={errors.event_time} hint="格式不限，例：下週六下午、2026/06/01 14:00–17:00">
+      <Field label="活動類型" required error={errors.category}>
+        <select
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          className={inputClass(errors.category)}
+        >
+          <option value="">請選擇活動類型…</option>
+          {['展覽', '演出', '講座', '工作坊', '節慶活動', '其他'].map(c => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </Field>
+
+      <Field label="時間類型" required error={errors.time_type}>
+        <div className="flex gap-4 pt-1">
+          {[
+            { value: '單日活動', label: '單日活動（演出、講座等）' },
+            { value: '期間限定', label: '期間限定（展覽、節慶等）' },
+          ].map(opt => (
+            <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+              <input
+                type="radio"
+                name="time_type"
+                value={opt.value}
+                checked={form.time_type === opt.value}
+                onChange={handleChange}
+                className="accent-orange-500 w-4 h-4"
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+        {form.time_type === '單日活動' && (
+          <p className="text-xs text-orange-600 mt-1.5">
+            💡 單日活動請務必填寫精確的時間點（如 14:00–17:00），系統將自動為您鎖定日期。
+          </p>
+        )}
+      </Field>
+
+      <Field label="活動時間" required error={errors.event_time} hint="格式不限，例：2026/06/01 14:00–17:00；展覽請填寫完整展期區間">
         <input
           name="event_time"
           value={form.event_time}

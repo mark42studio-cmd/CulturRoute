@@ -14,7 +14,7 @@ export default async function AdminPage() {
   // 忽略 is_published，讓後台看到全部活動（含已下架）
   const { data: events, error } = await supabase
     .from('events')
-    .select('id, title, start_time, end_time, venue_name, latitude, longitude, is_published, image_captured, ticket_url, category, sub_category')
+    .select('id, title, start_time, end_time, venue_name, latitude, longitude, is_published, image_captured, ticket_url, category, sub_category, time_type, region')
     .order('start_time', { ascending: false })
 
   if (error) {

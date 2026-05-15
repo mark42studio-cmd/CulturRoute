@@ -108,15 +108,8 @@ const getIsHardScheduled = (event: PlannedEvent): boolean => {
 };
 
 
-/**
- * 判斷活動是否為「靜態展覽」（與 EventBrowser.tsx 邏輯一致）：
- * - vibe_tags 含「靜態展覽」（AI 標記，最可靠）
- * - 標題含「個展」「聯展」「特展」（補充辨識）
- */
-const isExhibition = (event: PlannedEvent): boolean => {
-  if (event.vibe_tags?.includes('靜態展覽')) return true;
-  return /個展|聯展|特展/.test(event.title);
-};
+const isExhibition = (event: PlannedEvent): boolean =>
+  event.category === '展覽';
 
 /**
  * ISO 時間字串 → 台灣時區 HH:MM（24h）
@@ -165,27 +158,8 @@ const getEffectiveSortTime = (event: PlannedEvent): string => {
   return '00:00';
 };
 
-/** 單日活動鎖定判斷（與 ItinerarySidebar 邏輯一致） */
-const isSingleDayLocked = (event: PlannedEvent): boolean => {
-  if (event.time_type === '單日活動') return true;
-  if (!event.end_time && !event.end_date) return true;
-  const startDay = event.start_time.substring(0, 10);
-  const endDay = event.end_time?.substring(0, 10);
-  return !!endDay && startDay === endDay;
-};
-
-/**
- * Fixed Event：有明確非午夜時間，且 end_time - start_time < 24h（單場演出/講座）。
- * 固定行程不可拖拉，排序完全由 start_time 決定。
- */
-const isFixedEvent = (event: PlannedEvent): boolean => {
-  if (!event.start_time || !event.end_time) return false;
-  const startMs = new Date(event.start_time).getTime();
-  const endMs   = new Date(event.end_time).getTime();
-  if (isNaN(startMs) || isNaN(endMs)) return false;
-  const startHHMM = toTaipeiHHMM(event.start_time);
-  return startHHMM !== '00:00' && endMs > startMs && (endMs - startMs) < 86_400_000;
-};
+const isFixedEvent = (event: PlannedEvent): boolean =>
+  event.category !== '展覽' || event.time_type === '單日活動';
 
 // ── 行程時間智慧系統 ──────────────────────────────────────────────────────────
 
@@ -241,6 +215,28 @@ interface GapWarning {
  *                       長度 = items.length - 1。API 尚未回應時傳 []，
  *                       此時自動降級使用 mockTravelTime 估算。
  */
+const calculateTimeOverlaps = (events: PlannedEvent[]): Set<string> => {
+  const overlapping = new Set<string>();
+  const getRange = (e: PlannedEvent): [number, number] | null => {
+    const start = getStartHHMM(e);
+    if (!start) return null;
+    const s = hhmmToMin(start);
+    return [s, s + (e.stay_duration ?? 60)];
+  };
+  for (let i = 0; i < events.length; i++) {
+    for (let j = i + 1; j < events.length; j++) {
+      const a = getRange(events[i]);
+      const b = getRange(events[j]);
+      if (!a || !b) continue;
+      if (a[0] < b[1] && a[1] > b[0]) {
+        overlapping.add(events[i].id);
+        overlapping.add(events[j].id);
+      }
+    }
+  }
+  return overlapping;
+};
+
 const calculateItineraryGaps = (items: PlannedEvent[], realTravelMins: number[] = []): GapWarning[] => {
   const warnings: GapWarning[] = [];
   for (let i = 0; i < items.length - 1; i++) {
@@ -437,10 +433,8 @@ export default function ItineraryPage() {
   const handleDateChange = (event: PlannedEvent, newDateStr: string) => {
     if (newDateStr === event.assigned_date) return;
 
-    const exhibition = isExhibition(event);
-
-    if (!exhibition) {
-      showToast('此為單次性活動，無法更改日期');
+    if (isFixedEvent(event)) {
+      showToast('此為固定活動，無法更改日期');
       return;
     }
 
@@ -554,6 +548,7 @@ export default function ItineraryPage() {
   // legDurations：由 ItineraryMap Directions API 回傳的真實車程；未就緒時降級至估算
   const gapWarnings = calculateItineraryGaps(currentDayEvents, legDurations);
   const conflictSet = new Set(gapWarnings.map(w => w.afterIndex));
+  const overlapSet  = calculateTimeOverlaps(currentDayEvents);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -935,12 +930,13 @@ export default function ItineraryPage() {
                               index % 2 === 0 ? 'bg-white' : 'bg-slate-50',
                               snapshot.isDragging ? 'border-blue-500 shadow-xl scale-[1.02] z-50'
                                 : selectedEventId === event.id ? 'border-blue-500 ring-2 ring-blue-300'
+                                : overlapSet.has(event.id) ? 'border-rose-300'
                                 : 'border-gray-100',
                             ].join(' ')}
                           >
                             {isFixedEvent(event) ? (
                               <div className="flex items-center justify-center text-gray-200 shrink-0 cursor-not-allowed" title="固定場次，時間不可移動">
-                                <Clock size={18} />
+                                <Lock size={18} />
                               </div>
                             ) : (
                               <div {...provided.dragHandleProps} className="flex items-center justify-center text-gray-300 hover:text-blue-500 transition-colors cursor-grab active:cursor-grabbing">
@@ -977,6 +973,13 @@ export default function ItineraryPage() {
                                   </div>
                                 );
                               })()}
+                              {/* 時間重疊警告 */}
+                              {overlapSet.has(event.id) && (
+                                <div className="mb-2 flex items-center gap-1.5 px-2 py-1 bg-rose-50 text-rose-600 text-xs font-semibold rounded-md border border-rose-100">
+                                  <AlertTriangle size={12} className="shrink-0" />
+                                  <span>⚠️ 此活動與今日其他行程時間重疊</span>
+                                </div>
+                              )}
                               {/* Feature 1：展覽完整展期區間（與單次活動明確區分） */}
                               {isExhibition(event) && event.end_date && (
                                 <div className="flex items-center text-violet-400 text-[11px] gap-1 mb-1">
@@ -1023,7 +1026,7 @@ export default function ItineraryPage() {
                                     <Ticket size={10} className="opacity-70 shrink-0" /> 票務資訊
                                   </a>
                                 )}
-                                {isExhibition(event) && !isSingleDayLocked(event) ? (
+                                {!isFixedEvent(event) ? (
                                   <select
                                     value={actualActiveDate}
                                     onChange={(e) => handleDateChange(event, e.target.value)}
@@ -1588,7 +1591,7 @@ export default function ItineraryPage() {
                         type="text"
                         value={submitForm.name}
                         onChange={e => setSubmitForm(f => ({ ...f, name: e.target.value }))}
-                        placeholder="例：2026 台東鐵花野餐派對"
+                        placeholder="例：2026 臺東藝穗節"
                         maxLength={100}
                         className="w-full text-sm p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-400"
                       />

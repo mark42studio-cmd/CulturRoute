@@ -22,15 +22,35 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
-import { Clock, MapPin, Calendar, GripVertical, Pencil, ChevronDown, X, Trash2, Plus } from 'lucide-react';
+import { Clock, MapPin, Calendar, GripVertical, Pencil, ChevronDown, X, Trash2, Plus, Lock, AlertTriangle } from 'lucide-react';
 import EventDetailModal from '@/components/EventDetailModal';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { PlannedEvent } from '@/types';
 
-// ── 演出鎖定判斷（與 EventBrowser.tsx 相同常數）────────────────────────────
-const PERFORMANCE_TAGS = ['演出', '表演', '音樂', '音樂會', '演唱會', '舞蹈', '戲劇', '劇場'];
-const isPerformance = (e: PlannedEvent) =>
-  e.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
+const isFixedEvent = (e: PlannedEvent): boolean =>
+  e.category !== '展覽' || e.time_type === '單日活動';
+
+const calculateTimeOverlaps = (events: PlannedEvent[]): Set<string> => {
+  const overlapping = new Set<string>();
+  const getRange = (e: PlannedEvent): [number, number] | null => {
+    const start = getStartHHMM(e);
+    if (!start) return null;
+    const s = hhmmToMin(start);
+    return [s, s + (e.stay_duration ?? 60)];
+  };
+  for (let i = 0; i < events.length; i++) {
+    for (let j = i + 1; j < events.length; j++) {
+      const a = getRange(events[i]);
+      const b = getRange(events[j]);
+      if (!a || !b) continue;
+      if (a[0] < b[1] && a[1] > b[0]) {
+        overlapping.add(events[i].id);
+        overlapping.add(events[j].id);
+      }
+    }
+  }
+  return overlapping;
+};
 
 // ── 時間工具（與 itinerary/page.tsx 邏輯相同）────────────────────────────────
 
@@ -127,12 +147,15 @@ interface CardProps {
   onOpen: (event: PlannedEvent) => void;
   onEditTime: (event: PlannedEvent) => void;
   onRemove: (id: string) => void;
+  isConflicting: boolean;
 }
 
-function SortableEventCard({ event, index, onOpen, onEditTime, onRemove }: CardProps) {
+function SortableEventCard({ event, index, onOpen, onEditTime, onRemove, isConflicting }: CardProps) {
+  const fixed = isFixedEvent(event);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: event.id,
     data: { type: 'item', dateStr: event.assigned_date, event },
+    disabled: fixed,
   });
 
   const style: React.CSSProperties = {
@@ -153,17 +176,23 @@ function SortableEventCard({ event, index, onOpen, onEditTime, onRemove }: CardP
       </div>
 
       {/* 活動卡片 */}
-      <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm flex items-stretch overflow-hidden">
-        {/* 拖曳把手（左側，touch-none 防止與滑動頁面衝突） */}
-        <button
-          {...listeners}
-          {...attributes}
-          className="px-2.5 flex items-center justify-center text-stone-300 hover:text-stone-500 touch-none shrink-0 cursor-grab active:cursor-grabbing border-r border-gray-100"
-          aria-label="拖曳排序"
-          onClick={e => e.stopPropagation()}
-        >
-          <GripVertical size={15} />
-        </button>
+      <div className={`relative bg-white rounded-xl border shadow-sm flex items-stretch overflow-hidden ${isConflicting ? 'border-rose-300' : 'border-gray-100'}`}>
+        {/* 拖曳把手 / 鎖定圖示 */}
+        {fixed ? (
+          <div className="px-2.5 flex items-center justify-center text-stone-200 shrink-0 border-r border-gray-100 cursor-not-allowed" aria-label="固定活動，無法拖曳">
+            <Lock size={15} />
+          </div>
+        ) : (
+          <button
+            {...listeners}
+            {...attributes}
+            className="px-2.5 flex items-center justify-center text-stone-300 hover:text-stone-500 touch-none shrink-0 cursor-grab active:cursor-grabbing border-r border-gray-100"
+            aria-label="拖曳排序"
+            onClick={e => e.stopPropagation()}
+          >
+            <GripVertical size={15} />
+          </button>
+        )}
 
         {/* 主內容區（點擊開啟詳情） */}
         <button
@@ -187,6 +216,12 @@ function SortableEventCard({ event, index, onOpen, onEditTime, onRemove }: CardP
             </span>
           )}
 
+          {isConflicting && (
+            <div className="flex items-center gap-1 text-[10px] font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded px-1.5 py-0.5">
+              <AlertTriangle size={10} className="shrink-0" />
+              <span>⚠️ 與今日其他行程時間重疊</span>
+            </div>
+          )}
           {event.venue_name && (
             <div className="flex items-center gap-1 text-[11px] text-stone-400">
               <MapPin size={10} className="shrink-0" />
@@ -467,9 +502,9 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
   const [editingTimeEvent, setEditingTimeEvent] = useState<PlannedEvent | null>(null);
 
   const handleEditTime = (event: PlannedEvent) => {
-    if (isPerformance(event)) {
-      toast('演出活動為固定時間，無法修改', {
-        description: '演出的開始時間由主辦方決定，請依官方時間安排行程。',
+    if (isFixedEvent(event)) {
+      toast('此為固定活動，時間無法修改', {
+        description: '活動時間由主辦方決定，請依官方公告安排行程。',
       });
       return;
     }
@@ -524,6 +559,17 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
 
   const activeEvent = activeId ? (plannedEvents.find(e => e.id === activeId) ?? null) : null;
 
+  // 跨天時間重疊偵測：每天獨立計算，合併成全局 Set
+  const overlapSet = useMemo(() => {
+    const result = new Set<string>();
+    for (const dateStr of sortedDates) {
+      const dayEvents = dayEventMap[dateStr] ?? [];
+      const overlaps = calculateTimeOverlaps(dayEvents);
+      overlaps.forEach(id => result.add(id));
+    }
+    return result;
+  }, [dayEventMap, sortedDates]);
+
   // 從 over 取得目標日期：可能是 container droppable 或 sortable item 所屬的 SortableContext id
   function getTargetDate(over: DragEndEvent['over']): string | undefined {
     if (!over) return undefined;
@@ -565,10 +611,10 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
         }
       });
     } else {
-      // ── 跨天移動：演出鎖定防護 ─────────────────────────────────────────────
-      if (isPerformance(event)) {
-        toast('此為限定演出，無法隨意更改日期喔！', {
-          description: '演出活動的時間是固定的，請選擇正確的日期加入行程。',
+      // ── 跨天移動：固定活動鎖定防護 ────────────────────────────────────────
+      if (isFixedEvent(event)) {
+        toast('此為固定活動，無法更改日期！', {
+          description: '此活動時間由主辦方決定，請選擇正確的日期加入行程。',
         });
         return;
       }
@@ -629,6 +675,7 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
                     onOpen={setDetailEvent}
                     onEditTime={handleEditTime}
                     onRemove={removeEvent}
+                    isConflicting={overlapSet.has(evt.id)}
                   />
                 ))}
               </DayDropZone>

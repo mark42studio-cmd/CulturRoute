@@ -25,21 +25,8 @@ const fmtVisitTime = (hhmm: string): string => {
     .toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
 };
 
-/**
- * 判斷是否為展覽（有 end_date 且晚於 start_time 日期）
- * 與 page.tsx 的 isExhibition 邏輯一致，但僅用 end_date 判斷（最嚴格定義）
- */
-const isSidebarExhibition = (event: PlannedEvent): boolean =>
-  !!(event.end_date && event.end_date > event.start_time.substring(0, 10));
-
-const isSingleDayLocked = (event: PlannedEvent): boolean => {
-  if (event.time_type === '單日活動') return true;
-  // No end info at all → cannot confirm multi-day, treat as locked
-  if (!event.end_time && !event.end_date) return true;
-  const startDay = event.start_time.substring(0, 10);
-  const endDay = event.end_time?.substring(0, 10);
-  return !!endDay && startDay === endDay;
-};
+const isFixedEvent = (event: PlannedEvent): boolean =>
+  event.category !== '展覽' || event.time_type === '單日活動';
 
 const CHINESE_DAY_NAMES = ['一','二','三','四','五','六','七','八','九','十'];
 
@@ -300,12 +287,26 @@ export default function ItinerarySidebar() {
                             <ExternalLink size={10} className="shrink-0" />
                           </a>
                         )}
-                        {isSidebarExhibition(event) ? (
+                        {isFixedEvent(event) ? (
                           <div className="flex flex-col gap-0.5">
-                            <div className="flex items-center gap-1 text-[11px] text-gray-400">
-                              <Calendar size={10} className="shrink-0" />
-                              <span>展期：{fmtMonthDay(event.start_time)} – {fmtMonthDay(event.end_date!)}</span>
+                            <div className="text-xs text-gray-500">
+                              {new Date(event.start_time).toLocaleDateString('zh-TW', {
+                                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                              })}
                             </div>
+                            <div className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-md">
+                              <Lock size={11} className="shrink-0 opacity-60" />
+                              <span>🔒 此為固定活動，無法更改日期</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-0.5">
+                            {event.end_date && event.end_date > event.start_time.substring(0, 10) && (
+                              <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                                <Calendar size={10} className="shrink-0" />
+                                <span>展期：{fmtMonthDay(event.start_time)} – {fmtMonthDay(event.end_date)}</span>
+                              </div>
+                            )}
                             <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
                               <Clock size={11} className="shrink-0 text-violet-400" />
                               <div className="flex-1">
@@ -325,43 +326,6 @@ export default function ItinerarySidebar() {
                               {event.visit_time && (
                                 <span className="text-[11px] text-gray-400 shrink-0">{fmtVisitTime(event.visit_time)}</span>
                               )}
-                            </div>
-                          </div>
-                        ) : isSingleDayLocked(event) ? (
-                          <div className="flex flex-col gap-0.5">
-                            <div className="text-xs text-gray-500">
-                              {new Date(event.start_time).toLocaleDateString('zh-TW', {
-                                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-                              })}
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-md">
-                              <Lock size={11} className="shrink-0 opacity-60" />
-                              <span>此為單日限定活動，無法更改日期</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col gap-0.5">
-                            <div className="text-xs text-gray-500">
-                              {new Date(event.start_time).toLocaleDateString('zh-TW', {
-                                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-                              })}
-                            </div>
-                            <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
-                              <Calendar size={11} className="shrink-0 text-blue-400" />
-                              <div className="flex-1">
-                                <CustomSelect<string>
-                                  value={event.assigned_date}
-                                  options={buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => ({ value: d, label: formatDayOption(d, tripStartDate || event.assigned_date) }))}
-                                  onChange={(val) => {
-                                    const [vy, vm, vd] = val.split('-').map(Number);
-                                    if (new Date(vy, vm - 1, vd).getDay() === 1) {
-                                      const kw = ['藝文中心', '美術館', '圖書館'].find(v => event.venue_name.includes(v));
-                                      if (kw) { toast(`⚠️ 注意：該場館 (${kw}) 每週一休館，請選擇其他日期。`); return; }
-                                    }
-                                    updateEventDate(event.id, val);
-                                  }}
-                                />
-                              </div>
                             </div>
                           </div>
                         )}

@@ -110,6 +110,8 @@ export const GeocodeAddressSchema = z.object({
 });
 
 const CATEGORY_VALUES = ['展覽', '演出', '講座', '工作坊', '節慶活動', '其他'] as const;
+const TIME_TYPE_VALUES = ['單日活動', '期間限定'] as const;
+const REGION_VALUES    = ['市區', '海線', '山線', '南迴線', '離島'] as const;
 
 /**
  * updateEventFields(id, fields)
@@ -127,6 +129,8 @@ export const UpdateEventFieldsSchema = z.object({
     ticket_url:     z.string().url('必須為合法 URL').max(500, 'URL 超過長度限制').nullable().optional(),
     category:       z.enum(CATEGORY_VALUES).nullable().optional(),
     sub_category:   z.array(z.string().trim().max(30)).max(20).optional(),
+    time_type:      z.enum(TIME_TYPE_VALUES).nullable().optional(),
+    region:         z.enum(REGION_VALUES).nullable().optional(),
   }).strict(),  // 拒絕白名單外的欄位，防止 DB 欄位注入
 });
 
@@ -162,6 +166,8 @@ export const SubmitEventSchema = z.object({
   description: z.string().trim().min(1, '活動介紹不得為空').max(2000),
   image_url:   z.string().trim().max(500).optional().or(z.literal('')),
   comments:    z.string().trim().max(1000).optional().or(z.literal('')),
+  category:    z.enum(CATEGORY_VALUES).optional(),
+  time_type:   z.enum(TIME_TYPE_VALUES).optional(),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

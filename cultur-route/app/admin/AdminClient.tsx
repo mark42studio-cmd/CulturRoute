@@ -26,6 +26,8 @@ export type AdminEvent = {
   ticket_url: string | null
   category: string | null
   sub_category: string[] | null
+  time_type: string | null
+  region: string | null
 }
 
 type Tab = 'events' | 'places' | 'foods' | 'affiliate' | 'reports' | 'submissions'
@@ -33,6 +35,11 @@ type SortMode = 'default' | 'name' | 'issues'
 
 const CATEGORY_OPTIONS = ['展覽', '演出', '講座', '工作坊', '節慶活動', '其他'] as const
 type CategoryOption = typeof CATEGORY_OPTIONS[number]
+
+const TIME_TYPE_OPTIONS = ['單日活動', '期間限定'] as const
+const REGION_OPTIONS    = ['市區', '海線', '山線', '南迴線', '離島'] as const
+type TimeTypeOption = typeof TIME_TYPE_OPTIONS[number] | ''
+type RegionOption   = typeof REGION_OPTIONS[number] | ''
 
 type EditState = {
   id: string
@@ -46,7 +53,9 @@ type EditState = {
   imageCaptured: string
   ticketUrl: string
   category: CategoryOption | ''
-  subCategoryStr: string          // 逗號分隔，如 "音樂演出,講座工作坊"
+  subCategoryStr: string
+  timeType: TimeTypeOption
+  region: RegionOption
   geocodedResult: { latitude: number; longitude: number; formatted: string } | null
 }
 
@@ -244,6 +253,8 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
       ticketUrl: event.ticket_url ?? '',
       category: (CATEGORY_OPTIONS.includes(event.category as CategoryOption) ? event.category : '') as CategoryOption | '',
       subCategoryStr: (event.sub_category ?? []).join(', '),
+      timeType: (TIME_TYPE_OPTIONS.includes(event.time_type as typeof TIME_TYPE_OPTIONS[number]) ? event.time_type : '') as TimeTypeOption,
+      region: (REGION_OPTIONS.includes(event.region as typeof REGION_OPTIONS[number]) ? event.region : '') as RegionOption,
       geocodedResult: null,
     })
   }
@@ -289,6 +300,8 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
           ticket_url: editState.ticketUrl || null,
           category: editState.category || null,
           sub_category: subCategoryArr.length > 0 ? subCategoryArr : undefined,
+          time_type: editState.timeType || null,
+          region: editState.region || null,
         })
         setEvents(prev => prev.map(e =>
           e.id === editState.id
@@ -667,6 +680,17 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
                           <span className="ml-2 text-sky-400 text-xs">（線上）</span>
                         )}
                       </p>
+                      <div className="flex items-center gap-1.5 pl-4 mt-0.5 flex-wrap">
+                        {event.category && (
+                          <span className="px-2 py-0.5 bg-violet-100 text-violet-700 text-[10px] font-bold rounded-full">{event.category}</span>
+                        )}
+                        {event.time_type && (
+                          <span className="px-2 py-0.5 bg-teal-100 text-teal-700 text-[10px] font-bold rounded-full">{event.time_type}</span>
+                        )}
+                        {event.region && (
+                          <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">{event.region}</span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Actions */}
@@ -1200,6 +1224,35 @@ insert into affiliate_links (key, label, icon) values
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-violet-400 outline-none"
                   />
                   <p className="text-[10px] text-gray-400 mt-1">儲存時自動解析為陣列，空白將自動去除</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1">時間類型 (time_type)</label>
+                    <select
+                      value={editState.timeType}
+                      onChange={e => setEditState(s => s ? { ...s, timeType: e.target.value as TimeTypeOption } : s)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-violet-400 outline-none bg-white"
+                    >
+                      <option value="">（不設定）</option>
+                      {TIME_TYPE_OPTIONS.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1">地區 (region)</label>
+                    <select
+                      value={editState.region}
+                      onChange={e => setEditState(s => s ? { ...s, region: e.target.value as RegionOption } : s)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-violet-400 outline-none bg-white"
+                    >
+                      <option value="">（不設定）</option>
+                      {REGION_OPTIONS.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 

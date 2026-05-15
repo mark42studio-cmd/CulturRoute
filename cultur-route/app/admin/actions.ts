@@ -66,6 +66,8 @@ export async function updateEventFields(
     ticket_url?: string | null
     category?: '展覽' | '演出' | '講座' | '工作坊' | '節慶活動' | '其他' | null
     sub_category?: string[]
+    time_type?: '單日活動' | '期間限定' | null
+    region?: '市區' | '海線' | '山線' | '南迴線' | '離島' | null
   }
 ): Promise<void> {
   // .strict() Schema 確保 fields 只能包含白名單欄位，防止欄位注入
