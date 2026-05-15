@@ -11,12 +11,9 @@ import { useItineraryStore } from '@/store/useItineraryStore';
 import type { Event } from '@/types';
 import HomeOnboardingModal, { HOME_ONBOARDING_KEY } from '@/components/HomeOnboardingModal';
 import OnboardingModal from '@/components/OnboardingModal';
-
-// 台灣時區安全的日期轉換：將任意 ISO 字串轉換為台北時間的 YYYY-MM-DD
-// 必須用 toLocaleDateString 而非 substring(0,10)，因為 Supabase 回傳 UTC 時間
-// 例：凌晨 0:00 台北時間 = 前一天 16:00 UTC，substring 會取到錯誤日期
-const dateOnlyTaipei = (iso: string): string =>
-  new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+import DateRangePicker from '@/components/DateRangePicker';
+import { getDateMismatch, dateOnlyTaipei, formatDateZH } from '@/lib/eventUtils';
+import { buildAgodaUrl, addOneDay } from '@/lib/agoda';
 
 // ssr:false — @vis.gl/react-google-maps 依賴瀏覽器 window
 const EventsMapDynamic = dynamic(() => import('@/components/EventsMap'), {
@@ -32,9 +29,10 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   const {
     tripStartDate: startDate, tripEndDate: endDate, setTripDates,
     plannedEvents, addTripDay, addEvent, removeEvent, setHoveredEventId,
+    setPendingJumpToDate,
   } = useItineraryStore();
   const [isMounted, setIsMounted] = useState(false);
-  const [viewMode, setViewMode] = useState<'all' | 'performance' | 'lecture' | 'exhibition'>('all');
+  const [viewMode, setViewMode] = useState<'all' | '演出' | '講座' | '展覽' | '工作坊'>('all');
   const [districtFilter, setDistrictFilter] = useState<'all' | 'city' | 'sea' | 'mountain' | 'south' | 'island'>('all');
   const [quickToastId, setQuickToastId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -44,32 +42,26 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   // useMemo 確保每次 render 不重新計算（日期在同一天內不會改變）
   const TODAY = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }), []);
 
-  // 展覽：vibe_tags 含「靜態展覽」，或標題含「個展」「聯展」「特展」
-  // 不再依賴 end_date，避免多日節慶被誤判
-  const isExhibition = (event: Event): boolean => {
-    if (event.vibe_tags?.includes('靜態展覽')) return true;
-    return /個展|聯展|特展/.test(event.title);
-  };
+  // category 欄位直接比對（新資料），vibe_tags 為舊資料 fallback
+  const EXHIBITION_VIBE = ['靜態展覽'];
+  const EXHIBITION_TITLE = /個展|聯展|特展/;
+  const PERFORMANCE_TAGS = ['音樂演出', '舞蹈', '戲劇表演', '官方展演', '電影放映'];
+  const LECTURE_TAGS     = ['講座工作坊'];
+  const WORKSHOP_TAGS    = ['講座工作坊', '工作坊'];
 
-  // 演出：vibe_tags 含表演/音樂/舞蹈/戲劇相關標籤，且非展覽
-  const PERFORMANCE_TAGS = ['演出', '表演', '音樂', '音樂會', '演唱會', '舞蹈', '戲劇', '劇場'];
-  const isPerformance = (event: Event): boolean => {
-    if (isExhibition(event)) return false;
-    return event.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
-  };
-
-  // 講座：vibe_tags 含講座/工作坊/論壇等標籤，且非展覽
-  const LECTURE_TAGS = ['講座', '工作坊', '論壇', '分享', '課程', '演講', '研習'];
-  const isLecture = (event: Event): boolean => {
-    if (isExhibition(event)) return false;
-    return event.vibe_tags?.some(t => LECTURE_TAGS.some(lt => t.includes(lt))) ?? false;
+  const matchCategory = (event: Event, target: '演出' | '講座' | '展覽' | '工作坊'): boolean => {
+    if (event.category === target) return true;
+    // vibe_tags fallback（舊資料 category = "event"/"exhibition" 時）
+    if (target === '展覽')  return EXHIBITION_VIBE.some(t => event.vibe_tags?.includes(t)) || EXHIBITION_TITLE.test(event.title);
+    if (target === '演出')  return event.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
+    if (target === '講座')  return event.vibe_tags?.some(t => LECTURE_TAGS.some(lt => t.includes(lt))) ?? false;
+    if (target === '工作坊') return event.vibe_tags?.some(t => WORKSHOP_TAGS.some(wt => t.includes(wt))) ?? false;
+    return false;
   };
 
   const applyViewMode = (events: Event[]): Event[] => {
-    if (viewMode === 'performance') return events.filter(isPerformance);
-    if (viewMode === 'lecture')     return events.filter(isLecture);
-    if (viewMode === 'exhibition')  return events.filter(isExhibition);
-    return events;
+    if (viewMode === 'all') return events;
+    return events.filter(e => matchCategory(e, viewMode));
   };
 
   const DISTRICT_KEYWORDS = {
@@ -163,8 +155,8 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
 
   // 排序：演出優先 > 結束日期升冪（越快結束越前面，製造急迫感）
   currentEvents = [...currentEvents].sort((a, b) => {
-    const aIsPerf = a.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
-    const bIsPerf = b.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false;
+    const aIsPerf = a.category === '演出' || (a.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false);
+    const bIsPerf = b.category === '演出' || (b.vibe_tags?.some(t => PERFORMANCE_TAGS.some(pt => t.includes(pt))) ?? false);
     if (aIsPerf && !bIsPerf) return -1;
     if (!aIsPerf && bIsPerf) return 1;
     const aEnd = a.end_time ? new Date(a.end_time).getTime() : Infinity;
@@ -192,12 +184,45 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     const isAdded = plannedEvents.some(p => p.id === event.id);
     if (isAdded) {
       removeEvent(event.id);
-    } else {
+      return;
+    }
+
+    // 日期防呆鎖：必須先設定出發日期才能加入行程
+    if (!startDate) {
+      toast('📅 請先設定出發日期！', {
+        description: '請選擇您的行程日期，再開始安排專屬行程。',
+      });
+      document
+        .getElementById('tour-date-filter')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const mismatchDate = getDateMismatch(event, startDate, endDate);
+    if (mismatchDate) {
+      const newStart = mismatchDate < startDate ? mismatchDate : startDate;
+      const newEnd   = mismatchDate > endDate   ? mismatchDate : endDate;
+      setTripDates(newStart, newEnd);
       addEvent(event);
+      setPendingJumpToDate(mismatchDate);
       setQuickToastId(event.id);
       setTimeout(() => setQuickToastId(null), 1500);
-      toast('✓ 已加入行程', { description: event.title });
+      const dateLabel = formatDateZH(mismatchDate);
+      toast('✨ 已自動延長您的行程！', {
+        description: `已新增至 ${dateLabel}。您多留了幾天，記得提早預訂住宿喔！`,
+        action: {
+          label: '查看推薦住宿',
+          onClick: () => window.open(buildAgodaUrl(newStart, addOneDay(newEnd)), '_blank'),
+        },
+        duration: 6000,
+      });
+      return;
     }
+
+    addEvent(event);
+    setQuickToastId(event.id);
+    setTimeout(() => setQuickToastId(null), 1500);
+    toast('✓ 已加入行程', { description: event.title });
   };
 
   // 「多留幾天」區塊專用：卡片多一顆「多留一下」按鈕
@@ -340,27 +365,21 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-end w-full">
-          <div className="flex-1 w-full">
-            <label className="block text-[10px] font-medium text-stone-400 mb-2 uppercase tracking-[0.2em]">抵達日期</label>
-            <input
-              type="date" value={startDate}
-              onChange={(e) => setTripDates(e.target.value, endDate)}
-              className="w-full bg-transparent border-b border-stone-300 px-0 py-2 text-stone-700 focus:outline-none focus:border-teal-700 transition-colors"
-              suppressHydrationWarning
-            />
-          </div>
-          <div className="flex-1 w-full">
-            <label className="block text-[10px] font-medium text-stone-400 mb-2 uppercase tracking-[0.2em]">離開日期</label>
-            <input
-              type="date" min={startDate} value={endDate}
-              onChange={(e) => setTripDates(startDate, e.target.value)}
-              className="w-full bg-transparent border-b border-stone-300 px-0 py-2 text-stone-700 focus:outline-none focus:border-teal-700 transition-colors"
-              suppressHydrationWarning
+        <div className="flex items-center gap-3 w-full">
+          <div className="flex-1 min-w-0">
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onSelect={(start, end) => setTripDates(start, end)}
             />
           </div>
           {isFiltering && (
-            <button onClick={() => setTripDates('', '')} className="px-4 py-2 text-xs text-stone-400 hover:text-stone-600 tracking-wider border border-stone-300 hover:border-stone-500 transition-colors">清除</button>
+            <button
+              onClick={() => setTripDates('', '')}
+              className="shrink-0 px-4 py-3 text-xs text-stone-400 hover:text-stone-600 tracking-wider border border-stone-300 hover:border-stone-500 transition-colors rounded-xl"
+            >
+              清除
+            </button>
           )}
         </div>
 
@@ -405,10 +424,11 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
         <div className="flex gap-2 w-max min-w-max pb-0.5">
           {(
             [
-              { key: 'all',         label: '✨ 全部' },
-              { key: 'performance', label: '🎭 演出' },
-              { key: 'lecture',     label: '🎤 講座' },
-              { key: 'exhibition',  label: '🏛️ 展覽' },
+              { key: 'all',  label: '✨ 全部' },
+              { key: '演出', label: '🎭 演出' },
+              { key: '講座', label: '🎤 講座' },
+              { key: '展覽', label: '🏛️ 展覽' },
+              { key: '工作坊', label: '🛠️ 工作坊' },
             ] as const
           ).map(({ key, label }) => (
             <button

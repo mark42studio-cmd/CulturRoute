@@ -109,6 +109,8 @@ export const GeocodeAddressSchema = z.object({
   address: AddressSchema,
 });
 
+const CATEGORY_VALUES = ['展覽', '演出', '講座', '工作坊', '節慶活動', '其他'] as const;
+
 /**
  * updateEventFields(id, fields)
  * .strict() 確保無法透過 fields 注入未在白名單內的資料庫欄位。
@@ -123,6 +125,8 @@ export const UpdateEventFieldsSchema = z.object({
     longitude:      LongitudeSchema.optional(),
     image_captured: ImageUrlSchema,
     ticket_url:     z.string().url('必須為合法 URL').max(500, 'URL 超過長度限制').nullable().optional(),
+    category:       z.enum(CATEGORY_VALUES).nullable().optional(),
+    sub_category:   z.array(z.string().trim().max(30)).max(20).optional(),
   }).strict(),  // 拒絕白名單外的欄位，防止 DB 欄位注入
 });
 

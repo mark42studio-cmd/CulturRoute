@@ -1,0 +1,19 @@
+🚀 [CulturRoute 多站台聯合海巡] 啟動時間: 2026-05-15 10:40:27
+🎯 篩選目標：['台東藝文平台']
+
+🚢 駛入大廳：台東藝文平台 (https://culture.taitung.gov.tw/)
+📋 啟用分頁列表模式：https://culture.taitung.gov.tw/activity（最多 1 頁）
+   🖱️  Button-click 分頁模式（selector: button[aria-label="下一頁"]）
+   📄 列表第 1 頁 → +10 筆，累計 10 筆
+   🏁 內容未變化（已到末頁），列表掃描完成
+   ⚠️  已達最大分頁上限（1 頁），停止掃描
+🔎 共蒐集 10 個活動連結。
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/2026-5-%E7%AF%80%E7%9B%AE-outline.jpg
+✨ v2 schema → 1 筆活動準備入庫...
+  📌 白名單命中（子字串）：'臺東藝文中心廣場／大廳、在地展演空間（吧蟲 Bar Cynic、檔案室裡的小村閱讀、都蘭地下書店）' ≈ '都蘭' → (23.128, 121.3765)
+  [NEW] 山海有聲｜樂廣場—經典金曲演唱／講唱／講座／課程 (2026-04-03 ~ 2026-06-14)
+📊 crawl_log：台東藝文平台 ｜ ✅ 1 新 🔄 0 更新 ⏩ 0 跳過 ❌ 0 失敗
+
+💡 所有站台海巡任務完成。

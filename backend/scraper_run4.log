@@ -1,0 +1,518 @@
+🚀 [CulturRoute 多站台聯合海巡] 啟動時間: 2026-05-15 14:21:17
+
+🚢 駛入大廳：台東藝文平台 (https://culture.taitung.gov.tw/)
+📋 深度爬取模式：https://culture.taitung.gov.tw/activity（最多 20 頁）
+
+════════════════════════════════════════════════════════════
+📖 正在處理第 1 頁（活動列表）
+════════════════════════════════════════════════════════════
+   🔗 本頁發現 9 個活動內頁連結
+
+   🚪 正在進入內頁 [1]：https://culture.taitung.gov.tw/activity/%E9%BA%BB%E7%85%A9%E4%BA%86%EF%BC%8C%E8%87%BA%E6%9D%B1%EF%BC%81-good-trouble
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/01/TTDC2025成果展-展場形象-7300142-1.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [麻煩了，臺東！ Good Trouble]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (2cce07c4-eea3-4fb6-b1c5-1e5052ebfdc3, 麻煩了，臺東！ Good Trouble, 以臺東為觀察切面，透過「很遠、很少、一直一..., 2025-12-01 16:00:00+00, 臺東設計中心, https://culture.taitung.gov.tw/activity/%E9%BA%BB%E7%85%A9%E4%BA..., {}, null, {"score": 0}, 2026-05-15 06:21:42.52592+00, 22.7522277, 121.1469192, t, 2026-11-29 16:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/01/TTDC20..., 臺東設計中心以「麻煩」作為年度觀察切面，推..., 展覽, null, 60, 15, 臺東市鐵花路369號, 2026-05-15 06:21:42.52592+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-11-30, null, t, null, 63906e203f44230a226d322f0c7e27427fbf762e645f7e52013ccb5c6e8ebb72, null, null, null, null, pending, active, 市區, 常態展覽, {視覺藝術,社區活動}).'}
+
+   🚪 正在進入內頁 [2]：https://culture.taitung.gov.tw/activity/%E3%80%8A%E5%8F%B0%E6%9D%B1%E3%83%BB%E6%96%87%E5%8C%96%E4%B9%8B%E9%96%93%EF%BC%9A%E7%99%BE%E5%A4%A7%E6%96%87%E5%8C%96%E5%9F%BA%E5%9C%B0%E4%B8%B2%E9%80%A3%E4%B8%BB%E9%A1%8C%E5%B1%95%E3%80%8B
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2025/12/1141212-02主視覺@2x-2.png
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [《台東・文化之間：百大文化基地串連主題展》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (d8deeb14-3e94-4384-900b-6a6672316176, 《台東・文化之間：百大文化基地串連主題展》, 匯聚台東八處「百大文化基地」，展現食農、部..., 2025-12-19 16:00:00+00, 台東故事館, https://culture.taitung.gov.tw/activity/%E3%80%8A%E5%8F%B0%E6%9D..., {}, null, {"score": 0}, 2026-05-15 06:22:00.515575+00, 22.75406, 121.1452988, f, null, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2025/12/114121..., 展覽《台東・文化之間》，聚焦八處入選「百大..., 展覽, null, 60, 15, null, 2026-05-15 06:22:00.515575+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, null, null, t, null, 5152b3ed14ea30f78ceb8aeeb8b423dbe399fd2ae27f6d2897f0d1baf92b4cc2, null, null, null, null, pending, active, null, 期間限定, {視覺藝術,原住民文化,社區活動}).'}
+
+   🚪 正在進入內頁 [3]：https://culture.taitung.gov.tw/activity/%E6%B0%91%E6%AD%8C%E9%9F%B3%E6%A8%82%E6%9C%83-%E5%90%89%E4%BB%96%E5%BD%88%E5%94%B1%E6%86%B6%E7%95%B6%E5%B9%B4-%E9%99%B3%E5%A4%A7%E8%BB%8D
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/2026上半年.jpg
+   ✨ LLM 回傳了 4 個場次
+  [ERR] upsert 失敗 [民歌音樂會 吉他彈唱憶當年 --- 陳大軍]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (453e594f-df83-4f66-9a67-d0c8e5c888d9, 民歌音樂會 吉他彈唱憶當年 --- 陳大軍, 陳大軍將以吉他彈唱，演繹阿美族語歌、民歌、..., 2026-02-14 11:00:00+00, 大坡池風景區內 環境教育館, https://culture.taitung.gov.tw/activity/%E6%B0%91%E6%AD%8C%E9%9F..., {}, null, {"score": 0}, 2026-05-15 06:22:15.373224+00, 23.1205226, 121.2226186, t, 2026-02-14 12:10:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/2026..., 陳大軍，池上鄉大埔村恆春阿美族人，白天從事..., 演出, null, 60, 15, null, 2026-05-15 06:22:15.373224+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-02-14, null, t, null, 9849d1e7a99ab7579ef01cd7c916eeef7d577555ba9bc6e3ec1db76ea9385608, null, null, null, null, pending, active, 縱谷山線, 期間限定, {音樂,原住民文化}).'}
+  [ERR] upsert 失敗 [民歌音樂會 吉他彈唱憶當年 --- 陳大軍]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (1c6ffa63-2b1e-436d-8a2f-73aa7acfbccb, 民歌音樂會 吉他彈唱憶當年 --- 陳大軍, 陳大軍將以吉他彈唱，演繹阿美族語歌、民歌、..., 2026-03-07 11:00:00+00, 大坡池風景區內 環境教育館, https://culture.taitung.gov.tw/activity/%E6%B0%91%E6%AD%8C%E9%9F..., {}, null, {"score": 0}, 2026-05-15 06:22:16.406929+00, 23.1205226, 121.2226186, t, 2026-03-07 12:10:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/2026..., 陳大軍，池上鄉大埔村恆春阿美族人，白天從事..., 演出, null, 60, 15, null, 2026-05-15 06:22:16.406929+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-03-07, null, t, null, fc3019e77c0d46b57d085098df4b9be94cce24d8b42665ac1460fec61dfca33d, null, null, null, null, pending, active, 縱谷山線, 期間限定, {音樂,原住民文化}).'}
+  [ERR] upsert 失敗 [民歌音樂會 吉他彈唱憶當年 --- 陳大軍]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (d2c0f1db-6c7a-4eac-9167-7c3d6c150a7b, 民歌音樂會 吉他彈唱憶當年 --- 陳大軍, 陳大軍將以吉他彈唱，演繹阿美族語歌、民歌、..., 2026-05-09 11:00:00+00, 大坡池風景區內 環境教育館, https://culture.taitung.gov.tw/activity/%E6%B0%91%E6%AD%8C%E9%9F..., {}, null, {"score": 0}, 2026-05-15 06:22:17.496897+00, 23.1205226, 121.2226186, t, 2026-05-09 12:10:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/2026..., 陳大軍，池上鄉大埔村恆春阿美族人，白天從事..., 演出, null, 60, 15, null, 2026-05-15 06:22:17.496897+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-09, null, t, null, 532dfc5fa2171a33a85f0dc5154cda8bf21706bd8e18e703fa206ae79c23b2e1, null, null, null, null, pending, active, 縱谷山線, 期間限定, {音樂,原住民文化}).'}
+  [ERR] upsert 失敗 [民歌音樂會 吉他彈唱憶當年 --- 陳大軍]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (5ee805ad-6a2c-449e-be46-fa6fe91c9cb0, 民歌音樂會 吉他彈唱憶當年 --- 陳大軍, 陳大軍將以吉他彈唱，演繹阿美族語歌、民歌、..., 2026-06-06 11:00:00+00, 大坡池風景區內 環境教育館, https://culture.taitung.gov.tw/activity/%E6%B0%91%E6%AD%8C%E9%9F..., {}, null, {"score": 0}, 2026-05-15 06:22:18.285978+00, 23.1205226, 121.2226186, t, 2026-06-06 12:10:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/2026..., 陳大軍，池上鄉大埔村恆春阿美族人，白天從事..., 演出, null, 60, 15, null, 2026-05-15 06:22:18.285978+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-06-06, null, t, null, 048112de0e5e812bc299c5858441cdaddfb5956f660b9b98b8ed3edd1419afcb, null, null, null, null, pending, active, 縱谷山線, 期間限定, {音樂,原住民文化}).'}
+
+   🚪 正在進入內頁 [4]：https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98%A5%E9%81%8A%E6%8F%90%E6%A1%88%EF%BC%9A%E8%B7%9F%E8%91%97%E5%8F%B0%E6%9D%B1%E5%8D%9A%E8%A6%BD%E6%9C%83%E6%B0%91%E9%96%93%E5%8F%83%E8%88%87%E8%85%B3%E6%AD%A5
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266070_1259260939729336_5038882415848317847_n.jpg
+   ✨ LLM 回傳了 11 個場次
+  [ERR] upsert 失敗 [目目文創《1996–2026：聲音東洄中》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (529fcaab-20bb-463f-a395-76cb852da6b9, 目目文創《1996–2026：聲音東洄中》, 募集1996年以來台東的圖文、物件與故事，記錄在..., 2026-03-11 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98..., {}, null, {"score": 0}, 2026-05-15 06:22:40.943671+00, null, null, f, 2026-06-21 15:59:59+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266..., 目目文創《1996–2026：聲音東洄中》\n活動名稱｜..., 其他, null, 60, 15, null, 2026-05-15 06:22:40.943671+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-06-21, null, t, null, d43d22ef845094da90d4361d57641c7a260477f625dd8549ae87f71b403b1a32, null, null, null, null, pending, active, null, 期間限定, {其他}).'}
+  [SKIP] 無有效 start_time：成功總站：讓鏽掉的售票口，再次產出「回家的票」
+  [ERR] upsert 失敗 [遊程培力工作坊-你不認識的成功鎮]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (01266ce8-3094-4819-a1fb-c2f84aaa78ef, 遊程培力工作坊-你不認識的成功鎮, 探索成功鎮的在地特色，培養遊程規劃能力，發..., 2026-04-03 00:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98..., {}, null, {"score": 0}, 2026-05-15 06:22:41.144135+00, null, null, f, 2026-04-05 09:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266..., 活動名稱｜遊程培力工作坊-你不認識的成功鎮\n..., 工作坊, null, 60, 15, null, 2026-05-15 06:22:41.144135+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-05, null, t, null, 2eb90a741f6216093fb6d5d4bcd62ffc6c445d060e87288b6ebd9a12baaa2d70, null, null, null, null, pending, active, null, 單日活動, {社區活動}).'}
+  [ERR] upsert 失敗 [栞米製作「我們一起回家吧！」共融藝術社群與劇場演出計畫系列工作坊Vol.2]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (24b57291-9444-4c69-88e7-0dd2495f3626, 栞米製作「我們一起回家吧！」共融藝術社群與..., 透過集體創作劇場工作坊，探討「家」的概念，..., 2026-04-04 02:30:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98..., {}, null, {"score": 0}, 2026-05-15 06:22:41.787235+00, null, null, f, 2026-04-05 09:30:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266..., 活動名稱｜系列工作坊Vol.2——「家這種東西還..., 工作坊, null, 60, 15, null, 2026-05-15 06:22:41.787235+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-05, null, t, null, c725ab0a5210e5f9956fe8e83eeb2acd129c4cc056973c1c4fface91511d382b, null, null, null, null, pending, active, null, 單日活動, {親子,社區活動}).'}
+  [ERR] upsert 失敗 [島語她說：台東女性敘事 × 母語共創計畫 故事採集x共創工作坊2]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (0992054e-d7cf-45a3-83a6-683ba17292e2, 島語她說：台東女性敘事 × 母語共創計畫 故事..., 採集台東女性的生命故事，並以母語共創，展現..., 2026-04-26 02:00:00+00, 關山有機書店x富美子雞蛋糕, https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98..., {}, null, {"score": 0}, 2026-05-15 06:22:42.714218+00, 23.0473488, 121.1625873, f, 2026-04-26 06:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266..., 活動名稱｜故事採集x共創工作坊2\n活動時間｜4/26..., 工作坊, null, 60, 15, 關山鎮中山路67號, 2026-05-15 06:22:42.714218+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-26, null, t, null, 5767e2648f0de9771eff7d9bd1203672cfa18ccec2ba0abbb3d29db634dcbb06, null, null, null, null, pending, active, null, 單日活動, {講座,原住民文化,社區活動}).'}
+  📌 白名單命中（子字串）：'都蘭部落' ≈ '都蘭' → (23.128, 121.3765)
+  [ERR] upsert 失敗 [都蘭國【山海間的在地永續旅遊提案：都蘭慢旅指南】石縫生存記2：都蘭部落樹皮地圖藝術創作營]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (47ae4afa-1b42-408f-ba4e-fe1b91819b6c, 都蘭國【山海間的在地永續旅遊提案：都蘭慢旅..., 以都蘭部落為基地，透過樹皮地圖藝術創作，探..., 2026-04-16 16:00:00+00, 都蘭部落, https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98..., {}, null, {"score": 0}, 2026-05-15 06:22:42.945496+00, 23.128, 121.3765, f, 2026-04-20 15:59:59+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266..., 活動名稱｜石縫生存記2：都蘭部落樹皮地圖藝術..., 工作坊, null, 60, 15, null, 2026-05-15 06:22:42.945496+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-20, null, t, null, eca7fb6e539a6397232444338096cbdaea04fe6b451c133ddfb58094819da631, null, null, null, null, pending, active, 東海岸線, 單日活動, {視覺藝術,原住民文化,生態旅遊,社區活動}).'}
+  [ERR] upsert 失敗 [臺東縣關山鎮商圈產業永續發展協會【 關山節-異教仲夏慶典-○ × △人人祭(Oden) 】]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (3865e299-37d4-4e4d-85ae-c483a96d4191, 臺東縣關山鎮商圈產業永續發展協會【 關山節-..., 關山鎮的傳統祭典「人人祭」，匯聚社群力量，..., 2026-04-20 03:00:00+00, 關山鎮, https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98..., {}, null, {"score": 0}, 2026-05-15 06:22:43.854776+00, 23.0495603, 121.1646339, f, 2026-04-21 08:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266..., 活動名稱｜人人祭 聖餐集結\n活動時間｜4/20（一..., 節慶活動, null, 60, 15, null, 2026-05-15 06:22:43.854776+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-21, null, t, null, 2ef4bc6c7e17e0a31f0220fc06189e2546383bf0b5d2c7dd83de2a70de5b6f9a, null, null, null, null, pending, active, null, 單日活動, {社區活動,祭典}).'}
+  [SKIP] 無有效 start_time：東糖研究會「篳路藍縷的甜」展覽／全糖系列活動
+  [SKIP] 無有效 start_time：Kuroro Aqua 浪潛水海洋園區（渚橋）［#Kuroro海洋大冒險］認識海｜探索任務
+  📌 白名單命中（子字串）：'都蘭部落' ≈ '都蘭' → (23.128, 121.3765)
+  [ERR] upsert 失敗 [都蘭國 ’Etolan Style #石縫生存記2：都蘭部落樹皮地圖藝術創作營]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (8fb2decb-70e5-4f65-a691-af288614930e, 都蘭國 ’Etolan Style #石縫生存記2：都蘭部落樹皮..., 以都蘭部落為基地，透過樹皮地圖藝術創作，學..., 2026-04-16 16:00:00+00, 都蘭部落, https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98..., {}, null, {"score": 0}, 2026-05-15 06:22:44.138381+00, 23.128, 121.3765, f, 2026-04-20 15:59:59+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266..., ▋都蘭國 ’Etolan Style #石縫生存記2：都蘭部落樹..., 工作坊, null, 60, 15, null, 2026-05-15 06:22:44.138381+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-20, null, t, null, ddc78caa7ca33bd3fbaa38ca14ae327b01f954777b73cfba5adba1179788e813, null, null, null, null, pending, active, 東海岸線, 單日活動, {視覺藝術,原住民文化,社區活動}).'}
+  [SKIP] 無有效 start_time：禱告100天 錄音分享會
+
+   🚪 正在進入內頁 [5]：https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E5%8D%9A%E8%A6%BD%E6%9C%83-%E6%B0%91%E9%96%93%E5%8F%83%E8%88%87%E8%A8%88%E7%95%AB-%E4%B8%89%E6%9C%88%E6%B4%BB%E5%8B%95%E7%B8%BD%E8%A6%BD
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參3月活動月報_A1.jpg
+   ✨ LLM 回傳了 8 個場次
+  [ERR] upsert 失敗 [目目文創《1996–2026：聲音東洄中》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (2dd8c62d-189f-4c7f-853e-99d4080d6048, 目目文創《1996–2026：聲音東洄中》, 邀請民眾募集中1996-2026年的東洄圖文、物件與故..., 2026-03-11 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:07.902232+00, null, null, f, 2026-06-21 15:59:59+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 目目文創《1996–2026：聲音東洄中》活動名稱｜..., 展覽, null, 60, 15, null, 2026-05-15 06:23:07.902232+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-06-21, null, t, null, 32263fd13af22e692c47ca8695c801d66112a24c170d2b20ba0f2fdf061adc6b, null, null, null, null, pending, active, null, 期間限定, {視覺藝術}).'}
+  [ERR] upsert 失敗 [不懂生活【Cemel草草植物語】]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (9956cedb-3d87-4737-a35f-467d6c98cee5, 不懂生活【Cemel草草植物語】, Cemel草草植物語-1-3導覽培訓課程，培養在地永續..., 2026-03-14 16:00:00+00, 不懂生活園區, https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:08.799571+00, 22.4436334, 120.8634441, f, 2026-03-14 16:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 不懂生活【Cemel草草植物語】活動名稱｜Cemel草草..., 工作坊, null, 60, 15, null, 2026-05-15 06:23:08.799571+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-03-15, null, t, null, 250617bbb0164d2c76993518a4fff96417b9f56a1c5a5322f38aea8df83c1ada, null, null, null, null, pending, active, null, 單日活動, {社區活動}).'}
+  📌 白名單命中（子字串）：'都蘭部落' ≈ '都蘭' → (23.128, 121.3765)
+  [ERR] upsert 失敗 [都蘭國【山海間的在地永續旅遊提案：都蘭慢旅指南】]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (393f24c5-bcfc-45f6-85f7-97fe8274f402, 都蘭國【山海間的在地永續旅遊提案：都蘭慢旅..., 石縫生存記2：都蘭部落樹皮地圖藝術創作營，探..., 2026-03-19 16:00:00+00, 都蘭部落, https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:09.011918+00, 23.128, 121.3765, f, 2026-03-22 16:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 都蘭國【山海間的在地永續旅遊提案：都蘭慢旅..., 工作坊, null, 60, 15, null, 2026-05-15 06:23:09.011918+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-03-23, null, t, null, 84259acd82dd5ee8aea851663f85e53d9f07bca8b98c11acf9a0d9e91e29fb99, null, null, null, null, pending, active, null, 單日活動, {原住民文化,社區活動}).'}
+  [ERR] upsert 失敗 [有限責任台東元生態社區合作社【從療癒到永續：台東綠健康師的誕生計畫】]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (037bd721-c4a0-4dd8-bd2a-910cff5a6fae, 有限責任台東元生態社區合作社【從療癒到永續..., 《台東綠健康師誕生行動》OST開放空間會議，探..., 2026-03-21 01:00:00+00, 知本金聯世紀酒店會議廳, https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:09.959225+00, 22.6925436, 121.0193319, f, 2026-03-21 04:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 有限責任台東元生態社區合作社【從療癒到永續..., 講座, null, 60, 15, null, 2026-05-15 06:23:09.959225+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-03-21, null, t, null, 240b1960eb7ea3ecc186d8cd57501e0c93b68553927a5881cb1c1fdc13da60bf, null, null, null, null, pending, active, null, 單日活動, {社區活動}).'}
+  [ERR] upsert 失敗 [天光日文化工作室【島語她說：台東女性敘事 × 母語共創計畫】]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (f594fcad-1468-4ef0-a3e8-1604be835d6a, 天光日文化工作室【島語她說：台東女性敘事 × ..., 故事採集x共創工作坊1，聚焦台東女性的敘事與..., 2026-03-29 05:30:00+00, 種子樹屋, https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:10.851327+00, 22.7624029, 121.1404892, f, 2026-03-29 08:30:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 天光日文化工作室【島語她說：台東女性敘事 × ..., 工作坊, null, 60, 15, null, 2026-05-15 06:23:10.851327+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-03-29, null, t, null, 7b82c5387e65e1c659cca9995d38f7be227f5018f936d058f9c2aaa381be179a, null, null, null, null, pending, active, null, 單日活動, {社區活動}).'}
+  [ERR] upsert 失敗 [栞米製作【「我們一起回家吧！」共融藝術社群與劇場演出計畫】]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (3fdad92f-a6cd-47d7-bd49-236530f1a230, 栞米製作【「我們一起回家吧！」共融藝術社群..., 系列工作坊Vol.1「家的身體」舞蹈工作坊，探索..., 2026-03-29 06:00:00+00, 庭翊民宿, https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:11.873076+00, 22.7319828, 121.0591188, f, 2026-03-29 09:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 栞米製作【「我們一起回家吧！」共融藝術社群..., 工作坊, null, 60, 15, null, 2026-05-15 06:23:11.873076+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-03-29, null, t, null, 3619f5445768c7d5c5a80c3ed8835123fd247b954e25526e23e775318e947b79, null, null, null, null, pending, active, null, 單日活動, {戲劇,社區活動}).'}
+  📌 白名單命中（子字串）：'臺東藝文中心廣場／大廳、在地展演空間（吧蟲 Bar Cynic、檔案室裡的小村閱讀、都蘭地下書店）' ≈ '都蘭' → (23.128, 121.3765)
+  [ERR] upsert 失敗 [樂廣場—山海有聲｜節目單]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (8442f292-583c-4794-8bd9-9c4bafdccdc5, 樂廣場—山海有聲｜節目單, 「樂廣場—山海有聲」節目單，匯集聲音與視覺..., 2026-04-02 16:00:00+00, 臺東藝文中心廣場／大廳、在地展演空間（吧蟲 ..., https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:12.078079+00, 23.128, 121.3765, f, 2026-04-03 15:59:59+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 樂廣場—山海有聲｜節目單。看表演。2026.04.03 00..., 演出, null, 60, 15, null, 2026-05-15 06:23:12.078079+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-04-03, null, t, null, f6c78492e30a32bd301b643d7cb1cbb5507c31b8194f40af460e9f7a6bea0d7a, null, null, null, null, pending, active, null, 期間限定, {音樂,視覺藝術}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館落成，​打開閱讀新視野]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (caf63802-6f6d-470d-b04c-dc28a342ac93, 臺東縣立圖書館落成，\u200b打開閱讀新視野, 慶祝臺東縣立圖書館落成，開啟閱讀新篇章。, 2026-04-22 01:00:00+00, 臺東縣臺東市南京路25號, https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E..., {}, null, {"score": 0}, 2026-05-15 06:23:13.334765+00, 22.7564304, 121.1447272, f, 2026-04-22 01:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參..., 臺東縣立圖書館落成，\u200b打開閱讀新視野。講座..., 講座, null, 60, 15, 臺東縣臺東市南京路25號, 2026-05-15 06:23:13.334765+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-22, null, t, null, be93af4b51c6c9df7f10d702c63f2a216f89fb90e52cc746bfa61aac57eb38c0, null, null, null, null, pending, active, 市區, 單日活動, {文學}).'}
+
+   🚪 正在進入內頁 [6]：https://culture.taitung.gov.tw/activity/%E5%B1%B1%E6%B5%B7-wav-%E8%87%BA%E7%81%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E6%97%8F%E6%96%87%E5%AD%B8%E7%89%B9%E5%B1%95
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/1-1.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [山海.wav——臺灣原住民族文學特展]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (8596029f-d05b-40bd-932a-c36f84e0e924, 山海.wav——臺灣原住民族文學特展, 走入原住民作家以文字構築的聲音圖景，感受「..., 2026-03-01 01:00:00+00, 臺東縣立圖書館, https://culture.taitung.gov.tw/activity/%E5%B1%B1%E6%B5%B7-wav-%..., {}, null, {"score": 0}, 2026-05-15 06:23:26.596698+00, 22.7512573, 121.1517157, t, 2026-11-09 16:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/1-1.jp..., 「山海」一直是原住民族文化內涵中重要的意象..., 展覽, null, 60, 15, 三樓特展區, 2026-05-15 06:23:26.596698+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, 2026-11-10, null, t, null, 18370baee8d5f3d059f91644419d9bdaaa8b2bb5aa77782880ba0aa26bf62957, null, null, null, null, pending, active, 市區, 期間限定, {原住民文化,書寫文學}).'}
+
+   🚪 正在進入內頁 [7]：https://culture.taitung.gov.tw/activity/%E4%BB%A3%E8%A1%A8%E8%87%BA%E6%9D%B1%E7%9A%84%E3%80%8C%E4%B8%80%E5%80%8B%E8%81%B2%E9%9F%B3%E3%80%8D-%E8%87%BA%E6%9D%B1%E8%81%B2%E6%99%AF%E7%99%BE%E9%81%B8%E5%BE%B5%E4%BB%B6%E8%B3%87%E8%A8%8A
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/0316說明會貼文_fb-01.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [代表臺東的「一個聲音」--- 臺東聲景百選徵件資訊]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (9612a20e-120e-4e27-933d-89ad2fd22279, 代表臺東的「一個聲音」--- 臺東聲景百選徵件資..., 徵集具代表性的臺東聲音樣本，建構地方聽覺文..., 2026-03-28 16:00:00+00, 臺東故事館, https://culture.taitung.gov.tw/activity/%E4%BB%A3%E8%A1%A8%E8%87..., {}, null, {"score": 0}, 2026-05-15 06:23:44.015824+00, 22.75406, 121.1452988, t, 2026-05-28 16:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/0316..., 臺東縣政府辦理「台東博覽會」之委託國立臺東..., 其他, null, 60, 15, null, 2026-05-15 06:23:44.015824+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-29, null, t, null, f97e2115791d010398746de954f136011a988d534d6776bc14b1c37ba78b663c, null, null, null, null, pending, active, 市區, 期間限定, {原住民文化,生態旅遊}).'}
+
+   🚪 正在進入內頁 [8]：https://culture.taitung.gov.tw/activity/%E9%80%B8%E5%BD%A9%E5%A5%94%E9%A8%B0%E8%BF%8E%E6%96%B0%E6%98%A5-%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%BE%8E%E8%A1%93%E6%95%99%E8%82%B2%E5%AD%B8%E6%9C%83%E6%9C%83%E5%93%A1%E8%81%AF%E5%B1%95
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/604839_0.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [逸彩奔騰迎新春—臺東縣美術教育學會會員聯展]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (b5a0ac4d-73f7-4e49-ad4b-d71485dbe068, 逸彩奔騰迎新春—臺東縣美術教育學會會員聯展, 臺東縣美術教育學會舉辦會員聯展，展出以「馬..., 2026-04-02 00:00:00+00, 金剛寺藝文中心《雲筑苑》, https://culture.taitung.gov.tw/activity/%E9%80%B8%E5%BD%A9%E5%A5..., {}, null, {"score": 0}, 2026-05-15 06:23:56.474503+00, 22.746799, 121.1429923, t, 2026-05-20 12:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/604839..., 臺東縣美術教育學會長期深耕在地藝術教育，致..., 展覽, null, 60, 15, null, 2026-05-15 06:23:56.474503+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-20, null, t, null, 1789bbc76ab6bc028aafb8d9db5d61573df433f52798e8df62fed8fe6c7daff9, null, null, null, null, pending, active, 東海岸線, 期間限定, {視覺藝術,傳統工藝}).'}
+
+   🚪 正在進入內頁 [9]：https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0%B4-%E5%B1%B1%E6%B5%B7%E6%9C%89%E8%81%B2%EF%BD%9C%E7%AF%80%E7%9B%AE%E5%96%AE
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8%82%E5%BB%A3%E5%A0%B45-6%E6%9C%88%E7%AF%80%E7%9B%AE%E5%96%AE0428.jpg
+   ✨ LLM 回傳了 13 個場次
+  [ERR] upsert 失敗 [加拿大JMF音樂節 快閃臺東]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (b9c101d0-8ab4-4642-a9a3-a113c9049eb9, 加拿大JMF音樂節 快閃臺東, 加拿大JMF音樂節於臺東帶來一場快閃音樂饗宴，..., 2026-05-01 11:30:00+00, 臺東藝文中心廣場／大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:34.457528+00, 22.7565427, 121.1446118, t, 2026-05-01 13:00:00+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 加拿大JMF音樂節 快閃臺東\n時間：5/1 (五) 7:30-9:00p..., 演出, null, 60, 15, null, 2026-05-15 06:24:34.457528+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-01, null, t, null, a033edd2c12e2e69c1df312e44124b4fa2cf4d7663e034023b7693d7bb0cb9a0, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [被正史忽略的黑膠年代歌謠]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (94a07f2d-cb4f-4b12-a217-1424a0eb30b2, 被正史忽略的黑膠年代歌謠, 一場關於黑膠年代歌謠的演出，由徐睿楷Eric、豐..., 2026-05-02 11:30:00+00, 檔案室裡的小村閱讀, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:35.342489+00, 22.7678432, 121.1273067, t, 2026-05-02 13:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 演唱會\n被正史忽略的黑膠年代歌謠\n徐睿楷Eric×..., 演出, null, 60, 15, null, 2026-05-15 06:24:35.342489+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-02, null, t, null, 28a511d0bcbbe3c8e396fb3394e4b42867267b72aefe07e08828a1c74f3198b4, null, null, null, null, pending, active, null, 單日活動, {音樂,講座}).'}
+  [ERR] upsert 失敗 [張錦桂與滿州民謠]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (be72fadc-e5d8-4979-8001-7505f2705f5a, 張錦桂與滿州民謠, 張錦桂與滿州民謠的音樂演出，在臺東藝文中心..., 2026-05-23 11:30:00+00, 臺東藝文中心廣場／大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:36.354295+00, 22.7565427, 121.1446118, t, 2026-05-23 12:30:00+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 5/23 Sat. 7:30-8:30pm\n張錦桂與滿州民謠, 演出, null, 60, 15, null, 2026-05-15 06:24:36.354295+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-23, null, t, null, f9f85607a32a22a8862f5cff3ec6b9b4860f2a3e7966520f881022943d9f61f9, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [Jason李玠融／依靜依靜]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (db73e9c6-49f3-4bee-99c0-c146f69b5f32, Jason李玠融／依靜依靜, Jason李玠融與依靜依靜的音樂演出，為您帶來午..., 2026-05-24 08:00:00+00, 臺東藝文中心廣場／大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:37.302719+00, 22.7565427, 121.1446118, t, 2026-05-24 09:30:00+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 5/24 Sun. 4:00-5:30pm\nJason李玠融／依靜依靜, 演出, null, 60, 15, null, 2026-05-15 06:24:37.302719+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-24, null, t, null, ff1300fbbbcb4094ddcb4e2fb1e51a1553cc7eac1349f5ff580902fdc830e64a, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [斯馬里奧 X 張塗勘]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (90654bc3-62cb-402f-9ef7-f888065216fd, 斯馬里奧 X 張塗勘, 斯馬里奧與張塗勘的音樂演出，邀請您一同參與..., 2026-05-30 11:30:00+00, 臺東藝文中心廣場／大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:38.289499+00, 22.7565427, 121.1446118, t, 2026-05-30 13:00:00+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 5/30 Sat. 7:30-9:00pm\n斯馬里奧 × 張塗勘\nGiyu Tjuljaviyiy..., 演出, null, 60, 15, null, 2026-05-15 06:24:38.289499+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-30, null, t, null, eb13400e771cbec8cfc715be3ceefade560cd4a46c4143f92df8036e682868de, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [演唱會－臺灣山地歌謠]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (eb6ebd42-f6b7-492e-9645-8fe016b58cf0, 演唱會－臺灣山地歌謠, 一場關於臺灣山地歌謠的演唱會，由陳永龍與南..., 2026-06-06 08:00:00+00, 臺東藝文中心廣場／大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:39.230478+00, 22.7565427, 121.1446118, t, 2026-06-06 09:30:00+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 演唱會－臺灣山地歌謠\n陳永龍 × 南族青春歌隊\n..., 演出, null, 60, 15, null, 2026-05-15 06:24:39.230478+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-06-06, null, t, null, d3e87ae3f2ca5a3e34e342f2eb2b34b3321a39b5b10f0844374c3abc1b5eec0d, null, null, null, null, pending, active, null, 單日活動, {音樂,原住民文化}).'}
+  [ERR] upsert 失敗 [裝傱人]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (daa0426f-dc6f-4508-95fd-03faf8d9e790, 裝傱人, 裝傱人的音樂演出，在地展演空間提供獨特的聆..., 2026-06-07 11:30:00+00, 地下書店 underground bookstore, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:40.126208+00, 22.8737009, 121.2281276, t, 2026-06-07 13:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 6/7 Sun. 7:30-9:00pm\n裝傱人\nTsung-kha-lâng\n地點：地下..., 演出, null, 60, 15, null, 2026-05-15 06:24:40.126208+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-06-07, null, t, null, 3dc42ed102e9038ba2042b2276f1511d4c600123ec9c70858806d0b02c820b2c, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [原味醞釀]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (f8a45fd1-baf6-4d03-9e3b-7216d8664b3d, 原味醞釀, 原味醞釀的音樂演出，在Bar Cynic 吧蟲帶來在地風..., 2026-06-12 11:30:00+00, Bar Cynic 吧蟲, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:41.06442+00, 22.7518537, 121.1519208, t, 2026-06-12 13:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 6/12 Fri. 7:30-9:00pm\n原味醞釀\n地點：Bar Cynic 吧蟲, 演出, null, 60, 15, null, 2026-05-15 06:24:41.06442+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-06-12, null, t, null, 3efaa43a0192527a4b4238d9189f0bed6d7c19c1e07a04d81bab7f7aaa4260b7, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [樂(yào)成發]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (6e31dae6-ab37-4d1c-8fc8-64bc62422900, 樂(yào)成發, 樂(yào)成發的音樂演出，為「樂廣場—山海有聲..., 2026-06-14 11:30:00+00, 臺東藝文中心廣場／大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:41.962563+00, 22.7565427, 121.1446118, t, 2026-06-14 13:00:00+00, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 6/14 Sun. 7:30-9:00pm\n樂(yào)成發\n地點：臺東藝文中..., 演出, null, 60, 15, null, 2026-05-15 06:24:41.962563+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-06-14, null, t, null, 0bfef19039e31cacc53a87060667b09ada080c94429eee4d922d6c518c0113f1, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  📌 白名單命中（子字串）：'臺東藝文中心廣場／大廳、在地展演空間（吧蟲 Bar Cynic、檔案室裡的小村閱讀、都蘭地下書店）' ≈ '都蘭' → (23.128, 121.3765)
+  [ERR] upsert 失敗 [樂廣場—山海有聲]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (471e3b95-eecc-4ba7-ad24-3056bb15a472, 樂廣場—山海有聲, 「樂廣場—山海有聲」系列活動，結合多組音樂..., 2026-04-02 16:00:00+00, 臺東藝文中心廣場／大廳、在地展演空間（吧蟲 ..., https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:42.153651+00, 23.128, 121.3765, t, 2026-06-13 16:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 5月份加入「謠來謠去徵件」獲選團隊的節目，除..., 演出, null, 60, 15, null, 2026-05-15 06:24:42.153651+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-06-14, null, t, null, b7ecae45d2926d3db1410f7007216b1797a7a3f62f34620f0b0d20e6b4c2a40a, null, null, null, null, pending, active, null, 期間限定, {音樂}).'}
+  [ERR] upsert 失敗 [斯馬里奧 X 張塗勘]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (8d14e40d-5701-4478-8a6c-4d917ae344d8, 斯馬里奧 X 張塗勘, 斯馬里奧與張塗勘的音樂演出，在吧蟲 Bar Cynic ..., 2026-05-14 11:30:00+00, 吧蟲 Bar Cynic, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:43.002286+00, 22.749883, 121.1502028, t, 2026-05-14 13:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 5/14 Thu. 7:30-9:00pm\n斯馬里奧 × 張塗勘\nGiyu Tjuljaviyiy..., 演出, null, 60, 15, null, 2026-05-15 06:24:43.002286+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-14, null, t, null, 5cf1c9f79cc7c890e68195c727e96615f9bb3880187d639b60c97d7c6cca2ca2, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [依靜依靜]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (e17eebf2-5aa3-47c3-86b1-20cba0d7b699, 依靜依靜, 依靜依靜的音樂演出，在檔案室裡的小村閱讀，..., 2026-05-21 11:30:00+00, 檔案室裡的小村閱讀, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:43.831664+00, 22.7678432, 121.1273067, t, 2026-05-21 12:30:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 5/21 Thu. 7:30-8:30pm\n依靜依靜\n地點：檔案室裡的小..., 演出, null, 60, 15, null, 2026-05-15 06:24:43.831664+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-21, null, t, null, 0732a230cf6c07c11325efe165829a1386559fdecc0fda447d253a5ff0680ed2, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+  📌 白名單命中（子字串）：'都蘭地下書店' ≈ '都蘭' → (23.128, 121.3765)
+  [ERR] upsert 失敗 [張錦桂與滿州民謠]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (254358a6-2913-4592-a53c-16bc23573078, 張錦桂與滿州民謠, 張錦桂與滿州民謠的音樂演出，在都蘭地下書店..., 2026-05-22 11:30:00+00, 都蘭地下書店, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:24:44.021523+00, 23.128, 121.3765, t, 2026-05-22 12:30:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8..., 5/22 Fri. 7:30-8:30pm\n張錦桂與滿州民謠\n地點：都蘭..., 演出, null, 60, 15, null, 2026-05-15 06:24:44.021523+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-22, null, t, null, dcd0e35c89f5d1d798b3a6ae03ff773cd57e3ece457f5b12753dc637e338c334, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+   [PAGINATION] 正在點擊第 2 頁按鈕...
+   [PAGINATION] 基準首活動：https://culture.taitung.gov.tw/activity/%E9%BA%BB%E7%85%A9%E4%BA%86%EF%BC%8C%E8%87%BA%E6%9D%B1%EF%BC%81-good-trouble
+   [PAGINATION] ✅ DOM 偵測到活動卡片已更新
+   [PAGINATION] ✅ 偵測到內容已更新，開始處理第 2 頁
+
+════════════════════════════════════════════════════════════
+📖 正在處理第 2 頁（活動列表）
+════════════════════════════════════════════════════════════
+   🔗 本頁發現 9 個活動內頁連結
+
+   🚪 正在進入內頁 [10]：https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0%B4-%E5%B1%B1%E6%B5%B7%E6%9C%89%E8%81%B2%EF%BD%9C%E7%BC%BA%E6%B8%B4%E6%A8%82lao-%E7%B6%93%E5%85%B8%E8%AC%9B%E5%BA%A7
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/海小姐.jpg
+   ✨ LLM 回傳了 4 個場次
+  [ERR] upsert 失敗 [樂廣場—山海有聲｜缺渴樂(lào) 經典講座：民歌時期的文學想像]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (d1a3331c-bb1b-4f9a-b68a-20d43bbbb798, 樂廣場—山海有聲｜缺渴樂(lào) 經典講座：民歌..., 一場以民歌時期為主題的經典講座，探討文學與..., 2026-04-12 11:30:00+00, 檔案室裡的小村閱讀, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:25:05.99081+00, 22.7667844, 121.1268124, t, 2026-04-12 13:30:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/海小..., 講座以「民歌時期的文學想像」為題，邀請花蓮..., 講座, null, 60, 15, 臺東市中興路二段191號, 2026-05-15 06:25:05.99081+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-04-12, null, t, null, 2b34f06ecf77f8bee1b9786d58d4ba0385dd60c85f91b4236dd60eae301e3c15, null, null, null, null, pending, active, 市區, 單日活動, {音樂,書法文學}).'}
+  [ERR] upsert 失敗 [樂廣場—山海有聲｜缺渴樂(lào) 經典講座：遠洋歌謠]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (0afa710b-4c9f-4f67-ab92-388ae33fd595, 樂廣場—山海有聲｜缺渴樂(lào) 經典講座：遠洋..., 探討遠洋歌謠的採集與研究，從音樂史角度認識..., 2026-04-24 11:30:00+00, 臺東藝文中心大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:25:06.872306+00, 22.7564304, 121.1447272, t, 2026-04-24 13:30:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/海小..., 由國立臺灣大學音樂學研究所副教授、遠洋歌謠..., 講座, null, 60, 15, 臺東市南京路25號, 2026-05-15 06:25:06.872306+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-04-24, null, t, null, 900b7d53ca853efe4c4aecd7e442fc26d41fcae442553eb8c9df7d3ccb7102e7, null, null, null, null, pending, active, 市區, 單日活動, {音樂,原住民文化}).'}
+  [ERR] upsert 失敗 [樂廣場—山海有聲｜缺渴樂(lào) 經典講座：被正史忽略的黑膠年代歪歌]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (684b0c89-e28c-41d0-9318-527304353d67, 樂廣場—山海有聲｜缺渴樂(lào) 經典講座：被正..., 深入挖掘黑膠年代被遺忘的音樂，顛覆你對流行..., 2026-05-01 06:00:00+00, 臺東藝文中心大廳, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:25:07.608942+00, 22.7564304, 121.1447272, t, 2026-05-01 08:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/海小..., 臺灣流行音樂研究者徐睿楷（Eric Scheihagen）將帶..., 講座, null, 60, 15, 臺東市南京路25號, 2026-05-15 06:25:07.608942+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-01, null, t, null, 1bf09739324f5df9b6e5727e5cfbc558768942dddaf498b9d4b839f3af321abc, null, null, null, null, pending, active, 市區, 單日活動, {音樂,電影}).'}
+  [ERR] upsert 失敗 [樂廣場—山海有聲｜缺渴樂(lào) 經典講座：移動中的聲音：泰國Luk Thung音樂與都市化中的情感經驗]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (5326a3a1-e580-4e4f-986a-a858ba639e91, 樂廣場—山海有聲｜缺渴樂(lào) 經典講座：移動..., 從泰國Luk Thung音樂出發，探討都市化對情感經驗..., 2026-05-29 11:30:00+00, 檔案室裡的小村閱讀, https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0..., {}, null, {"score": 0}, 2026-05-15 06:25:08.380892+00, 22.7667844, 121.1268124, t, 2026-05-29 13:30:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/海小..., 政大東南亞語文學系助理教授、泰國表演藝術/音..., 講座, null, 60, 15, 臺東市中興路二段191號, 2026-05-15 06:25:08.380892+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-29, null, t, null, dcdafdfd6657fc167d4c51ff3711d6313573c809046a0afbf7f398050f5db203, null, null, null, null, pending, active, 市區, 單日活動, {音樂,電影}).'}
+
+   🚪 正在進入內頁 [11]：https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E5%90%84%E5%BC%8F%E6%B4%BB%E5%8B%95
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/%E5%8F%B0%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E7%B8%B1%E8%B0%B7%E5%8D%80.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [臺東縣立圖書館落成，​打開閱讀新視野]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (2402480b-d8ad-4f42-b888-78aa7358d435, 臺東縣立圖書館落成，\u200b打開閱讀新視野, 慶祝全新臺東縣立圖書館正式開幕，打造結合親..., 2026-04-22 01:00:00+00, 臺東縣立圖書館, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:25:47.863513+00, 22.7564304, 121.1447272, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/%E5%8F..., 全新臺東縣立圖書館將於4月22日正式開幕全區開..., 其他, null, 60, 15, 臺東市南京路25號, 2026-05-15 06:25:47.863513+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 自修區：週四至週日 09:00－21:00；青少年閱讀區..., null, null, t, null, c1a53efc4574ef5ee427832a425abb2d623bcf2532d7042c435be05f744563d4, null, null, null, null, pending, active, 市區, 期間限定, {}).'}
+
+   🚪 正在進入內頁 [12]：https://culture.taitung.gov.tw/activity/%E4%BE%86%E8%87%AA%E8%98%87%E6%A0%BC%E8%98%AD%E5%A5%B6%E5%A5%B6%E7%9A%84%E8%BA%AB%E9%AB%94%E5%AF%A6%E9%A9%97-these-mechanisms-%E3%80%8A%E9%80%99%E4%BA%9B%E6%A9%9F%E5%88%B6%E3%80%8B
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/截圖-2026-03-25-下午5.54.53.png
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [來自蘇格蘭奶奶的身體實驗—These Mechanisms /《這些機制》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (4399b874-ea64-48be-9733-35a9652fbe29, 來自蘇格蘭奶奶的身體實驗—These Mechanisms /《這..., 探索「移動」與「玩」的身體經驗，適合對身體..., 2026-05-20 05:30:00+00, 臺東藝文中心 演藝廳舞台, https://culture.taitung.gov.tw/activity/%E4%BE%86%E8%87%AA%E8%98..., {}, null, {"score": 0}, 2026-05-15 06:26:01.595141+00, 22.7565427, 121.1446118, t, 2026-05-20 09:30:00+00, https://forms.gle/UQNxw7dp3Yhdt2fe9, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/03/截圖..., 這是一場關於「移動」與「玩」的身體探索。無..., 演出, null, 60, 15, null, 2026-05-15 06:26:01.595141+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-20, null, t, null, 20ae1bbbdbb1f4d5f0ffdff3ce92480f0a9b3376b2752818d2cf2117c8822e41, null, null, null, null, pending, active, 市區, 期間限定, {舞蹈,戲劇,講座}).'}
+
+   🚪 正在進入內頁 [13]：https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E9%96%8B%E5%B9%95%E7%B3%BB%E5%88%97%E6%BC%94%E5%87%BA%E5%85%A8%E7%AF%80%E7%9B%AE%E4%BB%8B%E7%B4%B9
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423系列演出.jpg
+   ✨ LLM 回傳了 12 個場次
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 台東回響樂團 | 企鵝演奏會]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (b66bd57d-bc4d-41f5-b77d-ef72f86e7b7b, 臺東縣立圖書館開幕系列演出 - 台東回響樂團 | ..., 圖書館開幕系列演出，由台東回響樂團帶來企鵝..., 2026-04-25 08:00:00+00, 臺東縣立圖書館親子閱讀區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:45.122875+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:45.122875+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 8d34e7b720cf465a3dca01b2ddfa40f6d067beed4d382a83e9a2d8b2ca7a9113, null, null, null, null, pending, active, 市區, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 台東回響樂團 | 山海之音]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (e27ea362-6168-4021-8844-468c78c76d0d, 臺東縣立圖書館開幕系列演出 - 台東回響樂團 | ..., 圖書館開幕系列演出，由台東回響樂團帶來山海..., 2026-04-26 08:00:00+00, 臺東縣立圖書館縱谷館藏區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:46.411617+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:46.411617+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 638dcbc1cdc6d2d6b252f24f0c51f86c02037f94619957ccc3119bcbb65a05e0, null, null, null, null, pending, active, 市區, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 夢想成真魔術劇團 | 大型兒童魔術劇《怪盜神偷》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (6d0cf2f3-e57e-49ff-a61f-121ab76e33f2, 臺東縣立圖書館開幕系列演出 - 夢想成真魔術劇..., 圖書館開幕系列演出，夢想成真魔術劇團帶來大..., 2026-05-02 08:00:00+00, 臺東縣立圖書館大門前, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:47.716784+00, 22.7562409, 121.1450756, t, null, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:47.716784+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, c1cbdf57e648d65202536873774c178c84ddf356650dd37cd23d14a64176aa8e, null, null, null, null, pending, active, 市區, 單日活動, {戲劇,親子}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 夢想成真魔術劇團 | 大型兒童魔術劇《怪盜神偷》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (f7e5f150-b1ca-482b-a45d-66bdb0d2b4a8, 臺東縣立圖書館開幕系列演出 - 夢想成真魔術劇..., 圖書館開幕系列演出，夢想成真魔術劇團帶來大..., 2026-05-03 08:00:00+00, 臺東縣立圖書館大門前, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:48.94385+00, 22.7562409, 121.1450756, t, null, null, null, outdoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:48.94385+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 623e6e8593a2def16608a7aa8c84c0d6a076a9cb8613e86f5c7f180f9d08e81d, null, null, null, null, pending, active, 市區, 單日活動, {戲劇,親子}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 零捌玖 POP Space+| 未知的奇幻旅程]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (1bf790bf-a3a2-4efc-b6b8-1aeb328b14ff, 臺東縣立圖書館開幕系列演出 - 零捌玖 POP Space+| ..., 圖書館開幕系列演出，零捌玖 POP Space+ 帶來未知..., 2026-05-09 08:00:00+00, 臺東縣立圖書館大廳+親子閱讀區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:50.28698+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:50.28698+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 4c56c7150b81ea8812e317785280ef1c19a16ba386de8dae35bd1a544aaa233d, null, null, null, null, pending, active, 市區, 單日活動, {舞蹈}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 零捌玖 POP Space+| 未知的奇幻旅程]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (90f6ea7d-8fc7-4174-93b3-20754127dc5c, 臺東縣立圖書館開幕系列演出 - 零捌玖 POP Space+| ..., 圖書館開幕系列演出，零捌玖 POP Space+ 帶來未知..., 2026-05-10 08:00:00+00, 臺東縣立圖書館縱谷館藏區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:51.402564+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:51.402564+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 8af57ac756597ae83a2068c65c94d19b090747c8a73c5737b1d5ddae67d2c25a, null, null, null, null, pending, active, 市區, 單日活動, {舞蹈}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 夏威夷火山之花工作坊 | 夏威夷島嶼的呼喚]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (cfc0df25-c089-418f-96a5-49fff1fac8f2, 臺東縣立圖書館開幕系列演出 - 夏威夷火山之花..., 圖書館開幕系列演出，夏威夷火山之花工作坊帶..., 2026-05-16 08:00:00+00, 臺東縣立圖書館縱谷館藏區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:52.754368+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 工作坊, null, 60, 15, null, 2026-05-15 06:26:52.754368+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, fcc957b43cfcd3f4523b1e9afda56b979a342b1b2afae41e90d3cd2ae117b1a6, null, null, null, null, pending, active, 市區, 單日活動, {舞蹈,文化}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 腹語師小強 | 腹語師小強的奇幻劇場]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (faac93ae-22eb-4a1a-ad3f-3d8f636ba697, 臺東縣立圖書館開幕系列演出 - 腹語師小強 | 腹..., 圖書館開幕系列演出，腹語師小強帶來腹語師小..., 2026-05-16 02:30:00+00, 臺東縣立圖書館親子閱讀區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:54.205817+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:54.205817+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, d3367fab2c72c15855c21e8d7ca96671fb6f9a479766f2f9aa89c09fbc62222e, null, null, null, null, pending, active, 市區, 單日活動, {親子,故事}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 夏威夷火山之花工作坊 | 夏威夷島嶼的呼喚]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (6ab7f5e6-c4a4-4d4f-b464-dcc0427d1ad4, 臺東縣立圖書館開幕系列演出 - 夏威夷火山之花..., 圖書館開幕系列演出，夏威夷火山之花工作坊帶..., 2026-05-17 08:00:00+00, 臺東縣立圖書館縱谷館藏區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:55.515452+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 工作坊, null, 60, 15, null, 2026-05-15 06:26:55.515452+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 174c4c1d5747f139ca7986f09122ca23ef447366b133920492417f14183460b7, null, null, null, null, pending, active, 市區, 單日活動, {舞蹈,文化}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 腹語師小強 | 腹語師小強的奇幻劇場]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (9a25a828-17ad-499d-a7ba-6ab943889f1c, 臺東縣立圖書館開幕系列演出 - 腹語師小強 | 腹..., 圖書館開幕系列演出，腹語師小強帶來腹語師小..., 2026-05-17 02:30:00+00, 臺東縣立圖書館親子閱讀區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:56.836288+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:56.836288+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, a379b9daf1c18c9b7fce18effa0343d765d48061cf01a35310e314ba4d817c0a, null, null, null, null, pending, active, 市區, 單日活動, {親子,故事}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 請問芳名人聲樂團 | 山海詠嘆・無伴奏之聲]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (a18f35cc-0ade-4a36-af7d-a52fb4d25efd, 臺東縣立圖書館開幕系列演出 - 請問芳名人聲樂..., 圖書館開幕系列演出，請問芳名人聲樂團帶來山..., 2026-05-23 08:00:00+00, 臺東縣立圖書館縱谷館藏區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:58.071116+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:58.071116+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 45b37ed2fdbfa10b873403a18af94e3b5c498c3d3aeed9348e6c8731e2b14cfb, null, null, null, null, pending, active, 市區, 單日活動, {音樂}).'}
+  [ERR] upsert 失敗 [臺東縣立圖書館開幕系列演出 - 請問芳名人聲樂團 | 山海詠嘆・無伴奏之聲]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (477d0fcf-4fe6-4ff3-be7a-d408c79c5422, 臺東縣立圖書館開幕系列演出 - 請問芳名人聲樂..., 圖書館開幕系列演出，請問芳名人聲樂團帶來山..., 2026-05-24 08:00:00+00, 臺東縣立圖書館縱谷館藏區, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E7%B8..., {}, null, {"score": 0}, 2026-05-15 06:26:59.27335+00, 22.7562409, 121.1450756, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/0423..., 於四月 22 號正式開幕的臺東縣立圖書館，不只是..., 演出, null, 60, 15, null, 2026-05-15 06:26:59.27335+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, null, null, t, null, 55ab3b5a0d512bef3b25b74a70a3a7a7cd6d7e7da4574219fce6e9856ec0fb4e, null, null, null, null, pending, active, 市區, 單日活動, {音樂}).'}
+
+   🚪 正在進入內頁 [14]：https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E8%A8%AD%E8%A8%88%E9%BB%83%E9%A0%81%E7%B0%BF-%E2%95%B3%E5%8A%A0%E9%BB%9E%E5%BB%A2%E7%89%A9%E5%AF%A6%E9%A9%97%E5%AE%A4
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/%E5%8F%B0%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E7%B8%B1%E8%B0%B7%E5%8D%80.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [臺東設計黃頁簿 ╳ 加點廢物實驗室]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (8b2ca803-92b3-4652-853a-064c9d155907, 臺東設計黃頁簿 ╳ 加點廢物實驗室, 匯集臺東設計能量與廢物再生力，舉辦講座、市..., 2026-05-16 08:30:00+00, 加點廢物實驗室倉庫, https://culture.taitung.gov.tw/activity/%E8%87%BA%E6%9D%B1%E8%A8..., {}, null, {"score": 0}, 2026-05-15 06:27:41.484927+00, 22.7470165, 121.1539162, f, 2026-05-16 14:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/%E5%8F..., 「臺東設計黃頁簿 ╳ 加點廢物實驗室」旨在創..., 活動, null, 60, 15, null, 2026-05-15 06:27:41.484927+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-16, null, t, null, ffc2615190fec7154a59454802b1160edfcd685ba26afe841ec61bf1a187dc7a, null, null, null, null, pending, active, null, 期間限定, {講座,市集,社區活動}).'}
+
+   🚪 正在進入內頁 [15]：https://culture.taitung.gov.tw/activity/%E3%80%8A%E5%85%89%E6%88%90%E7%82%BA%E6%B5%B7%EF%BD%9C%E4%BD%9C%E5%93%81%E4%BD%9C%E7%82%BA%E5%A0%B4%E3%80%8B%E8%B3%B4%E7%B4%94%E7%B4%94%E5%80%8B%E5%B1%95
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/主視覺2.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [《光成為海｜作品作為場》賴純純個展]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (528eea5a-2f79-4747-b7c5-b5e9cda25139, 《光成為海｜作品作為場》賴純純個展, 享譽國際的藝術家賴純純，將於臺東美術館展出..., 2026-04-30 01:00:00+00, 臺東美術館, https://culture.taitung.gov.tw/activity/%E3%80%8A%E5%85%89%E6%88..., {}, null, {"score": 0}, 2026-05-15 06:28:06.884972+00, 22.7642898, 121.1498803, t, 2026-06-14 09:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/主視..., 準備好迎接一場純粹的光影洗禮了嗎？享譽國際..., 展覽, null, 60, 15, 臺東市浙江路350號, 2026-05-15 06:28:06.884972+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 9:00–12:00、13:30–17:00（週一休館）；每週一休館, 2026-06-14, null, t, null, 33462acdbeaf3f6de29cfad12c54cddc13ef1bd605e93d028e5de956d77e692b, null, null, null, null, pending, active, 市區, 常態展覽, {視覺藝術}).'}
+
+   🚪 正在進入內頁 [16]：https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A%84%E6%B0%91%E9%96%93%E5%8F%83%E8%88%87%E8%A8%88%E7%95%AB-%E9%82%81%E9%96%8B%E5%88%9D%E5%A4%8F%E7%9A%84%E6%AD%A5%E4%BC%90
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參5月活動月報_A1.jpg
+   ✨ LLM 回傳了 11 個場次
+  [ERR] upsert 失敗 [全糖系列活動：台東市街走讀（場次二）]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (ef7a733a-620b-4f4d-894a-80c53e8b3255, 全糖系列活動：台東市街走讀（場次二）, 參與台東市街走讀，探索東糖生活圈與糖廠的歷..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:30.753728+00, null, null, f, 2026-05-27 08:30:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., 東糖生活圈與糖廠走讀, 講座, null, 60, 15, null, 2026-05-15 06:28:30.753728+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 806c4cd0830eea7d740a112c66c3704f231adb01386e3f31382b889980a2c8a3, null, null, null, null, pending, active, null, 期間限定, {講座}).'}
+  [ERR] upsert 失敗 [人人祭 X 關山巡禮與記憶畫布]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (0d47702f-78f3-499c-ada8-df29f94151af, 人人祭 X 關山巡禮與記憶畫布, 透過關山巡禮與記憶畫布，體驗人人祭的文化魅..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:30.975172+00, null, null, f, 2026-05-27 08:30:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., 人人祭 X 關山巡禮與記憶畫布（已額滿）, 其他, null, 60, 15, null, 2026-05-15 06:28:30.975172+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 8e84150433727ea0c824410f490229d641173b0a6daa64f0247cc860066d9d5e, null, null, null, null, pending, active, null, 期間限定, {社區活動}).'}
+  [ERR] upsert 失敗 [馬到成功懷舊小旅行-遊程培力課程]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (43367f82-e632-4314-9251-16ec85deea20, 馬到成功懷舊小旅行-遊程培力課程, 參與馬到成功懷舊小旅行，發掘成功鎮的在地故..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:31.21629+00, null, null, f, 2026-05-27 08:30:00+00, https://docs.google.com/forms/d/e/1FAIpQLSc0F30Q4X12o9K2R-E8k1Jb..., null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., 驛動・歸鄉：成功總站記憶再生計畫\n馬到成功懷..., 其他, null, 60, 15, null, 2026-05-15 06:28:31.21629+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, da0a81f2ef1707bfac3316c2346495ac2634d4e7ad994c08282f6ffa36c838b5, null, null, null, null, pending, active, null, 期間限定, {生態旅遊,社區活動}).'}
+  [ERR] upsert 失敗 [「家的印象」凸版畫印刷工作坊]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (d3184bec-54af-4d53-ade5-a91e7eec9a93, 「家的印象」凸版畫印刷工作坊, 透過凸版畫印刷，創作屬於你「家的印象」。, 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:31.4721+00, null, null, f, 2026-05-27 08:30:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., @栞米製作\n「家的印象」凸版畫印刷工作坊, 工作坊, null, 60, 15, null, 2026-05-15 06:28:31.4721+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 68079da189ad631419dc95acb232f878d62c0bc81c3a1f1580438a9f531ca4c3, null, null, null, null, pending, active, null, 期間限定, {視覺藝術}).'}
+  [ERR] upsert 失敗 [太平洋的孩子-達悟族文化花朵串珠工作坊]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (b8d97bf3-8f7a-4c0e-bf71-a80a0269d122, 太平洋的孩子-達悟族文化花朵串珠工作坊, 學習達悟族傳統串珠技法，製作獨一無二的花朵..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:31.699951+00, null, null, f, 2026-05-27 08:30:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., @阿布斯布農傳統服飾工作室\n太平洋的孩子-達悟..., 工作坊, null, 60, 15, null, 2026-05-15 06:28:31.699951+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 2e5e920ee82a25b0929e0e37f4161a3ec636fcad10b929e98b7b9313a3414507, null, null, null, null, pending, active, null, 期間限定, {傳統工藝,原住民文化}).'}
+  [ERR] upsert 失敗 [《台東綠健康師誕生行動》情境驗證工作坊]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (1a3ca12d-b2b2-4623-ae91-e3e4597b3866, 《台東綠健康師誕生行動》情境驗證工作坊, 參與《台東綠健康師誕生行動》工作坊，體驗情..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:31.913907+00, null, null, f, 2026-05-27 08:30:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., @有一種很藍的生活,叫做"台東"\n《台東綠健康師..., 工作坊, null, 60, 15, null, 2026-05-15 06:28:31.913907+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 7fa2b72d383455ac1120c18784243dbf468c317104001319bd3a7858ad84ecd7, null, null, null, null, pending, active, null, 期間限定, {講座}).'}
+  [ERR] upsert 失敗 [石縫生存記2：都蘭部落樹皮地圖藝術創作營]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (e83e80ef-c685-4305-90c2-1112d1947d25, 石縫生存記2：都蘭部落樹皮地圖藝術創作營, 探索都蘭部落，透過樹皮地圖藝術創作，學習野..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:32.121819+00, null, null, f, 2026-05-27 08:30:00+00, https://docs.google.com/forms/d/e/1FAIpQLSdY1O0N-3m1F9Rk5yU-t_4U..., null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., 都蘭國 ’Etolan Style\n石縫生存記2：都蘭部落樹皮..., 工作坊, null, 60, 15, null, 2026-05-15 06:28:32.121819+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 3f2e2f88eb0eecccf3ace507ca5e2755f712339f5ccd039dff915aca79921c64, null, null, null, null, pending, active, null, 期間限定, {視覺藝術,原住民文化,社區活動}).'}
+  [ERR] upsert 失敗 [母語共學活動1：大圳傳說]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (4fb6266c-d3d7-44cf-b4e8-4728325b8780, 母語共學活動1：大圳傳說, 透過「大圳傳說」，一同學習母語，感受土地的..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:32.314957+00, null, null, f, 2026-05-27 08:30:00+00, https://docs.google.com/forms/d/e/1FAIpQLScNlq7I6o5oGj_7b2I64UoY..., null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., 島嶼她說：台東女性敘事x母語共創\n母語共學活..., 講座, null, 60, 15, null, 2026-05-15 06:28:32.314957+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 04807f404d09301eb3751a71d7ee53cc4ffb2908285ddddfd36ea78e34158131, null, null, null, null, pending, active, null, 期間限定, {講座,原住民文化,社區活動}).'}
+  [ERR] upsert 失敗 [母語共學活動2：帶你走進一首詩]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (bb157d7c-3f9c-4f26-887d-bbab241edbb1, 母語共學活動2：帶你走進一首詩, 透過詩的引導，一同感受母語的魅力與生命力。, 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:32.526871+00, null, null, f, 2026-05-27 08:30:00+00, https://docs.google.com/forms/d/e/1FAIpQLScNlq7I6o5oGj_7b2I64UoY..., null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., 島嶼她說：台東女性敘事x母語共創\n母語共學活..., 講座, null, 60, 15, null, 2026-05-15 06:28:32.526871+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, d7ab103abbb9171f8bb1b0373aaf2d3c3fa4d86528417932a1021d5509fdfc74, null, null, null, null, pending, active, null, 期間限定, {講座,"書  法文學",社區活動}).'}
+  [ERR] upsert 失敗 [【Kuroro海洋大冒險】微型親水課]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (2d175944-397a-4ae4-8584-bcf4828d11d2, 【Kuroro海洋大冒險】微型親水課, 在Kuroro海洋大冒險中，享受親水的樂趣，探索海..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:32.727088+00, null, null, f, 2026-05-27 08:30:00+00, https://docs.google.com/forms/d/e/1FAIpQLSc8F4M6j1m9N0X9u219h9j3..., null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., Kuroro Aqua 浪潛水海洋園區（渚橋）\n【Kuroro海洋大..., 其他, null, 60, 15, null, 2026-05-15 06:28:32.727088+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 8cbb39e338496d81bb510a8be0249af71d5ed1983d8abea83f5f7453e5558583, null, null, null, null, pending, active, null, 期間限定, {親子,生態旅遊}).'}
+  [ERR] upsert 失敗 [※作業勿遲交—1996東洄圖文、物件與故事募集中]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (41b2702e-a788-4522-a5ab-15a7329204df, ※作業勿遲交—1996東洄圖文、物件與故事募集中, 參與「1996東洄」圖文、物件與故事募集計畫，共..., 2026-05-04 16:00:00+00, 未提供, https://culture.taitung.gov.tw/activity/%E4%BA%94%E6%9C%88%E7%9A..., {}, null, {"score": 0}, 2026-05-15 06:28:32.937358+00, null, null, f, 2026-05-27 08:30:00+00, https://docs.google.com/forms/d/e/1FAIpQLSc4e6c9m1O-q5d8d4O9q9qX..., null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/民參..., 目目文創 ViVo Creative Studio\n※作業勿遲交—1996東..., 其他, null, 60, 15, null, 2026-05-15 06:28:32.937358+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-27, null, t, null, 76d2f19e418c30771866b98297654d144dc8d20c3aef015eb00b9e81578ca12a, null, null, null, null, pending, active, null, 期間限定, {社區活動}).'}
+
+   🚪 正在進入內頁 [17]：https://culture.taitung.gov.tw/activity/sasing%E9%87%8D%E8%AE%80%E7%9A%84%E8%A8%98%E6%86%B6-%E9%98%BF%E7%BE%8E%E6%97%8F%E7%94%B7%E5%A3%AB%E9%A0%AD%E9%A3%BE%E5%B1%95
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/重讀的記憶海報.jpg
+   ✨ LLM 回傳了 1 個場次
+  📌 白名單命中（子字串）：'臺東縣成功鎮原住民文物館' ≈ '成功鎮' → (23.0989, 121.3741)
+  [ERR] upsert 失敗 [Sasing重讀的記憶 --- 阿美族男士頭飾展]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (d4aa8acb-2466-4697-a234-d7ce64041c13, Sasing重讀的記憶 --- 阿美族男士頭飾展, 展出阿美族男士頭飾與老照片，呈現部落的工藝..., 2026-05-05 03:06:00+00, 臺東縣成功鎮原住民文物館, https://culture.taitung.gov.tw/activity/sasing%E9%87%8D%E8%AE%80..., {}, null, {"score": 0}, 2026-05-15 06:28:50.804927+00, 23.0989, 121.3741, t, 2026-11-29 09:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/重讀..., 老照片，不僅是紀錄，更是身分與生活情境的線..., 展覽, null, 60, 15, null, 2026-05-15 06:28:50.804927+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-11-29, null, t, null, f191ae48af5f34d3d6cbb16016841eed48429d33a24be0d1fd17823e2528c7ee, null, null, null, null, pending, active, 東海岸線, 期間限定, {原住民文化,視覺藝術}).'}
+
+   🚪 正在進入內頁 [18]：https://culture.taitung.gov.tw/activity/%E3%80%902026%E5%8F%B0%E6%9D%B1%E9%80%A0%E8%81%9A%E8%A1%8C%E5%8B%95%E7%8D%8E%E5%8B%B5%E8%A8%88%E7%95%AB%E3%80%91%E8%AA%AA%E6%98%8E%E6%9C%83%E6%9A%A8%E7%B3%BB%E5%88%97%E6%8F%90%E6%A1%88%E5%B7%A5
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/2026台東造聚行動獎勵計畫-工作坊海報1.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [【2026台東造聚行動獎勵計畫】說明會暨系列提案工作坊]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (e288e30a-9b4e-4d9d-9c5f-11a40a15897e, 【2026台東造聚行動獎勵計畫】說明會暨系列提案..., 兩天系列活動，陪你把想法慢慢變成真正的地方..., 2026-05-14 01:00:00+00, 臺東美術館大文創教室, https://culture.taitung.gov.tw/activity/%E3%80%902026%E5%8F%B0%E..., {}, null, {"score": 0}, 2026-05-15 06:29:08.164385+00, 22.7642898, 121.1498803, t, 2026-05-15 07:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/2026..., 你是不是也曾想過「台東其實還可以更不一樣？..., 講座, null, 60, 15, 臺東市浙江路350號, 2026-05-15 06:29:08.164385+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-15, null, t, null, 9957640fc722b3226fd463af59eb4d0666cf5596f13fc20f3a0eff61767e1a0b, null, null, null, null, pending, active, 市區, 期間限定, {社區活動,講座}).'}
+   [PAGINATION] 正在點擊第 3 頁按鈕...
+   [PAGINATION] 基準首活動：https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0%B4-%E5%B1%B1%E6%B5%B7%E6%9C%89%E8%81%B2%EF%BD%9C%E7%BC%BA%E6%B8%B4%E6%A8%82lao-%E7%B6%93%E5%85%B8%E8%AC%9B%E5%BA%A7
+   [PAGINATION] ✅ DOM 偵測到活動卡片已更新
+   [PAGINATION] ✅ 偵測到內容已更新，開始處理第 3 頁
+
+════════════════════════════════════════════════════════════
+📖 正在處理第 3 頁（活動列表）
+════════════════════════════════════════════════════════════
+   🔗 本頁發現 9 個活動內頁連結
+
+   🚪 正在進入內頁 [19]：https://culture.taitung.gov.tw/activity/%E3%80%8C%E8%97%9D%E3%80%8D%E7%94%9F%E6%87%B8%E5%91%BD-%E5%9C%8B%E7%AB%8B%E8%87%BA%E6%9D%B1%E5%A5%B3%E5%AD%90%E9%AB%98%E7%B4%9A%E4%B8%AD%E5%AD%B8%E7%AC%AC25%E5%B1%86%E7%BE%8E%E8%A1%93%E7%8F%AD
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/截圖-2026-05-08-下午4.39.012.png
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [「藝」生懸命-國立臺東女子高級中學第25屆美術班畢業成果展]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (58c3ec79-9109-49ea-bb08-189cdc2955cb, 「藝」生懸命-國立臺東女子高級中學第25屆美術..., 國立臺東女子高級中學第25屆美術班畢業成果展..., 2026-05-15 01:00:00+00, 臺東藝文中心＿1F展覽室及藝廊, https://culture.taitung.gov.tw/activity/%E3%80%8C%E8%97%9D%E3%80..., {}, null, {"score": 0}, 2026-05-15 06:29:33.858969+00, 22.7565427, 121.1446118, t, 2026-05-28 09:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/截圖..., 「藝」生懸命（一生懸命）：畫展主題借用日語..., 展覽, null, 60, 15, null, 2026-05-15 06:29:33.858969+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-28, null, t, null, 52ce0293a8b2357efa58848a8843dd33c6a3b10d8414c475048daebf32be72f2, null, null, null, null, pending, active, null, 期間限定, {視覺藝術}).'}
+
+   🚪 正在進入內頁 [20]：https://culture.taitung.gov.tw/activity/2026-%E9%80%B2%E5%85%A5%E6%9B%B8%E6%9B%B8%E6%9E%9C%E5%AF%A6%E4%B8%96%E7%95%8C%EF%BC%9A%E7%8D%A8%E7%AB%8B%E6%9B%B8%E5%BA%97%E2%95%B3%E5%8D%9A%E7%89%A9%E9%A4%A8%E6%97%A5
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/2026FB橫向使用.png
+   ✨ LLM 回傳了 1 個場次
+  📌 白名單命中（子字串）：'國立臺灣史前文化博物館' ≈ '史前文化博物館' → (22.7595, 121.1416)
+  [ERR] upsert 失敗 [2026 進入書書果實世界：獨立書店╳博物館日]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (3667d46b-860b-43e0-8db9-f25d16822c34, 2026 進入書書果實世界：獨立書店╳博物館日, 台東最大的閱讀盛事，讓博物館成為最有溫度的..., 2026-05-16 02:00:00+00, 國立臺灣史前文化博物館, https://culture.taitung.gov.tw/activity/2026-%E9%80%B2%E5%85%A5%..., {}, null, {"score": 0}, 2026-05-15 06:29:45.98543+00, 22.7595, 121.1416, t, 2026-05-17 09:00:00+00, null, null, null, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/2026FB..., 臺東最大的閱讀盛事 ──\n讓博物館，成為最有..., 市集, null, 60, 15, 臺東市博物館路1號, 2026-05-15 06:29:45.98543+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-05-17, null, t, null, 3fc191f834d97ae52d1d32d6e47adc6dc851a3d353b1a6fca682b91da01ea83a, null, null, null, null, pending, active, 市區, 期間限定, {書籍文學,社區活動}).'}
+
+   🚪 正在進入內頁 [21]：https://culture.taitung.gov.tw/activity/%E6%85%B6%E7%A5%9D%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E9%96%8B%E5%B9%95%E7%B3%BB%E5%88%97%E7%AF%80%E7%9B%AE-%E8%85%B9%E8%AA%9E%E5%B8%AB
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/110368_0.jpg
+   ✨ LLM 回傳了 2 個場次
+  [ERR] upsert 失敗 [慶祝臺東縣立圖書館開幕系列節目 --- 腹語師小強的奇幻劇場]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (20767d77-a094-4b77-bb30-44f140eae1a1, 慶祝臺東縣立圖書館開幕系列節目 --- 腹語師小..., 腹語師小強帶來一人一偶的爆笑對話，鸚鵡「大..., 2026-05-16 02:30:00+00, 臺東縣立圖書館親子閱讀區, https://culture.taitung.gov.tw/activity/%E6%85%B6%E7%A5%9D%E8%87..., {}, null, {"score": 0}, 2026-05-15 06:30:01.647792+00, 22.7562409, 121.1450756, t, 2026-05-16 03:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/110368..., 假的玩偶，真的笑聲！\n一人一偶的爆笑對話，讓..., 演出, null, 60, 15, null, 2026-05-15 06:30:01.647792+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, 2026-05-16, null, t, null, 7e220eabb84768c21ae107371ce3d868ff943a1308bb603ee6592fc32eb223a4, null, null, null, null, pending, active, null, 單日活動, {親子}).'}
+  [ERR] upsert 失敗 [慶祝臺東縣立圖書館開幕系列節目 --- 腹語師小強的奇幻劇場]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (5f911ebf-40e1-4de3-a730-1b163c0dde92, 慶祝臺東縣立圖書館開幕系列節目 --- 腹語師小..., 腹語師小強帶來一人一偶的爆笑對話，鸚鵡「大..., 2026-05-17 02:30:00+00, 臺東縣立圖書館親子閱讀區, https://culture.taitung.gov.tw/activity/%E6%85%B6%E7%A5%9D%E8%87..., {}, null, {"score": 0}, 2026-05-15 06:30:02.756138+00, 22.7562409, 121.1450756, t, 2026-05-17 03:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/110368..., 假的玩偶，真的笑聲！\n一人一偶的爆笑對話，讓..., 演出, null, 60, 15, null, 2026-05-15 06:30:02.756138+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, 2026-05-17, null, t, null, 9a014f30d5e97b085100e62d258e5cf0ce2724cdf7311fd557826f85692d005f, null, null, null, null, pending, active, null, 單日活動, {親子}).'}
+
+   🚪 正在進入內頁 [22]：https://culture.taitung.gov.tw/activity/%E7%92%B0%E5%A2%83%E6%95%99%E8%82%B2%E7%B9%AA%E6%9C%AC%E8%A6%AA%E5%AD%90%E5%8A%87-%E3%80%8A2026%E5%9C%B0%E7%90%83%E4%BB%BB%E5%8B%99%EF%BC%9A%E6%88%91%E5%80%91%E9%83%BD%E6%98%AF%E5%AE%88%E8%AD%B7
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/615712826_1303619988462304_5040303583188395596_n.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [環境教育繪本親子劇 --- 《2026地球任務：我們都是守護地球的超人》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (0ad8b896-3f78-4877-872c-aeb7241a8e73, 環境教育繪本親子劇 --- 《2026地球任務：我們都..., 由如果兒童劇團帶來環境教育繪本親子劇，以節..., 2026-05-16 06:30:00+00, 臺東藝文中心演藝廳, https://culture.taitung.gov.tw/activity/%E7%92%B0%E5%A2%83%E6%95..., {}, null, {"score": 0}, 2026-05-15 06:30:22.361715+00, 22.7565427, 121.1446118, t, 2026-05-16 06:30:00+00, https://culture.taitung.gov.tw/activity/%E7%92%B0%E5%A2%83%E6%95..., null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/615712..., 一年一度的環境教育繪本親子劇回來啦！《2026地..., 演出, null, 60, 15, null, 2026-05-15 06:30:22.361715+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-16, null, t, null, a0d4594e659234867d7e6f4a6eaa6b64966469943f44c746dd371d879021f9a3, null, null, null, null, pending, active, 市區, 期間限定, {親子,講座}).'}
+
+   🚪 正在進入內頁 [23]：https://culture.taitung.gov.tw/activity/%E6%85%B6%E7%A5%9D%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E9%96%8B%E5%B9%95%E7%B3%BB%E5%88%97%E7%AF%80%E7%9B%AE-%E5%A4%8F%E5%A8%81%E5%A4%B7
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/515371459_1161733185988648_7070785533799574989_n.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [慶祝臺東縣立圖書館開幕系列節目 --- 夏威夷島嶼的呼喚]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (9ef9fe65-7496-464b-86db-9ccece92080c, 慶祝臺東縣立圖書館開幕系列節目 --- 夏威夷島..., 在書海中聽見島嶼的呼喚，在舞步中翻開文化的..., 2026-05-16 08:00:00+00, 臺東縣立圖書館2樓縱谷館藏區, https://culture.taitung.gov.tw/activity/%E6%85%B6%E7%A5%9D%E8%87..., {}, null, {"score": 0}, 2026-05-15 06:30:42.586456+00, 22.7562409, 121.1450756, t, 2026-05-17 08:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/515371..., 在書海中聽見島嶼的呼喚， 在舞步中翻開文化的..., 演出, null, 60, 15, null, 2026-05-15 06:30:42.586456+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, 2026-05-17, null, t, null, 8fde3703e897ae85c8e5794155aa442760dad6373c7122a1e5e56443d027f70d, null, null, null, null, pending, active, 市區, 期間限定, {原住民文化,音樂}).'}
+
+   🚪 正在進入內頁 [24]：https://culture.taitung.gov.tw/activity/%E3%80%90%E6%9C%AA%E5%AE%9A%E7%A8%BF%E3%80%91%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%AB%8B%E6%96%B0%E7%94%9F%E5%9C%8B%E6%B0%91%E4%B8%AD%E5%AD%B8%E7%AC%AC33%E5%B1%86%E7%BE%8E%E8%A1%93%E7%8F%AD%E5%AD%B8%E7%BF%92
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/0430-海報確認@4x.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [臺東縣立新生國民中學第33屆美術班學習成果美展]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (a027ee96-3dd2-41ac-9a67-295523aa895e, 臺東縣立新生國民中學第33屆美術班學習成果美..., 新生國中美術班學生三年來的學習成果展，展出..., 2026-05-19 01:00:00+00, 臺東藝文中心＿2F展覽室及藝廊, https://culture.taitung.gov.tw/activity/%E3%80%90%E6%9C%AA%E5%AE..., {}, null, {"score": 0}, 2026-05-15 06:31:00.325322+00, 22.7565427, 121.1446118, t, 2026-05-31 09:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/0430-..., 本年度美術班學習成果美展定於 115 年 5 月 20 日1..., 展覽, null, 60, 15, null, 2026-05-15 06:31:00.325322+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-31, null, t, null, eac86eb24d15b5cf7e1273c59f9de9e1aad4b6e7f152da8466475ea128254ce1, null, null, null, null, pending, active, 市區, 期間限定, {視覺藝術}).'}
+
+   🚪 正在進入內頁 [25]：https://culture.taitung.gov.tw/activity/%E3%80%8C%E9%A3%9B%E6%A8%822026%E3%80%8D-%E9%A6%AC%E8%98%AD%E5%9C%8B%E5%B0%8F114%E5%AD%B8%E5%B9%B4%E5%BA%A6%E9%9F%B3%E6%A8%82%E7%8F%AD%E6%88%90%E6%9E%9C%E7%99%BC%E8%A1%A8%E6%9C%83
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/mail2AttachGet-2.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [「飛樂2026」-馬蘭國小114學年度音樂班成果發表會]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (e0fb6499-8e7c-4da3-bfca-3b6026c7f2b4, 「飛樂2026」-馬蘭國小114學年度音樂班成果發表..., 馬蘭國小音樂班年度成果發表會，由三至六年級..., 2026-05-22 11:00:00+00, 藝文中心演藝廳, https://culture.taitung.gov.tw/activity/%E3%80%8C%E9%A3%9B%E6%A8..., {}, null, {"score": 0}, 2026-05-15 06:31:25.559922+00, 22.7565427, 121.1446118, t, null, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/mail2A..., 馬蘭國小音樂班致力於培育具有音樂才能的學生..., 演出, null, 60, 15, null, 2026-05-15 06:31:25.559922+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, null, null, t, null, 0a7e79ff05e53f7aa1383ed959a62031b1af3f1dfff86f728c0af35eebda3a9e, null, null, null, null, pending, active, 市區, 單日活動, {音樂,親子}).'}
+
+   🚪 正在進入內頁 [26]：https://culture.taitung.gov.tw/activity/lecture01
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/%E5%8F%B0%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E7%B8%B1%E8%B0%B7%E5%8D%80.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [2026文化講座｜闕又上《賺》到錢，也賺到優雅與人生]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (59462b41-70b0-4578-a243-78d921e365b9, 2026文化講座｜闕又上《賺》到錢，也賺到優雅與..., 理財專家闕又上分享如何優雅地擁有財富與人生..., 2026-05-23 06:00:00+00, 臺東藝文中心演講廳, https://culture.taitung.gov.tw/activity/lecture01, {}, null, {"score": 0}, 2026-05-15 06:32:08.505131+00, 22.7564304, 121.1447272, t, 2026-05-23 09:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/%E5%8F..., 理財專家｜闕又上 財富，也可以是優雅的選擇 ..., 講座, null, 60, 15, 臺東市南京路25號, 2026-05-15 06:32:08.505131+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-23, null, t, null, 15ff93658fe72bb782dec63fab101fdeb8381272aab41b9e0b75f9f44d964fe3, null, null, null, null, pending, active, 市區, 單日活動, {講座}).'}
+
+   🚪 正在進入內頁 [27]：https://culture.taitung.gov.tw/activity/%E6%85%B6%E7%A5%9D%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%AB%8B%E5%9C%96%E6%9B%B8%E9%A4%A8%E9%96%8B%E5%B9%95%E7%B3%BB%E5%88%97%E7%AF%80%E7%9B%AE-%E5%B1%B1%E6%B5%B7%E8%A9%A0%E5%98%86%E3%83%BB%E7%84%A1
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/芳名0.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [慶祝臺東縣立圖書館開幕系列節目 --- 山海詠嘆・無伴奏之聲]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (85814af9-2007-45f4-a512-58c63e22ef0e, 慶祝臺東縣立圖書館開幕系列節目 --- 山海詠嘆..., 專屬於臺東的純人聲音樂演出，芳名人聲樂團以..., 2026-05-23 08:00:00+00, 臺東縣立圖書館二樓縱谷館藏區, https://culture.taitung.gov.tw/activity/%E6%85%B6%E7%A5%9D%E8%87..., {}, null, {"score": 0}, 2026-05-15 06:32:29.959599+00, 22.7562409, 121.1450756, t, 2026-05-24 08:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/芳名..., 專屬於臺東的純人聲音樂演出，芳名人聲樂團以..., 演出, null, 60, 15, null, 2026-05-15 06:32:29.959599+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一及月底休館, 2026-05-24, null, t, null, 0b8f7b8192490df63412c28b0e3aa3da6c9fbc7fa4585f21ff55a97ce6f06ec5, null, null, null, null, pending, active, 市區, 期間限定, {音樂,原住民文化}).'}
+   [PAGINATION] 正在點擊第 4 頁按鈕...
+   [PAGINATION] 基準首活動：https://culture.taitung.gov.tw/activity/%E3%80%8C%E8%97%9D%E3%80%8D%E7%94%9F%E6%87%B8%E5%91%BD-%E5%9C%8B%E7%AB%8B%E8%87%BA%E6%9D%B1%E5%A5%B3%E5%AD%90%E9%AB%98%E7%B4%9A%E4%B8%AD%E5%AD%B8%E7%AC%AC25%E5%B1%86%E7%BE%8E%E8%A1%93%E7%8F%AD
+   [PAGINATION] ✅ DOM 偵測到活動卡片已更新
+   [PAGINATION] ✅ 偵測到內容已更新，開始處理第 4 頁
+
+════════════════════════════════════════════════════════════
+📖 正在處理第 4 頁（活動列表）
+════════════════════════════════════════════════════════════
+   🔗 本頁發現 3 個活動內頁連結
+
+   🚪 正在進入內頁 [28]：https://culture.taitung.gov.tw/activity/2026-%E5%9C%8B%E6%A8%82%E8%BF%8E%E6%98%A5%E5%8F%B0%E6%9D%B1%E6%85%B6%E8%B1%90%E5%B9%B4
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/toc台東公益演出1.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [2026 國樂迎春台東慶豐年]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (b255d1fc-496f-48ee-b346-125f6805b083, 2026 國樂迎春台東慶豐年, 由臺北市立國樂團附設學院國樂團帶來精彩的國..., 2026-05-24 06:30:00+00, 臺東縣文化處演藝廳, https://culture.taitung.gov.tw/activity/2026-%E5%9C%8B%E6%A8%82%..., {}, null, {"score": 0}, 2026-05-15 06:32:57.057168+00, 22.7564304, 121.1447272, f, null, https://culture.taitung.gov.tw/activity/2026-%E5%9C%8B%E6%A8%82%..., null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/toc台..., 臺北市立國樂團附設學院國樂團成立於 2010 年 12 ..., 演出, null, 60, 15, 臺東縣臺東市南京路25號, 2026-05-15 06:32:57.057168+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, null, null, t, null, 3afc6f6d878962a0eef2ebf2f4f15a8bcc7a053f2bf93ea2b1c16656dc127ae0, null, null, null, null, pending, active, 市區, 單日活動, {音樂}).'}
+
+   🚪 正在進入內頁 [29]：https://culture.taitung.gov.tw/activity/%E3%80%8C%E6%8B%BE%E5%85%89%EF%BC%8E%E8%BF%B4%E9%9F%BF%E3%80%8D-%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%AB%8B%E6%96%B0%E7%94%9F%E5%9C%8B%E4%B8%AD114%E5%AD%B8%E5%B9%B4%E5%BA%A6%E7%AC%AC%E4%BA%8C%E5%8D%81
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/1150409-114學年度第25屆音樂會-拾光迴響-海報設計1.jpg
+   ✨ LLM 回傳了 1 個場次
+  [ERR] upsert 失敗 [「拾光．迴響」-- 臺東縣立新生國中114學年度第二十五屆音樂班學習成果音樂會]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (bb4e647a-f9ca-4861-ad21-6dc1139098f9, 「拾光．迴響」-- 臺東縣立新生國中114學年度第..., 臺東縣立新生國中音樂班的學習成果音樂會，將..., 2026-05-29 11:00:00+00, 臺東藝文中心演藝廳, https://culture.taitung.gov.tw/activity/%E3%80%8C%E6%8B%BE%E5%85..., {}, null, {"score": 0}, 2026-05-15 06:33:19.096854+00, 22.7565427, 121.1446118, t, 2026-05-29 13:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/04/115040..., 第二十五屆音樂班學習成果音樂會-「拾光．迴響..., 演出, null, 60, 15, null, 2026-05-15 06:33:19.096854+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., 每週一休館, 2026-05-29, null, t, null, c94c4073f4ea6362089c2503b7906b18d3b39ce27a0a457e9a5aa566e001e6a3, null, null, null, null, pending, active, null, 單日活動, {音樂}).'}
+
+   🚪 正在進入內頁 [30]：https://culture.taitung.gov.tw/activity/2026-%E5%8A%87%E5%A0%B4%E6%99%AE%E6%82%A0%E7%91%AA%E3%80%8A%E5%85%92%E7%AB%A5%E5%8A%87%E5%A0%B4%E7%87%9F%E3%80%8B%E3%80%81%E3%80%8A%E8%A6%AA%E5%AD%90%E6%88%B2%E5%8A%87%E5%B7%A5%E4%BD%9C%E5%9D%8A
+   🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/A3＿海報_正2.jpg
+   ✨ LLM 回傳了 2 個場次
+  📌 白名單命中（子字串）：'就藝會－臺東表演藝術創生基地' ≈ '就藝會' → (22.7533, 121.1481)
+  [ERR] upsert 失敗 [2026 劇場普悠瑪《兒童劇場營》劇場小霸王・召集令！]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (ed55f0ec-0cdd-4979-a111-dbdcd2fa0ea1, 2026 劇場普悠瑪《兒童劇場營》劇場小霸王・召..., 讓國小四至六年級學生透過戲劇體驗，提升想像..., 2026-07-07 16:00:00+00, 就藝會－臺東表演藝術創生基地, https://culture.taitung.gov.tw/activity/2026-%E5%8A%87%E5%A0%B4%..., {}, null, {"score": 0}, 2026-05-15 06:33:36.576629+00, 22.7533, 121.1481, f, 2026-07-10 16:00:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/A3＿..., 「眼觀前方，耳聽八方，我是劇場小霸王！」\n這..., 工作坊, null, 60, 15, 臺東市更生路416號, 2026-05-15 06:33:36.576629+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-07-11, null, t, null, 6d04c5be8af3d446dfaf739309addaa06b8587211458b003136e7081b973bf38, null, null, null, null, pending, active, 市區, 期間限定, {親子,戲劇}).'}
+  📌 白名單命中（子字串）：'就藝會－臺東表演藝術創生基地' ≈ '就藝會' → (22.7533, 121.1481)
+  [ERR] upsert 失敗 [2026 劇場普悠瑪《親子戲劇工作坊》]: {'message': 'new row for relation "events" violates check constraint "events_category_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (86dcebef-f353-4d5e-9b24-c1cc895772c5, 2026 劇場普悠瑪《親子戲劇工作坊》, 大小朋友一起透過戲劇遊戲拉近距離，創造專屬..., 2026-07-11 08:30:00+00, 就藝會－臺東表演藝術創生基地, https://culture.taitung.gov.tw/activity/2026-%E5%8A%87%E5%A0%B4%..., {}, null, {"score": 0}, 2026-05-15 06:33:36.77839+00, 22.7533, 121.1481, f, 2026-07-11 10:30:00+00, null, null, indoor, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/A3＿..., 大朋友小朋友，作伙動起來！透過戲劇遊戲拉近..., 工作坊, null, 60, 15, 臺東市更生路416號, 2026-05-15 06:33:36.77839+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-07-11, null, t, null, 97e192aa7146b61b95b970712d9b0c87dc096ed9c63fb8859ed19c2ad736c749, null, null, null, null, pending, active, 市區, 單日活動, {親子,戲劇}).'}
+   [PAGINATION] 正在點擊第 5 頁按鈕...
+   [PAGINATION] 基準首活動：https://culture.taitung.gov.tw/activity/2026-%E5%9C%8B%E6%A8%82%E8%BF%8E%E6%98%A5%E5%8F%B0%E6%9D%B1%E6%85%B6%E8%B1%90%E5%B9%B4
+   [PAGINATION] ⚠️ 翻頁操作失敗：Locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("button[aria-label=\"下一頁\"], a[aria-label=\"下一頁\"]").first
+    - locator resolved to <button type="button" aria-label="下一頁" data-v-662726ef="" class="pagination__changeBtn disable">></button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="pagination" data-v-662726ef="" data-v-6e754204="">…</div> intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <div class="pagination" data-v-662726ef="" data-v-6e754204="">…</div> intercepts pointer events
+  - retrying click action
+    - waiting 100ms
+    - waiting for element to be visible, enabled and stable
+    - element is not stable
+  - retrying click action
+    - waiting 100ms
+    5 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="pagination" data-v-662726ef="" data-v-6e754204="">…</div> intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div data-v-be8c6ce6="" class="header__bg active"></div> from <header class="header" data-v-be8c6ce6="" data-v-6e9df7a8="">…</header> subtree intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+    - element is not stable
+  4 × retrying click action
+      - waiting 500ms
+      - waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="pagination" data-v-662726ef="" data-v-6e754204="">…</div> intercepts pointer events
+  - retrying click action
+    - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+
+
+✅ 深度爬取完成，共處理 30 個內頁，耗時 773s
+📊 crawl_log：台東藝文平台 ｜ ✅ 0 新 🔄 0 更新 ⏩ 4 跳過 ❌ 84 失敗
+
+🚢 駛入大廳：台東生活美學館 (https://www.ttcsec.gov.tw/)
+🏠 使用首頁掃描模式（未設 list_url）
+🔎 共蒐集 8 個活動連結。
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/#
+🖼️  捕獲圖片：https://event.culture.tw/mocweb/reg/userFiles/TTCSEC/JpgFile/01/60135/AD/60135_0_0_624476.jpg
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 2026 初聲之韻 文化百老匯青少年展演 (2026-05-01 ~ 2026-11-30)
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/News_Actives_photo.aspx?n=2379&sms=11896
+🖼️  捕獲圖片：https://event.culture.tw/mocweb/reg/userFiles/TTCSEC/JpgFile/01/60135/AD/60135_0_0_624476.jpg
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+🗓️  語意相似但日期不同（2026-05-01 ≠ 2026-04-30），同系列不同場次，放行：2026 初聲之韻 文化百老匯青少年展演
+  [NEW] 2026 初聲之讚 - 文化百老匯青少年展演 (2026-05-01 ~ 2026-11-30)
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/News_Actives_photo.aspx?n=2387&sms=11896
+🖼️  捕獲圖片：https://event.culture.tw/mocweb/reg/userFiles/TTCSEC/JpgFile/01/60138/AD/60138_0_0_427632.jpg
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 山海詩情畫意：2026名家邀請暨會員聯展 (2026-05-18 ~ 2026-06-22)
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/News_Card.aspx?n=2436&sms=11743
+🖼️  捕獲圖片：https://file.moc.gov.tw/001/Upload/500/relpic/11743/204290/e3bbfce1-ba70-4116-8655-66f6420a33f5@710x470.jpg
+👁️ 正在將海報交給 AI 分析時間表...
+⏳ Gemini 暫時錯誤，5s 後重試... (第 1/3 次)
+✨ 準備寫入資料庫...
+  [SKIP] 無有效 start_time：東區文化體驗教育
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/News.aspx?n=2411&sms=11621
+🖼️  捕獲圖片：https://www.ttcsec.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/Advanced_Search.aspx?q=展覽
+🖼️  捕獲圖片：https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-DgbJdWjWn5dYxGY1N1ILNWldiy6gi6eT0yE_Uy4AIInSDHJUxQdX2XY&s
+👁️ 正在將海報交給 AI 分析時間表...
+⏳ Gemini 暫時錯誤，5s 後重試... (第 1/3 次)
+✨ 準備寫入資料庫...
+🗓️  語意相似但日期不同（2026-05-18 ≠ 2026-05-17），同系列不同場次，放行：山海詩情畫意：2026名家邀請暨會員聯展
+  [NEW] 山海相連詩情畫意2026名家邀請暨會員聯展 (2026-05-18 ~ 2026-05-23)
+  [SKIP] 無有效 start_time：穿越百年甜味：「篳路藍縷的甜」特展
+  [SKIP] 無有效 start_time：筆墨馳想—2026 台東縣都蘭山畫院藝術展
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/News_Content.aspx?n=2381&s=255126
+🖼️  捕獲圖片：https://www.ttcsec.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 2026書書果實創新書市集-來一場假日的閱讀之旅吧! (2026-05-15)
+
+🚪 潛入活動頁：https://www.ttcsec.gov.tw/News_Content.aspx?n=2381&s=248979
+🖼️  捕獲圖片：https://www.ttcsec.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過
+📊 crawl_log：台東生活美學館 ｜ ✅ 5 新 🔄 0 更新 ⏩ 3 跳過 ❌ 0 失敗
+
+🚢 駛入大廳：東管處 (東部海岸國家風景區) (https://www.eastcoast-nsa.gov.tw/)
+🏠 使用首頁掃描模式（未設 list_url）
+🔎 共蒐集 4 個活動連結。
+
+🚪 潛入活動頁：https://www.eastcoast-nsa.gov.tw/en/event/newslist/
+🖼️  捕獲圖片：https://www.eastcoast-nsa.gov.tw/images/global/social-share.jpg
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 探索東海岸 (2026-01-01 ~ 2026-12-31)
+
+🚪 潛入活動頁：https://www.eastcoast-nsa.gov.tw/en/event/news/5723/
+🖼️  捕獲圖片：https://www.eastcoast-nsa.gov.tw/image/91302/1024x768
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河之間 (2025-06-21)
+🗓️  語意相似但日期不同（2025-06-22 ≠ 2025-06-21），同系列不同場次，放行：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河之間
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海洋之詩 (2025-06-22)
+🗓️  語意相似但日期不同（2025-07-11 ≠ 2025-06-22），同系列不同場次，放行：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海洋之詩
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 生命之流 (2025-07-11)
+🗓️  語意相似但日期不同（2025-07-12 ≠ 2025-06-22），同系列不同場次，放行：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海洋之詩
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 無垠之洋 (2025-07-12)
+🗓️  語意相似但日期不同（2025-08-09 ≠ 2025-06-21），同系列不同場次，放行：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河之間
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河共舞 (2025-08-09)
+🗓️  語意相似但日期不同（2025-08-10 ≠ 2025-08-09），同系列不同場次，放行：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河共舞
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 豐饒之地 (2025-08-10)
+🗓️  語意相似但日期不同（2025-09-08 ≠ 2025-08-09），同系列不同場次，放行：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河共舞
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 風華再現 (2025-09-08)
+🗓️  語意相似但日期不同（2025-09-09 ≠ 2025-09-08），同系列不同場次，放行：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 風華再現
+  [NEW] 2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 成為出海口 (2025-09-09)
+
+🚪 潛入活動頁：https://www.eastcoast-nsa.gov.tw/en/event/news/5717/
+🖼️  捕獲圖片：https://www.eastcoast-nsa.gov.tw/Image/91256/?r=1750148504854
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+🏷️  語意相似但標題不同，同系列不同場次，放行
+   ↳ 新進：2025 East Coast Land Arts Festival Moonlit Sea Concert - 海河之間
+   ↳ 既有：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河之間
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 海河之間 (2025-06-21)
+🏷️  語意相似但標題不同，同系列不同場次，放行
+   ↳ 新進：2025 East Coast Land Arts Festival Moonlit Sea Concert - 海洋之詩
+   ↳ 既有：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海洋之詩
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 海洋之詩 (2025-06-22)
+🏷️  語意相似但標題不同，同系列不同場次，放行
+   ↳ 新進：2025 East Coast Land Arts Festival Moonlit Sea Concert - 生命之流
+   ↳ 既有：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 生命之流
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 生命之流 (2025-07-11)
+🗓️  語意相似但日期不同（2025-07-12 ≠ 2025-06-22），同系列不同場次，放行：2025 East Coast Land Arts Festival Moonlit Sea Concert - 海洋之詩
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 無垠之洋 (2025-07-12)
+🗓️  語意相似但日期不同（2025-08-09 ≠ 2025-06-21），同系列不同場次，放行：2025 East Coast Land Arts Festival Moonlit Sea Concert - 海河之間
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 海河共舞 (2025-08-09)
+🏷️  語意相似但標題不同，同系列不同場次，放行
+   ↳ 新進：2025 East Coast Land Arts Festival Moonlit Sea Concert - 豐饒之地
+   ↳ 既有：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 豐饒之地
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 豐饒之地 (2025-08-10)
+🏷️  語意相似但標題不同，同系列不同場次，放行
+   ↳ 新進：2025 East Coast Land Arts Festival Moonlit Sea Concert - 風華再現
+   ↳ 既有：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 風華再現
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 風華再現 (2025-09-08)
+🏷️  語意相似但標題不同，同系列不同場次，放行
+   ↳ 新進：2025 East Coast Land Arts Festival Moonlit Sea Concert - 成為出海口
+   ↳ 既有：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 成為出海口
+  [NEW] 2025 East Coast Land Arts Festival Moonlit Sea Concert - 成為出海口 (2025-09-09)
+
+🚪 潛入活動頁：https://www.eastcoast-nsa.gov.tw/en/event/news/5684/
+🖼️  捕獲圖片：https://www.eastcoast-nsa.gov.tw/Image/90905/?r=1744601459306
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+🏷️  語意相似但標題不同，同系列不同場次，放行
+   ↳ 新進：2025 Taiwan East Coast Land Arts Festival - Moonlight Sea Concerts
+   ↳ 既有：2025 Taiwan East Coast Land Arts Festival & Moonlit Sea Concert - 海河之間
+  [NEW] 2025 Taiwan East Coast Land Arts Festival - Moonlight Sea Concerts (2025-06-21 ~ 2025-09-09)
+📊 crawl_log：東管處 (東部海岸國家風景區) ｜ ✅ 18 新 🔄 0 更新 ⏩ 0 跳過 ❌ 0 失敗
+
+🚢 駛入大廳：史前文化博物館 (https://www.nmp.gov.tw/)
+🏠 使用首頁掃描模式（未設 list_url）
+🔎 共蒐集 10 個活動連結。
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/News_actives.aspx?n=8827&sms=11894
+🖼️  捕獲圖片：https://event.culture.tw/mocweb/reg/userFiles/NMP/JpgFile/01/60308/AD/60308_0_0_886291.JPG
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 冰期大遷徙：臺灣史前文化博物館推薦桌遊 (臺灣台語音) (2026-05-16)
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/cl.aspx?n=2066
+🖼️  捕獲圖片：https://www.nmp.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/cl.aspx?n=2094
+🖼️  捕獲圖片：https://www.nmp.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/News_actives.aspx?n=1993&sms=11894
+🖼️  捕獲圖片：https://event.culture.tw/mocweb/reg/userFiles/NMP/JpgFile/01/50264/AD/50264_0_0_937071.jpg
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  📌 白名單命中（子字串）：'國立臺灣史前文化博物館 康樂本館第二特展室' ≈ '史前文化博物館' → (22.7595, 121.1416)
+  [NEW] 第一浪潮：臺灣原住民族當代時裝藝術展 (2026-05-01 ~ 2026-05-31)
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/News_actives.aspx?n=2007&sms=11894
+🖼️  捕獲圖片：https://www.nmp.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 卑南遺址公園 當期特展 (2026-05-01 ~ 2026-05-31)
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/News_actives.aspx?n=2016&sms=11894
+🖼️  捕獲圖片：https://www.nmp.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/News_actives.aspx?n=2067&sms=11894
+🖼️  捕獲圖片：https://www.nmp.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/cp.aspx?n=3255
+🖼️  捕獲圖片：https://www.nmp.gov.tw/images/aplus.png
+👁️ 正在將海報交給 AI 分析時間表...
+🚫 AI 守門員判定為無效內容（徵件/租場/公告），跳過
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/News_Content.aspx?n=8869&s=246616
+🖼️  捕獲圖片：https://file.moc.gov.tw/001/Upload/497/relpic/11572/246616/0327ed47-0067-4784-86db-34f0d9927a77@710x470.jpg
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  📌 白名單命中（子字串）：'國立臺灣史前文化博物館' ≈ '史前文化博物館' → (22.7595, 121.1416)
+  [NEW] 美式人生：阿美族的山海環境與文化知識 (2025-11-16)
+
+🚪 潛入活動頁：https://www.nmp.gov.tw/News_actives.aspx?n=2931&sms=11894
+🖼️  捕獲圖片：https://event.culture.tw/mocweb/reg/userFiles/NMP/JpgFile/01/60308/AD/60308_0_0_886291.JPG
+👁️ 正在將海報交給 AI 分析時間表...
+✨ 準備寫入資料庫...
+  [NEW] 【自然生態觀察主題活動】蝴蝶講座 (2026-06-13)
+🗓️  語意相似但日期不同（2026-05-23 ≠ 2026-06-13），同系列不同場次，放行：【自然生態觀察主題活動】蝴蝶講座
+  [NEW] 【自然生態觀察主題活動】初夏蟲蟲大發現 (2026-05-23)
+  [NEW] 2026 假日賞屋團 (2026-05-16)
+  [COORD] 非台東地點，已過濾：700台灣臺南市中西區永華里湯德章大道1號
+  [SKIP] 場地不在台東，已過濾：【518國際博物館日】冰期大遷徙桌遊
+🗓️  語意相似但日期不同（2026-05-18 ≠ 2026-05-01），同系列不同場次，放行：第一浪潮：臺灣原住民族當代時裝藝術展
+  📌 白名單命中（子字串）：'國立臺灣史前文化博物館' ≈ '史前文化博物館' → (22.7595, 121.1416)
+  [NEW] 第一浪潮：臺灣原住民族當代時裝藝術展 (2026-05-18)
+📊 crawl_log：史前文化博物館 ｜ ✅ 8 新 🔄 0 更新 ⏩ 1 跳過 ❌ 0 失敗
+
+🚢 駛入大廳：台東縣立圖書館 (https://library.taitung.gov.tw/)
+🏠 使用首頁掃描模式（未設 list_url）
+❌ 無法連接到站台 台東縣立圖書館: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://library.taitung.gov.tw/
+Call log:
+  - navigating to "https://library.taitung.gov.tw/", waiting until "domcontentloaded"
+
+
+💡 所有站台海巡任務完成。

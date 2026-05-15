@@ -1,11 +1,13 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useItineraryStore } from '@/store/useItineraryStore';
-import { Calendar, X, Trash2, Clock } from 'lucide-react';
+import { Calendar, X, Trash2, Clock, ExternalLink, Lock } from 'lucide-react';
 import Link from 'next/link';
 import type { PlannedEvent } from '@/types';
+import { toast } from 'sonner';
 import { buildTripDateRange } from '@/lib/tripDates';
+import { buildAgodaUrl, addOneDay } from '@/lib/agoda';
 
 // ── 側邊欄日期格式工具 ──────────────────────────────────────────────────────────
 
@@ -29,6 +31,15 @@ const fmtVisitTime = (hhmm: string): string => {
  */
 const isSidebarExhibition = (event: PlannedEvent): boolean =>
   !!(event.end_date && event.end_date > event.start_time.substring(0, 10));
+
+const isSingleDayLocked = (event: PlannedEvent): boolean => {
+  if (event.time_type === '單日活動') return true;
+  // No end info at all → cannot confirm multi-day, treat as locked
+  if (!event.end_time && !event.end_date) return true;
+  const startDay = event.start_time.substring(0, 10);
+  const endDay = event.end_time?.substring(0, 10);
+  return !!endDay && startDay === endDay;
+};
 
 const CHINESE_DAY_NAMES = ['一','二','三','四','五','六','七','八','九','十'];
 
@@ -66,6 +77,67 @@ const STAY_OPTIONS = [
   { value: 180, label: '3 小時' },
   { value: 240, label: '半天' },
 ];
+
+// ── 客製化下拉選單（捨棄原生 <select>，消除 OS 藍色反白）────────────────────────
+
+type SelectOption<T> = { value: T; label: string };
+
+function CustomSelect<T extends string | number>({
+  value,
+  options,
+  onChange,
+  triggerClassName,
+}: {
+  value: T;
+  options: SelectOption<T>[];
+  onChange: (v: T) => void;
+  triggerClassName?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
+  const selected = options.find(o => o.value === value);
+
+  return (
+    <div ref={ref} className="relative w-full">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className={triggerClassName ?? 'w-full flex items-center justify-between rounded-lg px-2 py-1 border border-purple-200 text-purple-700 bg-purple-50 text-xs cursor-pointer transition-colors hover:border-purple-300'}
+      >
+        <span className="truncate text-left">{selected?.label ?? String(value)}</span>
+        <svg className="ml-1 shrink-0 opacity-50" width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      {open && (
+        <ul className="absolute z-50 top-full mt-1 left-0 min-w-full bg-white shadow-lg border border-stone-200 rounded-xl overflow-hidden">
+          {options.map(opt => (
+            <li
+              key={String(opt.value)}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={[
+                'cursor-pointer px-4 py-2 text-stone-700 hover:bg-stone-100 hover:text-stone-900 transition-colors text-sm whitespace-nowrap',
+                opt.value === value ? 'bg-stone-50 font-medium' : '',
+              ].join(' ')}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function ItinerarySidebar() {
   const pathname = usePathname();
@@ -216,9 +288,17 @@ export default function ItinerarySidebar() {
                           </button>
                         </div>
                         {event.isExtraDayTrigger && (
-                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-lg w-fit leading-tight">
-                            💡 多留了一天，記得多訂住宿
-                          </div>
+                          <a
+                            href={event.affiliate_links?.accommodation?.url ?? buildAgodaUrl(tripStartDate || event.assigned_date, addOneDay(tripEndDate || event.assigned_date))}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-lg w-fit leading-tight hover:bg-amber-100 transition-colors cursor-pointer"
+                          >
+                            <span>💡</span>
+                            <span>多留了一天，記得多訂住宿</span>
+                            <ExternalLink size={10} className="shrink-0" />
+                          </a>
                         )}
                         {isSidebarExhibition(event) ? (
                           <div className="flex flex-col gap-0.5">
@@ -228,23 +308,35 @@ export default function ItinerarySidebar() {
                             </div>
                             <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
                               <Clock size={11} className="shrink-0 text-violet-400" />
-                              <div className="relative flex-1">
-                                <select
+                              <div className="flex-1">
+                                <CustomSelect<string>
                                   value={event.assigned_date}
-                                  onChange={(e) => updateEventDate(event.id, e.target.value)}
-                                  className="w-full appearance-none text-xs rounded-lg px-2 py-1 pr-6 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
-                                >
-                                  {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
-                                    <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
-                                  ))}
-                                </select>
-                                <svg className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                                  options={buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => ({ value: d, label: formatDayOption(d, tripStartDate || event.assigned_date) }))}
+                                  onChange={(val) => {
+                                    const [vy, vm, vd] = val.split('-').map(Number);
+                                    if (new Date(vy, vm - 1, vd).getDay() === 1) {
+                                      const kw = ['藝文中心', '美術館', '圖書館'].find(v => event.venue_name.includes(v));
+                                      if (kw) { toast(`⚠️ 注意：該場館 (${kw}) 每週一休館，請選擇其他日期。`); return; }
+                                    }
+                                    updateEventDate(event.id, val);
+                                  }}
+                                />
                               </div>
                               {event.visit_time && (
                                 <span className="text-[11px] text-gray-400 shrink-0">{fmtVisitTime(event.visit_time)}</span>
                               )}
+                            </div>
+                          </div>
+                        ) : isSingleDayLocked(event) ? (
+                          <div className="flex flex-col gap-0.5">
+                            <div className="text-xs text-gray-500">
+                              {new Date(event.start_time).toLocaleDateString('zh-TW', {
+                                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                              })}
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-md">
+                              <Lock size={11} className="shrink-0 opacity-60" />
+                              <span>此為單日限定活動，無法更改日期</span>
                             </div>
                           </div>
                         ) : (
@@ -256,37 +348,37 @@ export default function ItinerarySidebar() {
                             </div>
                             <div className="flex items-center gap-1 text-xs text-gray-600 font-medium">
                               <Calendar size={11} className="shrink-0 text-blue-400" />
-                              <div className="relative flex-1">
-                                <select
+                              <div className="flex-1">
+                                <CustomSelect<string>
                                   value={event.assigned_date}
-                                  onChange={(e) => updateEventDate(event.id, e.target.value)}
-                                  className="w-full appearance-none text-xs rounded-lg px-2 py-1 pr-6 text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500 outline-none cursor-pointer transition-colors"
-                                >
-                                  {buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => (
-                                    <option key={d} value={d}>{formatDayOption(d, tripStartDate || event.assigned_date)}</option>
-                                  ))}
-                                </select>
-                                <svg className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                                  options={buildTripDateOptions(tripStartDate, tripEndDate, event.assigned_date).map(d => ({ value: d, label: formatDayOption(d, tripStartDate || event.assigned_date) }))}
+                                  onChange={(val) => {
+                                    const [vy, vm, vd] = val.split('-').map(Number);
+                                    if (new Date(vy, vm - 1, vd).getDay() === 1) {
+                                      const kw = ['藝文中心', '美術館', '圖書館'].find(v => event.venue_name.includes(v));
+                                      if (kw) { toast(`⚠️ 注意：該場館 (${kw}) 每週一休館，請選擇其他日期。`); return; }
+                                    }
+                                    updateEventDate(event.id, val);
+                                  }}
+                                />
                               </div>
                             </div>
                           </div>
                         )}
-                        <div className="text-xs text-blue-600 font-medium line-clamp-1 bg-blue-50 px-2 py-1 rounded w-fit">
-                          {event.venue_name}
+                        <div className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded overflow-hidden">
+                          <span className="block truncate">{event.venue_name}</span>
                         </div>
-                        {event.ticket_url ? (
+                        {event.ticket_url?.startsWith('http') && (
                           <a
                             href={event.ticket_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-lg transition-colors w-fit"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-md hover:bg-violet-100 transition-colors w-fit"
                           >
-                            🎟️ 購票去
+                            <ExternalLink size={11} className="opacity-70 shrink-0" />
+                            <span>票務資訊</span>
                           </a>
-                        ) : (
-                          <p className="text-xs text-stone-400">請再確認是否需要購票</p>
                         )}
                         <div
                           className={[
@@ -298,20 +390,14 @@ export default function ItinerarySidebar() {
                           <span className={`text-xs shrink-0 ${event.id === flashEventId ? 'text-green-600 font-bold' : 'text-gray-400'}`}>
                             {event.id === flashEventId ? '已延長！' : '預計停留'}
                           </span>
-                          <select
+                          <CustomSelect<number>
                             value={event.stay_duration ?? 90}
-                            onChange={(e) => updateStayDuration(event.id, Number(e.target.value))}
-                            className={[
-                              'flex-1 text-xs rounded-lg px-2 py-1 outline-none cursor-pointer transition-colors',
-                              event.id === flashEventId
-                                ? 'text-green-700 bg-green-50 border border-green-300 font-bold focus:border-green-500'
-                                : 'text-gray-600 bg-gray-50 border border-gray-200 hover:border-blue-400 focus:border-blue-500',
-                            ].join(' ')}
-                          >
-                            {STAY_OPTIONS.map(opt => (
-                              <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                          </select>
+                            options={STAY_OPTIONS.map(o => ({ value: o.value, label: o.label }))}
+                            onChange={(val) => updateStayDuration(event.id, val)}
+                            triggerClassName={event.id === flashEventId
+                              ? 'flex-1 w-full flex items-center justify-between rounded-lg px-2 py-1 border border-green-300 text-green-700 bg-green-50 text-xs cursor-pointer font-bold transition-colors hover:border-green-400'
+                              : 'flex-1 w-full flex items-center justify-between rounded-lg px-2 py-1 border border-stone-200 text-stone-600 bg-stone-50 text-xs cursor-pointer transition-colors hover:border-stone-400'}
+                          />
                         </div>
                       </div>
                     ))
@@ -320,6 +406,14 @@ export default function ItinerarySidebar() {
               );
             })
           )}
+        </div>
+
+        {/* 免責聲明 */}
+        <div className="mx-2 mb-2 mt-1 px-4 py-3 bg-slate-50/80 rounded-lg border border-slate-100">
+          <p className="text-xs text-slate-500 leading-relaxed text-center font-medium">
+            <span className="text-amber-500 mr-1">💡</span>
+            本平台資訊由 AI 輔助彙整。實際展演時間、地點、休館日與票務規定，請務必於出發前至官方網站再次確認。
+          </p>
         </div>
 
         {/* 面板底部 */}

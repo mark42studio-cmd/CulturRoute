@@ -64,6 +64,8 @@ export async function updateEventFields(
     longitude?: number
     image_captured?: string | null
     ticket_url?: string | null
+    category?: '展覽' | '演出' | '講座' | '工作坊' | '節慶活動' | '其他' | null
+    sub_category?: string[]
   }
 ): Promise<void> {
   // .strict() Schema 確保 fields 只能包含白名單欄位，防止欄位注入

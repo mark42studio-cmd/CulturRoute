@@ -1,0 +1,85 @@
+🚀 [CulturRoute 多站台聯合海巡] 啟動時間: 2026-05-15 10:26:18
+🎯 篩選目標：['台東藝文平台']
+
+🚢 駛入大廳：台東藝文平台 (https://culture.taitung.gov.tw/)
+📋 啟用分頁列表模式：https://culture.taitung.gov.tw/activity（最多 1 頁）
+   🖱️  Button-click 分頁模式（selector: button[aria-label="下一頁"]）
+   📄 列表第 1 頁 → +10 筆，累計 10 筆
+   🏁 內容未變化（已到末頁），列表掃描完成
+   ⚠️  已達最大分頁上限（1 頁），停止掃描
+🔎 共蒐集 10 個活動連結。
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/2026-5-%E7%AF%80%E7%9B%AE-outline.jpg
+✨ v2 schema → 1 筆活動準備入庫...
+  [ERR] upsert 失敗 [山海有聲｜樂廣場—節目單]: {'message': 'new row for relation "events" violates check constraint "events_indoor_or_outdoor_check"', 'code': '23514', 'hint': None, 'details': 'Failing row contains (73fd646e-684e-4a77-b3c7-240d45caeb24, 山海有聲｜樂廣場—節目單, 臺東藝文中心廣場及在地展演空間，匯集音樂、..., 2026-04-02 16:00:00+00, 臺東藝文中心廣場／大廳、在地展演空間, https://culture.taitung.gov.tw/activity, {}, null, {"score": 0}, 2026-05-15 02:26:45.320097+00, 22.7565427, 121.1446118, f, 2026-06-13 16:00:00+00, null, null, 室內 | 室外, https://culture.taitung.gov.tw/wp-content/uploads/2026/05/2026-5..., 2026年4月至6月，臺東藝文中心廣場及在地展演空..., exhibition, null, 60, 15, null, 2026-05-15 02:26:45.320097+00, {"rental": {"url": null, "label": "租車/租機車"}, "ticket":..., null, 2026-06-14, null, t, null, 60ac511b05a931b8841a5e9ca41e21e16d0b216a797d34e35a3b1b2a5baa2fc3, null, null, null, null, pending, active, null, 期間限定, {音樂,傳統工藝,原住民文化}).'}
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E9%BA%BB%E7%85%A9%E4%BA%86%EF%BC%8C%E8%87%BA%E6%9D%B1%EF%BC%81-good-trouble
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/01/TTDC2025成果展-展場形象-7300142-1.jpg
+✨ v2 schema → 1 筆活動準備入庫...
+  [NEW] 麻煩了，臺東！ Good Trouble (2025-12-02 ~ 2026-11-30)
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E3%80%8A%E5%8F%B0%E6%9D%B1%E3%83%BB%E6%96%87%E5%8C%96%E4%B9%8B%E9%96%93%EF%BC%9A%E7%99%BE%E5%A4%A7%E6%96%87%E5%8C%96%E5%9F%BA%E5%9C%B0%E4%B8%B2%E9%80%A3%E4%B8%BB%E9%A1%8C%E5%B1%95%E3%80%8B
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2025/12/1141212-02主視覺@2x-2.png
+✨ v2 schema → 1 筆活動準備入庫...
+  [NEW] 《台東・文化之間：百大文化基地串連主題展》 (2025-12-20)
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E6%B0%91%E6%AD%8C%E9%9F%B3%E6%A8%82%E6%9C%83-%E5%90%89%E4%BB%96%E5%BD%88%E5%94%B1%E6%86%B6%E7%95%B6%E5%B9%B4-%E9%99%B3%E5%A4%A7%E8%BB%8D
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/2026上半年.jpg
+✨ v2 schema → 1 筆活動準備入庫...
+  [NEW] 民歌音樂會 吉他彈唱憶當年 --- 陳大軍 (2026-02-14 ~ 2026-06-06)
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E5%9B%9B%E6%9C%88%E6%98%A5%E9%81%8A%E6%8F%90%E6%A1%88%EF%BC%9A%E8%B7%9F%E8%91%97%E5%8F%B0%E6%9D%B1%E5%8D%9A%E8%A6%BD%E6%9C%83%E6%B0%91%E9%96%93%E5%8F%83%E8%88%87%E8%85%B3%E6%AD%A5
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/657266070_1259260939729336_5038882415848317847_n.jpg
+✨ v2 schema → 10 筆活動準備入庫...
+  [SKIP] 無有效 start_time：四月春遊提案：跟著台東博覽會”民間參與“腳步出發
+  [NEW] 目目文創《1996–2026：聲音東洄中》 (2026-03-12 ~ 2026-06-21)
+  [SKIP] 無有效 start_time：成功總站：讓鏽掉的售票口，再次產出「回家的票」
+  [NEW] 遊程培力工作坊-你不認識的成功鎮 (2026-04-03 ~ 2026-04-05)
+  [NEW] 系列工作坊Vol.2——「家這種東西還是一起蓋比較酷」——集體創作劇場工作坊 (2026-04-04 ~ 2026-04-05)
+  [NEW] 故事採集x共創工作坊2 (2026-04-26)
+  📌 白名單命中（子字串）：'都蘭部落' ≈ '都蘭' → (23.128, 121.3765)
+  [NEW] 石縫生存記2：都蘭部落樹皮地圖藝術創作營 (2026-04-17 ~ 2026-04-20)
+  [NEW] 人人祭 聖餐集結 (2026-04-20 ~ 2026-04-21)
+  📌 白名單命中（子字串）：'臺東藝文中心廣場／大廳、在地展演空間（吧蟲 Bar Cynic、檔案室裡的小村閱讀、都蘭地下書店）' ≈ '都蘭' → (23.128, 121.3765)
+  [NEW] 樂廣場—山海有聲｜節目單 (2026-04-03)
+  [NEW] 臺東縣立圖書館落成，​打開閱讀新視野 (2026-04-22)
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/2026%E5%8F%B0%E6%9D%B1%E5%8D%9A%E8%A6%BD%E6%9C%83-%E6%B0%91%E9%96%93%E5%8F%83%E8%88%87%E8%A8%88%E7%95%AB-%E4%B8%89%E6%9C%88%E6%B4%BB%E5%8B%95%E7%B8%BD%E8%A6%BD
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/民參3月活動月報_A1.jpg
+   ⚠️  AI 解析失敗：503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+⚠️  AI 回傳為空，略過此頁
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E5%B1%B1%E6%B5%B7-wav-%E8%87%BA%E7%81%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E6%97%8F%E6%96%87%E5%AD%B8%E7%89%B9%E5%B1%95
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/1-1.jpg
+✨ v2 schema → 1 筆活動準備入庫...
+  [NEW] 山海.wav——臺灣原住民族文學特展 (2026-03-01 ~ 2026-11-10)
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E4%BB%A3%E8%A1%A8%E8%87%BA%E6%9D%B1%E7%9A%84%E3%80%8C%E4%B8%80%E5%80%8B%E8%81%B2%E9%9F%B3%E3%80%8D-%E8%87%BA%E6%9D%B1%E8%81%B2%E6%99%AF%E7%99%BE%E9%81%B8%E5%BE%B5%E4%BB%B6%E8%B3%87%E8%A8%8A
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/03/0316說明會貼文_fb-01.jpg
+✨ v2 schema → 1 筆活動準備入庫...
+  [NEW] 代表臺東的「一個聲音」--- 臺東聲景百選徵件資訊 (2026-03-29 ~ 2026-05-29)
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E9%80%B8%E5%BD%A9%E5%A5%94%E9%A8%B0%E8%BF%8E%E6%96%B0%E6%98%A5-%E8%87%BA%E6%9D%B1%E7%B8%A3%E7%BE%8E%E8%A1%93%E6%95%99%E8%82%B2%E5%AD%B8%E6%9C%83%E6%9C%83%E5%93%A1%E8%81%AF%E5%B1%95
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/04/604839_0.jpg
+✨ v2 schema → 1 筆活動準備入庫...
+  [NEW] 逸彩奔騰迎新春—臺東縣美術教育學會會員聯展 (2026-04-02 ~ 2026-05-20)
+
+🚪 潛入活動頁：https://culture.taitung.gov.tw/activity/%E6%A8%82%E5%BB%A3%E5%A0%B4-%E5%B1%B1%E6%B5%B7%E6%9C%89%E8%81%B2%EF%BD%9C%E7%AF%80%E7%9B%AE%E5%96%AE
+🖼️  捕獲圖片：https://culture.taitung.gov.tw/wp-content/uploads/2026/05/%E6%A8%82%E5%BB%A3%E5%A0%B45-6%E6%9C%88%E7%AF%80%E7%9B%AE%E5%96%AE0428.jpg
+✨ v2 schema → 11 筆活動準備入庫...
+  [NEW] 加拿大JMF音樂節快閃臺東 (2026-05-01)
+  [NEW] 被正史忽略的黑膠年代金歌 (2026-05-02)
+  [NEW] 張錦桂與滿州民謠 (2026-05-23)
+  [NEW] Jason李玠融 / 依錚依靜 (2026-05-24)
+  [NEW] 斯馬里奧 Giyu Tjuljaviyya (2026-05-30)
+  [NEW] 演唱會—臺灣山地歌謠 (2026-06-06)
+  [NEW] 裝孥人 Tsng-kha-lâng (2026-06-07)
+  [NEW] 原味醞釀 (2026-06-12)
+  [NEW] 樂(yào)成發 (2026-06-14)
+  [NEW] 依錚依靜 (2026-05-21)
+  📌 白名單命中（子字串）：'都蘭地下書店' ≈ '都蘭' → (23.128, 121.3765)
+  [UPDATE] 張錦桂與滿州民謠 (2026-05-22)
+📊 crawl_log：台東藝文平台 ｜ ✅ 24 新 🔄 1 更新 ⏩ 2 跳過 ❌ 1 失敗
+
+💡 所有站台海巡任務完成。

@@ -23,6 +23,9 @@ interface ItineraryStore {
   /** UI-only：游標懸停中的活動 ID，用於列表 ↔ 地圖雙向連動（未持久化） */
   hoveredEventId: string | null;
   setHoveredEventId: (id: string | null) => void;
+  /** UI-only：自動延長行程後，通知行程頁切換到此日期 Tab（未持久化） */
+  pendingJumpToDate: string | null;
+  setPendingJumpToDate: (date: string | null) => void;
   setTripDates: (start: string, end: string) => void;
   addEvent: (event: Event, options?: { isExtraDayTrigger?: boolean; addToToday?: boolean }) => void;
   removeEvent: (eventId: string) => void;
@@ -56,6 +59,8 @@ export const useItineraryStore = create<ItineraryStore>()(
       flashDayAdded: false,
       hoveredEventId: null,
       setHoveredEventId: (id) => set({ hoveredEventId: id }),
+      pendingJumpToDate: null,
+      setPendingJumpToDate: (date) => set({ pendingJumpToDate: date }),
 
       // 儲存首頁設定的日期
       setTripDates: (start, end) => set({ tripStartDate: start, tripEndDate: end }),

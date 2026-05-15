@@ -29,16 +29,14 @@ from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 from playwright_stealth import Stealth
 
-# ── 共用函式從 scraper.py 匯入（去重、清洗、寫入）────────────────────────────
+# ── 共用函式匯入 ─────────────────────────────────────────────────────────────
 sys.path.insert(0, os.path.dirname(__file__))
 from scraper import (
-    generate_embedding,
-    check_semantic_duplicate,
-    save_to_supabase,
     ai_data_cleaner,
     client,       # genai.Client
     supabase,     # Supabase Client
 )
+from db_utils import upsert_event, map_legacy_fields
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
@@ -218,7 +216,20 @@ def scrape_and_store(event_urls: list[str], dry_run: bool = False, limit: int = 
                         print("   🚫 AI 守門員：無效內容，跳過")
                     else:
                         print("   ✨ 準備寫入資料庫...")
-                        save_to_supabase(event_json, dry_run=dry_run)
+                        events = event_json if isinstance(event_json, list) else [event_json]
+                        for ev in events:
+                            mapped = map_legacy_fields(ev)
+                            upsert_event(
+                                llm_data=mapped,
+                                system_fields={
+                                    "source_url":  url,
+                                    "source_name": "台東觀光旅遊網",
+                                    "image_url":   ev.get("image_url", img_url),
+                                },
+                                supabase=supabase,
+                                google_maps_key=os.getenv("GOOGLE_MAPS_API_KEY", ""),
+                                dry_run=dry_run,
+                            )
 
                 except Exception as e:
                     print(f"   ⚠️  頁面處理失敗（跳過）：{e}")

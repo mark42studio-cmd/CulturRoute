@@ -25,6 +25,8 @@ export interface Event {
   address?: string;         // 完整地址（比 venue_name 更精確）
   latitude?: number;
   longitude?: number;
+  category?: string;           // "演出" | "展覽" | "講座" | "工作坊" | "節慶活動" | "其他"
+  time_type?: string;          // "單日活動" | "期間限定" | etc.（Gemini 輸出）
   vibe_tags: string[];
   target_audience?: string[];
   weather_resilience: number; // 1–5

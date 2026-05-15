@@ -132,14 +132,14 @@ export default function EventDetailModal({ event, onClose }: Props) {
         {/* 行動按鈕 */}
         <div className="space-y-2">
           <AddItineraryButton event={event} />
-          {event.ticket_url && (
+          {event.ticket_url?.startsWith('http') && (
             <a
               href={event.ticket_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-bold text-sm transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-violet-50 border border-violet-200 text-violet-700 py-2.5 rounded-xl font-semibold text-sm transition-colors hover:bg-violet-100"
             >
-              <Ticket size={16} /> 前往購票 / 報名
+              <ExternalLink size={15} className="opacity-70" /> 票務資訊
             </a>
           )}
           {event.source_url && (

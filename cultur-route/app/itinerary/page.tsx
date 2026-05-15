@@ -11,7 +11,7 @@ const supabase = createClient(
 import {
   MapPin, Calendar, ArrowLeft, Trash2, Map as MapIcon,
   GripVertical, Ticket, AlertTriangle, FileText, X, Clock, Car, BedDouble,
-  ExternalLink, PackageOpen, Camera, CalendarPlus, Loader2, Ban,
+  ExternalLink, PackageOpen, Camera, CalendarPlus, Loader2, Ban, Lock,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, Fragment, useRef, useState } from 'react';
@@ -23,6 +23,7 @@ import { submitEvent } from '../actions/submitEvent';
 import { ITINERARY_TOUR_KEY_V3 } from '@/lib/tourConfig';
 import OnboardingModal from '@/components/OnboardingModal';
 import MobileTimeline from '@/components/MobileTimeline';
+import EventDetailModal from '@/components/EventDetailModal';
 import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
 import { buildAgodaUrl } from '@/lib/agoda';
 import { buildKlookUrl } from '@/lib/klook';
@@ -164,6 +165,28 @@ const getEffectiveSortTime = (event: PlannedEvent): string => {
   return '00:00';
 };
 
+/** 單日活動鎖定判斷（與 ItinerarySidebar 邏輯一致） */
+const isSingleDayLocked = (event: PlannedEvent): boolean => {
+  if (event.time_type === '單日活動') return true;
+  if (!event.end_time && !event.end_date) return true;
+  const startDay = event.start_time.substring(0, 10);
+  const endDay = event.end_time?.substring(0, 10);
+  return !!endDay && startDay === endDay;
+};
+
+/**
+ * Fixed Event：有明確非午夜時間，且 end_time - start_time < 24h（單場演出/講座）。
+ * 固定行程不可拖拉，排序完全由 start_time 決定。
+ */
+const isFixedEvent = (event: PlannedEvent): boolean => {
+  if (!event.start_time || !event.end_time) return false;
+  const startMs = new Date(event.start_time).getTime();
+  const endMs   = new Date(event.end_time).getTime();
+  if (isNaN(startMs) || isNaN(endMs)) return false;
+  const startHHMM = toTaipeiHHMM(event.start_time);
+  return startHHMM !== '00:00' && endMs > startMs && (endMs - startMs) < 86_400_000;
+};
+
 // ── 行程時間智慧系統 ──────────────────────────────────────────────────────────
 
 /**
@@ -244,6 +267,7 @@ export default function ItineraryPage() {
   const {
     plannedEvents, removeEvent, reorderEvents,
     updateEventDate, updateVisitTime, tripStartDate, tripEndDate, setTripDates,
+    pendingJumpToDate, setPendingJumpToDate,
   } = useItineraryStore();
 
   const [isMounted,        setIsMounted]        = useState(false);
@@ -271,6 +295,7 @@ export default function ItineraryPage() {
   const [mockTourEvents,    setMockTourEvents]    = useState<PlannedEvent[]>([]);
   const [isDesktop,         setIsDesktop]         = useState<boolean | null>(null);
   const [showOnboarding,    setShowOnboarding]    = useState(false);
+  const [detailEvent,       setDetailEvent]       = useState<PlannedEvent | null>(null);
   const reportCardRef    = useRef<HTMLDivElement>(null);
   const postcardRef      = useRef<HTMLDivElement>(null);
   const mapContainerRef  = useRef<HTMLDivElement>(null);
@@ -281,6 +306,13 @@ export default function ItineraryPage() {
     setToasts(prev => [...prev, { id, message }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
   }, []);
+
+  // 自動延長行程後跳轉到新增日期 Tab（由首頁「加入行程」的自動延長功能觸發）
+  useEffect(() => {
+    if (!pendingJumpToDate) return;
+    setActiveDate(pendingJumpToDate);
+    setPendingJumpToDate(null);
+  }, [pendingJumpToDate, setPendingJumpToDate]);
 
   // Task 2：active tab 自動捲入視野
   const activeTabRef = useRef<HTMLButtonElement | null>(null);
@@ -529,34 +561,42 @@ export default function ItineraryPage() {
     const dstIdx = result.destination.index;
     if (srcIdx === dstIdx) return;
 
-    // ── 時間槽自動繼承（Time-Slot Auto-Reassignment） ───────────────────────
-    // currentDayEvents 已按有效時間升序排列，代表「坑位」的固定順序。
-    // 拖曳只是讓活動重新填入坑位，坑位本身的時間不動。
+    // Fixed Event 安全防線（isDragDisabled 已擋在 UI 層，此處雙重保險）
+    const movedEvent = currentDayEvents[srcIdx];
+    if (isFixedEvent(movedEvent)) return;
+
+    // ── 彈性活動時間槽自動繼承 ──────────────────────────────────────────────
+    // 固定活動（Fixed Event）永遠保持原本時間，不參與時間槽重分配。
+    // 只有「彈性活動」的時間槽才可互換，確保固定場次不被意外移位。
     //
     // 步驟：
-    //  1. 萃取當前坑位時間列表（已排序）
-    //  2. 對事件陣列執行元素換位
-    //  3. 依序將坑位時間重新賦值給換位後的事件
-    //  → 下次 render getEffectiveSortTime 自動重排，視覺順序正確
+    //  1. 分離固定與彈性活動，各自取時間槽
+    //  2. 僅對彈性活動陣列執行元素換位
+    //  3. 彈性活動的時間槽依序重新賦值
+    //  → 下次 render getEffectiveSortTime 自動重排，固定活動位置不變
 
-    const timeSlots = currentDayEvents.map(e => getEffectiveSortTime(e));
-    // timeSlots 已是升序（currentDayEvents 排序保證），再 sort 確保穩定
-    timeSlots.sort();
+    const flexEvents  = currentDayEvents.filter(e => !isFixedEvent(e));
+    const flexSlots   = flexEvents.map(e => getEffectiveSortTime(e)).sort();
 
-    const reordered = [...currentDayEvents];
-    const [moved] = reordered.splice(srcIdx, 1);
-    reordered.splice(dstIdx, 0, moved);
+    const flexSrcIdx  = flexEvents.findIndex(e => e.id === movedEvent.id);
+    // 計算目標在彈性清單中的位置（去除固定活動後的相對位置）
+    const flexDstIdx  = Math.min(
+      currentDayEvents.slice(0, dstIdx + 1).filter(e => !isFixedEvent(e)).length - 1,
+      flexEvents.length - 1,
+    );
 
-    reordered.forEach((event, i) => {
-      // 只有時間確實改變時才寫入，避免多餘 state update
-      if (timeSlots[i] !== getEffectiveSortTime(event)) {
-        updateVisitTime(event.id, timeSlots[i]);
+    if (flexSrcIdx < 0) return;
+
+    const reorderedFlex = [...flexEvents];
+    const [movedFlex]   = reorderedFlex.splice(flexSrcIdx, 1);
+    reorderedFlex.splice(Math.max(0, flexDstIdx), 0, movedFlex);
+
+    reorderedFlex.forEach((event, i) => {
+      if (flexSlots[i] !== getEffectiveSortTime(event)) {
+        updateVisitTime(event.id, flexSlots[i]);
       }
     });
-    // 不呼叫 reorderEvents：store 索引與 sorted view 索引不同步；
-    // 改由 visit_time 的重新賦值驅動下次 render 的排序結果。
 
-    // 若地圖已顯示，重置舊的車程資料，讓 MapComponent 以新順序重算路線
     if (showMap) setLegDurations([]);
   };
 
@@ -581,13 +621,23 @@ export default function ItineraryPage() {
         {toasts.map(t => (
           <div
             key={t.id}
-            className="flex items-center gap-2.5 bg-red-600 text-white px-4 py-3 rounded-2xl shadow-2xl text-sm font-bold w-full"
+            className="flex items-center gap-3 px-4 py-3 rounded-full bg-slate-800 text-slate-50 shadow-lg border border-slate-700/50 w-full"
           >
-            <Ban size={15} className="shrink-0" />
-            <span>{t.message}</span>
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 shrink-0">
+              <Lock size={14} />
+            </div>
+            <span className="text-sm font-medium tracking-wide">{t.message}</span>
           </div>
         ))}
       </div>
+
+      {/* ── 活動詳情 Modal（桌機卡片點擊觸發）────────────────────────────── */}
+      {detailEvent && (
+        <EventDetailModal
+          event={detailEvent}
+          onClose={() => setDetailEvent(null)}
+        />
+      )}
 
       {/* ── 完整行程報告 Modal ─────────────────────────────────────────────── */}
       {showReport && (
@@ -638,19 +688,19 @@ export default function ItineraryPage() {
                                 <h4 className="font-medium text-stone-900 text-sm leading-snug mb-2">{event.title}</h4>
                                 <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                                   {event.venue_name && (
-                                    <span className="flex items-center gap-1.5 text-xs text-stone-500">
+                                    <span className="flex items-center gap-1.5 text-xs text-stone-500 min-w-0">
                                       <MapPin size={11} className="text-stone-400 shrink-0" />
-                                      {event.venue_name}
+                                      <span className="truncate">{event.venue_name}</span>
                                     </span>
                                   )}
                                   <span className="flex items-center gap-1.5 text-xs text-stone-500">
                                     <Clock size={11} className="text-stone-400 shrink-0" />
                                     停留 {STAY_LABELS[event.stay_duration ?? 90] ?? '1.5 小時'}
                                   </span>
-                                  {event.ticket_url && (
+                                  {event.ticket_url?.startsWith('http') && (
                                     <a href={event.ticket_url} target="_blank" rel="noopener noreferrer"
-                                       className="flex items-center gap-1 text-xs text-stone-600 underline underline-offset-2 hover:text-stone-900 transition-colors">
-                                      <Ticket size={11} /> 購票
+                                       className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-md hover:bg-violet-100 transition-colors">
+                                      <Ticket size={11} className="opacity-70 shrink-0" /> 票務資訊
                                     </a>
                                   )}
                                 </div>
@@ -874,24 +924,29 @@ export default function ItineraryPage() {
                   <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-col gap-4">
                     {currentDayEvents.map((event, index) => (
                       <Fragment key={event.id}>
-                      <Draggable draggableId={event.id} index={index}>
+                      <Draggable draggableId={event.id} index={index} isDragDisabled={isFixedEvent(event)}>
                         {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            onClick={() => setSelectedEventId(prev => prev === event.id ? null : event.id)}
+                            onClick={() => { setSelectedEventId(event.id); setDetailEvent(event); }}
                             className={[
                               'planned-event-card rounded-2xl p-5 border shadow-sm relative group flex gap-4 transition-colors cursor-pointer',
-                              // 斑馬紋：偶數 white，奇數 slate-50
                               index % 2 === 0 ? 'bg-white' : 'bg-slate-50',
                               snapshot.isDragging ? 'border-blue-500 shadow-xl scale-[1.02] z-50'
                                 : selectedEventId === event.id ? 'border-blue-500 ring-2 ring-blue-300'
                                 : 'border-gray-100',
                             ].join(' ')}
                           >
-                            <div {...provided.dragHandleProps} className="flex items-center justify-center text-gray-300 hover:text-blue-500 transition-colors">
-                              <GripVertical size={20} />
-                            </div>
+                            {isFixedEvent(event) ? (
+                              <div className="flex items-center justify-center text-gray-200 shrink-0 cursor-not-allowed" title="固定場次，時間不可移動">
+                                <Clock size={18} />
+                              </div>
+                            ) : (
+                              <div {...provided.dragHandleProps} className="flex items-center justify-center text-gray-300 hover:text-blue-500 transition-colors cursor-grab active:cursor-grabbing">
+                                <GripVertical size={20} />
+                              </div>
+                            )}
                             <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-1">
                               {index + 1}
                             </div>
@@ -899,9 +954,9 @@ export default function ItineraryPage() {
                               <h3 className="font-bold text-gray-800 text-base mb-1 pr-6 leading-tight truncate">{event.title}</h3>
                               {/* 硬排警告 tag — 不影響 DnD 佈局，inline-block 流式排列 */}
                               {getIsHardScheduled(event) && (
-                                <div className="mb-2 flex items-center gap-1.5 bg-red-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg w-fit leading-tight">
-                                  <AlertTriangle size={11} className="shrink-0" />
-                                  此活動在今日無舉辦，請再確認
+                                <div className="mb-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200 w-fit">
+                                  <span className="text-amber-500 text-[11px]">⚠️</span>
+                                  <span>今日無場次，請確認日期</span>
                                 </div>
                               )}
                               {/* Task 3：嚴格對齊 assigned_date */}
@@ -961,27 +1016,38 @@ export default function ItineraryPage() {
                                   <MapPin size={12} />
                                   <span className="truncate max-w-[100px] sm:max-w-[150px]">{event.venue_name}</span>
                                 </div>
-                                {event.ticket_url && (
+                                {event.ticket_url?.startsWith('http') && (
                                   <a href={event.ticket_url} target="_blank" rel="noopener noreferrer"
                                      onClick={(e) => e.stopPropagation()}
-                                     className="flex items-center gap-1 text-[10px] font-bold text-white bg-amber-500 hover:bg-amber-600 px-2 py-0.5 rounded transition-colors shadow-sm">
-                                    <Ticket size={10} /> 購票
+                                     className="inline-flex items-center gap-1 text-[10px] font-medium text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded hover:bg-violet-100 transition-colors">
+                                    <Ticket size={10} className="opacity-70 shrink-0" /> 票務資訊
                                   </a>
                                 )}
-                                <select
-                                  value={actualActiveDate}
-                                  onChange={(e) => handleDateChange(event, e.target.value)}
-                                  className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 outline-none hover:bg-gray-100 cursor-pointer ml-auto"
-                                >
-                                  {sortedDates.map((d, i) => (
-                                    <option key={d} value={d}>移至 {formatTabLabel(d, i)}</option>
-                                  ))}
-                                </select>
+                                {isExhibition(event) && !isSingleDayLocked(event) ? (
+                                  <select
+                                    value={actualActiveDate}
+                                    onChange={(e) => handleDateChange(event, e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-[10px] font-bold text-gray-500 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 outline-none hover:bg-gray-100 cursor-pointer ml-auto"
+                                  >
+                                    {sortedDates.map((d, i) => (
+                                      <option key={d} value={d}>移至 {formatTabLabel(d, i)}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <div
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="inline-flex items-center gap-1 text-[10px] text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded ml-auto"
+                                  >
+                                    <Lock size={9} className="shrink-0 opacity-50" />
+                                    <span>日期鎖定</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <button
-                              onClick={() => removeEvent(event.id)}
-                              className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                              onClick={(e) => { e.stopPropagation(); removeEvent(event.id); }}
+                              className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
                             >
                               <Trash2 size={16} />
                             </button>

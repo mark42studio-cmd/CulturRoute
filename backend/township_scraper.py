@@ -52,6 +52,7 @@ from supabase import create_client, Client
 
 from venue_whitelist import lookup_venue_coords
 from scraper import generate_embedding, check_semantic_duplicate
+from db_utils import upsert_event
 
 # ── 初始化 ─────────────────────────────────────────────────────────────────────
 
@@ -664,9 +665,9 @@ def save_to_raw_posts(source_name: str, source_type: str, url: str,
         return False
 
 
-# ── AI 清洗（公所 / 官方機構版）─────────────────────────────────────────────
+# ── AI 清洗（Phase 3：新版 Gemini Schema）────────────────────────────────────
 
-def ai_cleaner_official(
+def ai_cleaner_v2(
     raw_text: str,
     source_name: str,
     source_type: str,
@@ -676,149 +677,70 @@ def ai_cleaner_official(
     attachments: list[str] | None = None,
 ) -> list[dict] | None:
     """
-    送 Gemini 清洗官方網站內頁文字（含可選的海報圖片多模態輸入）。
-    attachments 清單也揭露在 prompt 中，讓 LLM 知道有哪些附件可供視覺 OCR 判讀。
+    Phase 3 新版 Gemini 清洗器。
+    輸出欄位直接對應 Supabase events 表（新版 Gemini Schema），
+    由 upsert_event 直接入庫，不再需要中間欄位對映。
     """
-    source_label = {
-        "official": "官方機構（博物館/美學館等）",
-        "township": "鄉鎮公所（常轉知其他單位活動）",
-    }.get(source_type, "官方網站")
-
-    image_note = (
-        f"\n【海報圖片已附上】：{image_url}\n"
-        "請優先從圖片讀取活動日期、時間、地點、票價等關鍵資訊。\n"
-        if image_url else
-        "\n【無海報圖片】：請僅依賴文字內容判斷。\n"
-    )
+    from datetime import datetime, timezone
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     attachments_note = ""
     if attachments:
-        att_lines = "\n".join(f"  - {a}" for a in attachments[:10])
-        attachments_note = (
-            f"\n【附件 / 海報清單】（以下可能含活動日期、地點等關鍵資訊）：\n"
-            f"{att_lines}\n"
-            "若文字資訊不足，請嘗試從附件檔名或圖片 alt 推斷活動資訊。\n"
-        )
+        lines = "\n".join(f"  - {a}" for a in attachments[:10])
+        attachments_note = f"\n【附件清單（可能含活動日期、地點）】：\n{lines}\n"
+
+    image_part = download_image_part(image_url) if image_url else None
 
     prompt = f"""
-你是台灣在地文化策展人兼資料工程師。以下內容來自「{source_name}」（{source_label}）。
-{image_note}{attachments_note}
-【來源說明】：
-- 發布單位：{source_name}
-- 參考地區：{venue_hint}
-
+你是台灣在地文化策展人兼資料工程師。
+以下內容來自「{source_name}」（台東{venue_hint}地區），類型：{'鄉鎮公所' if source_type == 'township' else '官方機構'}。
+今天日期：{today}
+{attachments_note}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-★ 主理人嚴選規則 0：標題精煉規則（Critical，優先執行）
-提取 event_name 時，請強制執行：
-① 刪除冠頭的主辦單位全名，例如「財團法人○○基金會」「中華民國台東縣○○協會」「台東縣政府文化處」等
-② 刪除括號內的附註說明，例如「（自由入場）」「（線上報名）」「（免費參加）」
-③ 刪除行政前綴符號：【公告】【活動資訊】📢 等
-④ 保留最核心的「活動 / 展覽主名稱」，若有子標題以「－」連接
-⑤ 範例：「台東縣政府文化處主辦 第十屆山海有聲音樂節（免費入場）」→「山海有聲音樂節」
+【過濾規則（優先判斷）】
+下列情況請回傳 [{{"is_event": false}}]，不輸出活動：
+- 行政通知（停水/停電/施工/招標/人事/政令宣導）
+- 志工/攤商/工作招募
+- 補助申請/線上徵件（非到場參與類）
+- 活動地點明確在台東縣以外
+- 無法確認是台東縣舉辦的活動
+- 非藝文/文化類公告（社福/教育/民政等）
 
+【台東縣限定】全國巡迴活動只保留台東場次。
+
+【多場次】若有多個不連續日期，每個日期輸出一個獨立物件，標題加上 (MM/DD場)。
+
+【民國年 → 西元年】115年=2026、114年=2025、113年=2024（+1911）
+
+【發布單位 ≠ 活動地點】公所通知常轉知他處活動，嚴禁將「{source_name}」直接填入地點。
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-★ 主理人嚴選規則 1：地理過濾器（Taitung-Only）
-全國性或跨縣市系列活動（如家政 70 周年巡迴、桐花祭各地場），
-只保留「台東縣」舉辦的場次，其他縣市場次一律忽略，不要輸出。
-若整個活動都在台東以外 → 回傳 [{{"is_event": false}}]
-若無法確認是台東 → 回傳 [{{"is_event": false}}]
-
-★ 主理人嚴選規則 2：多場次與系列活動拆解（Multi-Session Splitter）
-⚠️ 核心禁令：若內文列出「多個不連續的特定日期」（場次表、不同週末演出），
-   絕對禁止將其合併為一個橫跨數月的單一長效活動。
-
-觸發條件（符合任一即須拆解）：
-  • 明確場次表：列出多個不連續日期（如：2/14、3/7、5/9）
-  • 不同週末演出：每週六或隔週等週期性但各場獨立的演出
-  • 子活動：同一頁面有不同日期/地點的獨立場次（如博覽會開幕式、山谷開桌、閉幕晚會）
-  • 系列活動：總期間長達數月，各場有不同演出者或主題
-
-拆解規則：
-  • 每個具體舉辦日期 → 獨立輸出一個 JSON 物件
-  • event_name 後加場次識別：「主名稱 (MM/DD場)」或「主名稱 - 子標題」
-    例：「大坡池懷舊情歌 (5/9場)」、「金峰博覽會 - 開幕式」
-  • 每筆 iso_end_time 填該場次當日結束時間+08:00，end_date 留 null
-  • 即使只有一個活動，也必須包裝在 Array 中回傳
-
-★ 主理人嚴選規則 3：視覺優先（Poster First）
-若有附上海報圖片，請優先從圖片讀取活動資訊。
-若文字極少，請特別留意：
-  ① 附件清單中的圖片與 PDF 檔名（如 20260512_concert.jpg → 2026年5月12日）
-  ② 圖片 alt 屬性文字
-  ③ 多模態視覺判讀圖片上的日期、時間、地點
-
-★ 主理人嚴選規則 4：容錯深度判讀
-若文字資料不完整，請盡力從海報圖片、活動名稱、主辦單位名稱中推斷。
-推斷資訊填入欄位，並在 card_summary 中標注「（詳見海報）」。
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-【⚠️ 發布單位 ≠ 活動地點】：
-公所與官方機構的公告常常是「轉知」其他單位辦的活動。
-嚴禁將「{source_name}」直接當成活動舉辦地點。
-
-【地點判別（按優先順序）】：
-1. 內文有「活動地點：○○」「舉辦地點：○○」「在○○廣場」→ 直接使用
-2. 內文有「○○部落」「○○廣場」「○○社區」→ 使用該處
-3. 活動名稱含地名（如「卑南族豐年祭」）→ 推斷部落廣場
-4. 官方機構且未提其他地點 → 填機構本身名稱
-5. 以上都找不到 → 該子活動輸出 {{"is_event": false}}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-【基本過濾】：
-- 行政通知（停水/停電/施工/招標/人事）→ [{{"is_event": false}}]
-- 非公開參與的活動 → [{{"is_event": false}}]
-- 志工/攤商招募 → [{{"is_event": false}}]
-- 線上報名 / 全國網路徵件 / 業者補助申請計畫 → [{{"is_event": false}}]
-  （這類雖有時間截止，但不是「到台東現場參與的藝文體驗活動」）
-- 明確標示地點在台東縣以外（如臺北、高雄、花蓮、苗栗）→ [{{"is_event": false}}]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-【民國年 → 西元年（嚴格遵守）】：
-115年=2026、114年=2025、113年=2024（規則：+1911）
-格式：YYYY-MM-DDTHH:mm:ss+08:00，禁止輸出民國年
-
-【長期展覽 vs 單次活動】：
-- 單次：iso_end_time = 當日結束時間+08:00，end_date = null
-- 長期展覽（含「展期」「即日起至」）：iso_end_time = null，end_date = 最後一天
-
-【展覽結束時間：營業時間優先規則】
-跨日展覽的最後一天 iso_end_time 依以下優先順序決定：
-① 活動專屬時間（最優先）：若活動本身另外註明獨立結束時間
-  （例：園區 17:00 關門，但「星空電影院」寫明 19:00-21:00）→ 以活動專屬時間為準
-② 場館營業/開放時間：若內文提及場館打烊時間（如「開放時間 09:00-17:00」）
-  → 以打烊時間作為 iso_end_time 基準，例如 "2026-06-28T17:00:00+08:00"
-③ 備援（極端情況）：完全找不到場館營業時間且無活動具體時間
-  → 才可使用 23:59:59+08:00 作為最後備援（禁止在有線索時直接跳到此項）
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-請 strictly 回傳純 JSON Array（不含 markdown code block、不含其他文字）：
+請嚴格回傳純 JSON Array（不含 markdown 標籤）：
 [
   {{
     "is_event": true,
-    "event_name": "活動標題（若系列活動格式：主名稱 - 子標題）",
-    "iso_start_time": "YYYY-MM-DDTHH:mm:ss+08:00（西元，禁用民國年）",
-    "iso_end_time": "結束時間或 null（長期展覽）",
-    "end_date": "YYYY-MM-DD（長期展覽）或 null",
-    "location": "實際活動地點（非發布公所）",
-    "address": "完整地址或 null",
-    "image_url": "海報/主視覺圖片 URL 或 null",
-    "latitude": null,
-    "longitude": null,
+    "title": "活動標題（刪除主辦單位名稱、括號附註、行政前綴如【公告】）",
+    "category": "展覽 | 演出 | 講座 | 工作坊 | 節慶活動 | 其他",
+    "sub_category": ["音樂", "舞蹈", "戲劇", "視覺藝術", "傳統工藝", "原住民文化", "電影", "親子", "講座", "市集", "祭典", "書法文學", "生態旅遊", "社區活動（選1-3個）"],
+    "time_type": "單日活動 | 期間限定 | 常態展覽",
+    "start_time": "YYYY-MM-DDTHH:mm:ss+08:00（無具體時間填 null）",
+    "end_time": "YYYY-MM-DDTHH:mm:ss+08:00（單日可 null；長期展覽填末日閉館時間）",
+    "opening_hours": "展覽開放時段說明（如無填 null）",
+    "venue_name": "實際活動場地名稱（非發布公所；不確定填 null）",
+    "address": "完整地址（如無填 null）",
+    "region": "市區 | 縱谷山線 | 東海岸線 | 南迴線 | 離島（無法判斷填 null）",
     "is_free": true 或 false,
-    "vibe_tags": ["⚠️ 格式嚴格規定：純文字陣列，絕對禁止包含 # 或任何 Markdown 符號。從以下選1–5個：音樂演出, 視覺藝術, 傳統工藝, 原住民文化, 在地節慶, 戶外體驗, 親子活動, 靜態展覽, 講座工作坊, 市集, 電影放映, 舞蹈, 戲劇表演, 祭典儀式, 生態旅遊, 書法文學, 藝術裝置, 官方展演, 社區活動。⚠️ 標籤規則：真正的畫展/藝術展/博物館典藏展才可標『靜態展覽』；多日節慶、嘉年華、市集、音樂節等動態活動嚴禁標『靜態展覽』。輸出範例：[\"靜態展覽\", \"視覺藝術\"]"],
-    "target_audience": ["親子/情侶/獨旅/銀髮/學生 中選適合的"],
-    "weather_resilience": 1到5整數,
-    "card_summary": "15-30字吸睛介紹（推斷資訊加註「詳見海報」）",
+    "ticket_url": "購票或報名網址（有則提取，否則 null）",
+    "indoor_or_outdoor": "室內 | 室外（無法判斷填 null）",
+    "description": "50字以內短摘要，吸引人參與",
     "long_description": "完整活動說明"
   }}
 ]
 
-來源：{source_name}
+來源：{source_name}（{venue_hint}）
 網址：{source_url}
 內文：
 {raw_text[:3500]}
 """
-    image_part = download_image_part(image_url) if image_url else None
     api_contents: list = [prompt]
     if image_part:
         api_contents.append(image_part)
@@ -829,7 +751,7 @@ def ai_cleaner_official(
                 model="gemini-2.5-flash-lite", contents=api_contents
             )
             clean = resp.text.replace("```json", "").replace("```", "").strip()
-            result = json.loads(clean)
+            result = json.loads(clean, strict=False)
             return result if isinstance(result, list) else [result]
         except Exception as e:
             if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
@@ -839,150 +761,6 @@ def ai_cleaner_official(
                 print(f"  [ERR] AI parse failed: {e}")
                 return None
     return None
-
-
-# ── 寫入 events ────────────────────────────────────────────────────────────────
-
-def fix_timezone_jig(ts: str | None) -> str | None:
-    """
-    時區防撞治具：若 ISO 時間字串結尾缺少時區資訊，強制補上 +08:00。
-    已含 +/-HH:MM 偏移或 Z（UTC）者直接回傳，不重複補。
-    """
-    if not ts:
-        return ts
-    s = str(ts).strip()
-    if not s:
-        return None
-    suffix = s[19:] if len(s) > 19 else ""
-    if suffix.startswith("+") or suffix.startswith("-") or s.endswith("Z"):
-        return s
-    return s + "+08:00"
-
-
-def save_event(event_data: dict, source_url: str, source_name: str,
-               source_type: str, config_fixed_coords: dict | None) -> bool:
-    try:
-        title   = event_data.get("event_name", "未提供")
-        # 時區防撞治具：補上缺漏的 +08:00，避免 Supabase 視為 UTC
-        start   = fix_timezone_jig(event_data.get("iso_start_time"))
-        end     = fix_timezone_jig(event_data.get("iso_end_time"))
-
-        # ── 第一層：複合鍵去重（source_url + title）────────────────────────
-        # 不再單靠 source_url 阻擋，避免同頁系列活動被誤殺；
-        # 只有「網址相同」且「標題也相同」才視為真重複。
-        if source_url:
-            dup1 = (
-                supabase.table("events")
-                .select("id")
-                .eq("source_url", source_url)
-                .eq("title", title)
-                .execute()
-            )
-            if dup1.data:
-                print(f"  [SKIP] already exists (source_url + title): {title}")
-                return False
-
-        # ── 第二層：跨平台模糊去重（start_time 精確 + title 前 6 字模糊）────
-        # 防止不同單位發布同一展覽時因標題微差異而重複入庫。
-        title_prefix = title[:6]
-        if title_prefix and start:
-            dup2 = (
-                supabase.table("events")
-                .select("id")
-                .eq("start_time", start)
-                .ilike("title", f"{title_prefix}%")
-                .execute()
-            )
-            if dup2.data:
-                print(f"  [SKIP] already exists (cross-platform fuzzy): {title}")
-                return False
-
-        lat = event_data.get("latitude")
-        lng = event_data.get("longitude")
-        if not lat or not lng:
-            lat, lng = lookup_venue_coords(event_data.get("location", ""))
-        # ⚠️  修復：移除 config_fixed_coords fallback。
-        # 原本此處會用來源網站（公所/獨立空間）的固定座標填補缺漏，
-        # 但那是「發布單位」座標，不是「活動場地」座標，造成地圖定位偏差。
-        # 找不到座標時改設 None，強迫前端 Geocoding API 用 venue_name 精確定位。
-        if not lat or not lng:
-            lat, lng = None, None
-            print(f"  [COORD] no coords found for '{event_data.get('location', '')}' → null (frontend will geocode)")
-
-        vibe_tags = list(event_data.get("vibe_tags", []))
-        if source_type == "township" and "#在地節慶" not in vibe_tags:
-            vibe_tags.append("#在地節慶")
-        elif source_type == "official" and "#官方展演" not in vibe_tags:
-            vibe_tags.append("#官方展演")
-
-        # 圖片 URL 格式強校驗：非有效圖片格式一律清空，避免頁面 URL 存入 image_captured
-        raw_image_url = event_data.get("image_url", "") or ""
-        image_captured = raw_image_url if is_valid_image_url(raw_image_url) else ""
-        if raw_image_url and not image_captured:
-            print(f"  [IMG] 無效圖片 URL 已清除：{raw_image_url[:70]}")
-
-        payload = {
-            "title":              title,
-            "description":        event_data.get("card_summary", ""),
-            "long_description":   event_data.get("long_description", ""),
-            "image_captured":     image_captured,
-            "start_time":         start,
-            "end_time":           end,
-            "end_date":           event_data.get("end_date"),
-            "venue_name":         event_data.get("location", "未提供"),
-            "address":            event_data.get("address"),
-            "latitude":           lat,
-            "longitude":          lng,
-            "is_free":            event_data.get("is_free", True),
-            "source_url":         source_url,
-            "vibe_tags":          vibe_tags,
-            "target_audience":    event_data.get("target_audience", []),
-            "weather_resilience": event_data.get("weather_resilience", 3),
-            "engagement_metrics": {"score": 0},
-            "affiliate_links": {
-                "rental":        {"label": "租車/租機車", "url": None},
-                "ticket":        {"label": "售票連結",   "url": None},
-                "accommodation": {"label": "周邊住宿",   "url": None},
-            },
-        }
-
-        # ── 向量語意去重（最終防線）────────────────────────────────────────────
-        embed_text = (
-            f"{title} "
-            f"{start[:10] if start else ''} "
-            f"{event_data.get('card_summary', event_data.get('long_description', ''))[:200]}"
-        ).strip()
-        embedding = generate_embedding(embed_text)
-        if embedding:
-            is_dup, matched = check_semantic_duplicate(
-                embedding,
-                new_start_date=start[:10] if start else None,
-                new_title=title,
-            )
-            if is_dup:
-                print(f"  🧠 語意重複，跳過：{title}（↳ 相似：{matched}）")
-                return False
-        payload["embedding"] = embedding  # None → Supabase 寫入 NULL
-
-        supabase.table("events").insert(payload).execute()
-        print(f"  [OK] saved: {title}")
-        return True
-    except Exception as e:
-        print(f"  [ERR] save_event failed: {e}")
-        return False
-
-
-def save_events_list(events: list[dict], source_url: str, source_name: str,
-                     source_type: str, config_fixed_coords: dict | None) -> int:
-    """迭代 AI 回傳的 list，逐筆呼叫 save_event，回傳成功寫入筆數。"""
-    saved = 0
-    for event in events:
-        if not event.get("is_event"):
-            print(f"  [SKIP] AI says not_event")
-            continue
-        if save_event(event, source_url, source_name, source_type, config_fixed_coords):
-            saved += 1
-    return saved
 
 
 # ── 攔截觀測 Log（dry-run 專用）──────────────────────────────────────────────
@@ -1179,7 +957,7 @@ def scrape_target(config: dict, max_items: int, dry_run: bool) -> dict:
             _log_inspect_pre_ai(inner_soup, attachments, image_url, raw_text, item_url)
 
         # ── 送 AI 清洗（文字 + 圖片多模態 + attachments 清單）───────────
-        events_list = ai_cleaner_official(
+        events_list = ai_cleaner_v2(
             raw_text, name, source_type, item_url, venue_hint,
             image_url=image_url,
             attachments=attachments if attachments else None,
@@ -1203,10 +981,25 @@ def scrape_target(config: dict, max_items: int, dry_run: bool) -> dict:
                                   raw_text=raw_text, keyword=title_text[:50])
                 stats["raw_saved"] += 1
             else:
-                n = save_events_list(events_list, item_url, name, source_type, fixed_coords)
-                stats["events"] += n
-                if n == 0:
-                    stats["skipped"] += 1
+                for ev in events_list:
+                    if not ev.get("is_event"):
+                        stats["skipped"] += 1
+                        continue
+                    result = upsert_event(
+                        llm_data=ev,
+                        system_fields={
+                            "source_url":  item_url,
+                            "source_name": name,
+                            "image_url":   image_url or "",
+                        },
+                        supabase=supabase,
+                        google_maps_key=os.getenv("GOOGLE_MAPS_API_KEY", ""),
+                        dry_run=False,
+                    )
+                    if result in ("inserted", "updated"):
+                        stats["events"] += 1
+                    elif result == "skipped":
+                        stats["skipped"] += 1
 
         time.sleep(random.uniform(6, 12))
 

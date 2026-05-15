@@ -24,10 +24,15 @@ export type AdminEvent = {
   is_published: boolean
   image_captured: string | null
   ticket_url: string | null
+  category: string | null
+  sub_category: string[] | null
 }
 
 type Tab = 'events' | 'places' | 'foods' | 'affiliate' | 'reports' | 'submissions'
 type SortMode = 'default' | 'name' | 'issues'
+
+const CATEGORY_OPTIONS = ['展覽', '演出', '講座', '工作坊', '節慶活動', '其他'] as const
+type CategoryOption = typeof CATEGORY_OPTIONS[number]
 
 type EditState = {
   id: string
@@ -40,6 +45,8 @@ type EditState = {
   longitude: number | null
   imageCaptured: string
   ticketUrl: string
+  category: CategoryOption | ''
+  subCategoryStr: string          // 逗號分隔，如 "音樂演出,講座工作坊"
   geocodedResult: { latitude: number; longitude: number; formatted: string } | null
 }
 
@@ -235,6 +242,8 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
       longitude: event.longitude,
       imageCaptured: event.image_captured ?? '',
       ticketUrl: event.ticket_url ?? '',
+      category: (CATEGORY_OPTIONS.includes(event.category as CategoryOption) ? event.category : '') as CategoryOption | '',
+      subCategoryStr: (event.sub_category ?? []).join(', '),
       geocodedResult: null,
     })
   }
@@ -266,6 +275,10 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
     if (!editState) return
     startTransition(async () => {
       try {
+        const subCategoryArr = editState.subCategoryStr
+          .split(',')
+          .map(t => t.trim())
+          .filter(Boolean)
         await updateEventFields(editState.id, {
           start_time: editState.startTime ? new Date(editState.startTime).toISOString() : undefined,
           end_time: editState.endTime ? new Date(editState.endTime).toISOString() : null,
@@ -274,6 +287,8 @@ export default function AdminClient({ initialEvents }: { initialEvents: AdminEve
           longitude: editState.longitude ?? undefined,
           image_captured: editState.imageCaptured || null,
           ticket_url: editState.ticketUrl || null,
+          category: editState.category || null,
+          sub_category: subCategoryArr.length > 0 ? subCategoryArr : undefined,
         })
         setEvents(prev => prev.map(e =>
           e.id === editState.id
@@ -1155,6 +1170,37 @@ insert into affiliate_links (key, label, icon) values
                   onChange={e => setEditState(s => s ? { ...s, ticketUrl: e.target.value } : s)}
                   className="w-full border border-teal-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 outline-none bg-teal-50/30"
                 />
+              </div>
+
+              {/* ── 分類修正區塊 ── */}
+              <div className="border border-violet-200 bg-violet-50/30 rounded-xl p-4 space-y-3">
+                <p className="text-xs font-bold text-violet-700 tracking-wider uppercase">AI 分類修正</p>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1">大分類 (category)</label>
+                  <select
+                    value={editState.category}
+                    onChange={e => setEditState(s => s ? { ...s, category: e.target.value as CategoryOption | '' } : s)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-violet-400 outline-none bg-white"
+                  >
+                    <option value="">（不設定 / 清除）</option>
+                    {CATEGORY_OPTIONS.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1">次分類標籤 (sub_category)</label>
+                  <input
+                    type="text"
+                    placeholder="以逗號分隔，如：音樂演出, 講座工作坊"
+                    value={editState.subCategoryStr}
+                    onChange={e => setEditState(s => s ? { ...s, subCategoryStr: e.target.value } : s)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-violet-400 outline-none"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1">儲存時自動解析為陣列，空白將自動去除</p>
+                </div>
               </div>
 
               <div className="border border-amber-200 bg-amber-50/40 rounded-xl p-4 space-y-3">

@@ -14,7 +14,24 @@
 
   "official_sites": [
     {
-      "_note": "此清單由 township_scraper.py 讀取。勿與 scraper.py TARGET_SITES 重複。目前為空，待新目標結構驗證後逐步加入。"
+      "name":             "台東市公所活動訊息",
+      "url":              "https://www.taitungcity.gov.tw/news/",
+      "base_url":         "https://www.taitungcity.gov.tw",
+      "source_type":      "township",
+      "parser_type":      "static",
+      "list_selector":    ".news-list li, .list-group-item, article",
+      "url_must_contain": "/news/",
+      "fixed_coords":     { "lat": 22.7524, "lng": 121.1499 }
+    },
+    {
+      "name":             "池上鄉公所活動訊息",
+      "url":              "https://www.cs.gov.tw/home/index.php/news",
+      "base_url":         "https://www.cs.gov.tw",
+      "source_type":      "township",
+      "parser_type":      "static",
+      "list_selector":    ".news-list li, .list-group-item, article, tr",
+      "url_must_contain": "/news/",
+      "fixed_coords":     { "lat": 23.0972, "lng": 121.2262 }
     }
   ],
 

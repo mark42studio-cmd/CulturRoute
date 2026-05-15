@@ -30,8 +30,9 @@ from bs4 import BeautifulSoup
 from google import genai
 from google.genai import types
 
-# ── 共用工具從 scraper.py 匯入，避免重複定義 ────────────────────────────────
-from scraper import save_to_supabase, normalize_title
+# ── 共用工具匯入 ────────────────────────────────────────────────────────────
+from scraper import normalize_title, supabase
+from db_utils import upsert_event, map_legacy_fields
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 load_dotenv(find_dotenv(), encoding="utf-8-sig", override=True)
@@ -528,7 +529,19 @@ def run(dry_run: bool = False, limit: int = 0) -> None:
                         for ev in events_list:
                             _fix_source_url(ev, url)
                         print("✨ 準備寫入資料庫...")
-                        save_to_supabase(event_json, dry_run=dry_run)
+                        for ev in events_list:
+                            mapped = map_legacy_fields(ev)
+                            upsert_event(
+                                llm_data=mapped,
+                                system_fields={
+                                    "source_url":  ev.get("source_url", url),
+                                    "source_name": "國立臺東生活美學館",
+                                    "image_url":   ev.get("image_url", main_img_url),
+                                },
+                                supabase=supabase,
+                                google_maps_key=os.getenv("GOOGLE_MAPS_API_KEY", ""),
+                                dry_run=dry_run,
+                            )
 
                 except Exception as e:
                     print(f"⚠️  略過此頁（超時或錯誤）：{e}")
