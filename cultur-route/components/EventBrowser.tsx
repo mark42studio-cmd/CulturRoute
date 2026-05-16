@@ -9,8 +9,6 @@ import { CalendarRange, CalendarX, Sparkles, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useItineraryStore } from '@/store/useItineraryStore';
 import type { Event } from '@/types';
-import HomeOnboardingModal, { HOME_ONBOARDING_KEY } from '@/components/HomeOnboardingModal';
-import OnboardingModal from '@/components/OnboardingModal';
 import DateRangePicker from '@/components/DateRangePicker';
 import { getDateMismatch, dateOnlyTaipei, formatDateZH } from '@/lib/eventUtils';
 import { buildAgodaUrl, addOneDay } from '@/lib/agoda';
@@ -36,8 +34,6 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
   const [districtFilter, setDistrictFilter] = useState<'all' | 'city' | 'sea' | 'mountain' | 'south' | 'island'>('all');
   const [quickToastId, setQuickToastId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [showHomeOnboarding, setShowHomeOnboarding] = useState(false);
-  const [showExploreGuide,   setShowExploreGuide]   = useState(false);
 
   // useMemo 確保每次 render 不重新計算（日期在同一天內不會改變）
   const TODAY = useMemo(() => new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' }), []);
@@ -105,19 +101,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
 
   useEffect(() => { setIsMounted(true); }, []);
 
-  useEffect(() => {
-    if (window.innerWidth >= 768) return;
-    if (localStorage.getItem(HOME_ONBOARDING_KEY)) return;
-    setShowHomeOnboarding(true);
-  }, []);
 
-  useEffect(() => {
-    const handler = (e: globalThis.Event) => {
-      if ((e as CustomEvent).detail?.context === 'explore') setShowExploreGuide(true);
-    };
-    window.addEventListener('cultrRoute:showOnboarding', handler);
-    return () => window.removeEventListener('cultrRoute:showOnboarding', handler);
-  }, []);
 
   const isFiltering = startDate && endDate;
   let currentEvents = initialEvents;
@@ -457,11 +441,19 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
       )}
 
       {isFiltering && missedEvents.length > 0 && (
-        <div className="mt-16 pt-12 border-t border-stone-300 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f8f6f0] px-6">
-            <div className="flex items-center gap-2 text-stone-600 border border-stone-300 px-4 py-2"><Sparkles size={14} className="text-amber-600" /><span className="text-sm tracking-widest font-serif">如果您願意多留幾天</span></div>
+        <div className="mt-12 mb-6">
+          {/* 帶有文字的質感分隔線 */}
+          <div className="relative flex py-5 items-center">
+            <div className="flex-grow border-t border-slate-200" />
+            <span className="flex-shrink-0 mx-4 px-4 py-1.5 flex items-center gap-2 rounded-full bg-teal-50 border border-teal-100 text-teal-700 text-sm font-semibold tracking-wide shadow-sm">
+              <Sparkles size={16} className="text-teal-500 shrink-0" />
+              如果您願意多留幾天...
+            </span>
+            <div className="flex-grow border-t border-slate-200" />
           </div>
-          <p className="text-center text-stone-400 text-sm mb-8 max-w-2xl mx-auto tracking-wide">就在您預計離開後的幾天內，台東還有這些即將發生的精彩活動。</p>
+          <p className="text-center text-slate-500 text-sm font-medium mb-8">
+            就在您預計離開後的幾天內，台東還有這些即將發生的精彩活動。
+          </p>
           <div className="opacity-90 hover:opacity-100 transition-opacity">{renderMissedEventGrid(missedEvents)}</div>
         </div>
       )}
@@ -469,17 +461,6 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
     </div>
 
     <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
-    {showHomeOnboarding && (
-      <HomeOnboardingModal
-        onClose={() => {
-          localStorage.setItem(HOME_ONBOARDING_KEY, 'true');
-          setShowHomeOnboarding(false);
-        }}
-      />
-    )}
-    {showExploreGuide && (
-      <OnboardingModal context="explore" onClose={() => setShowExploreGuide(false)} />
-    )}
     </>
   );
 }

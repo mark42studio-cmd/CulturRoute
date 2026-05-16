@@ -30,6 +30,71 @@ import type { PlannedEvent } from '@/types';
 const isFixedEvent = (e: PlannedEvent): boolean =>
   e.category !== '展覽' || e.time_type === '單日活動';
 
+const isExhibition = (e: PlannedEvent): boolean => e.category === '展覽';
+
+const EXHIBITION_TIME_OPTIONS = [
+  '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+];
+
+// ── ExhibitionTimePicker：展覽專屬「我打算幾點去？」選單 ──────────────────────
+
+interface ExhibitionTimePickerProps {
+  eventId: string;
+  currentTime?: string;
+  onUpdateVisitTime: (id: string, time: string) => void;
+}
+
+function ExhibitionTimePicker({ eventId, currentTime, onUpdateVisitTime }: ExhibitionTimePickerProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('touchstart', close);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('touchstart', close);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
+      <button
+        type="button"
+        id="tour-exhibition-time-btn"
+        onClick={() => setOpen(v => !v)}
+        className="inline-flex items-center gap-1.5 text-[11px] font-medium text-violet-600 bg-violet-50 border border-violet-100 rounded-md px-2 py-0.5 cursor-pointer hover:bg-violet-100 active:bg-violet-200 transition-colors"
+        aria-label="設定參觀時間"
+      >
+        <Clock size={10} className="shrink-0" />
+        <span>{currentTime ? `${currentTime} 前往` : '我打算幾點去？'}</span>
+        <ChevronDown size={9} className="text-violet-400 shrink-0" />
+      </button>
+      {open && (
+        <ul className="absolute bottom-full left-0 mb-1.5 z-50 bg-white border border-stone-200 rounded-xl shadow-lg py-1 min-w-[110px]">
+          {EXHIBITION_TIME_OPTIONS.map(t => (
+            <li
+              key={t}
+              onClick={() => { onUpdateVisitTime(eventId, t); setOpen(false); }}
+              className={`px-3 py-2 text-xs font-mono cursor-pointer transition-colors ${
+                t === currentTime
+                  ? 'bg-violet-50 text-violet-700 font-semibold'
+                  : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+              }`}
+            >
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 const calculateTimeOverlaps = (events: PlannedEvent[]): Set<string> => {
   const overlapping = new Set<string>();
   const getRange = (e: PlannedEvent): [number, number] | null => {
@@ -147,11 +212,13 @@ interface CardProps {
   onOpen: (event: PlannedEvent) => void;
   onEditTime: (event: PlannedEvent) => void;
   onRemove: (id: string) => void;
+  onUpdateVisitTime: (id: string, time: string) => void;
   isConflicting: boolean;
 }
 
-function SortableEventCard({ event, index, onOpen, onEditTime, onRemove, isConflicting }: CardProps) {
-  const fixed = isFixedEvent(event);
+function SortableEventCard({ event, index, onOpen, onEditTime, onRemove, onUpdateVisitTime, isConflicting }: CardProps) {
+  const fixed  = isFixedEvent(event);
+  const exhib  = isExhibition(event);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: event.id,
     data: { type: 'item', dateStr: event.assigned_date, event },
@@ -167,16 +234,26 @@ function SortableEventCard({ event, index, onOpen, onEditTime, onRemove, isConfl
   const endHHMM   = startHHMM
     ? minToHHMM(hhmmToMin(startHHMM) + (event.stay_duration ?? 60))
     : null;
+  const openingHours = exhib
+    ? (event.opening_hours
+        ?? (event.end_time
+          ? `${toTaipeiHHMM(event.start_time)} - ${toTaipeiHHMM(event.end_time)}`
+          : null))
+    : null;
 
   return (
-    <div ref={setNodeRef} style={style} className={`relative mb-3 ${isDragging ? 'opacity-30' : ''}`}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative mb-3 planned-event-card ${isDragging ? 'opacity-30' : ''} ${exhib ? 'tour-exhibition-card' : 'tour-fixed-event-card'}`}
+    >
       {/* 時間軸節點 */}
       <div className="absolute -left-[18px] top-3.5 w-4 h-4 rounded-full bg-slate-700 border-2 border-[#f8f6f0] flex items-center justify-center z-10">
         <span className="text-white text-[9px] font-bold leading-none">{index + 1}</span>
       </div>
 
       {/* 活動卡片 */}
-      <div className={`relative bg-white rounded-xl border shadow-sm flex items-stretch overflow-hidden ${isConflicting ? 'border-rose-300' : 'border-gray-100'}`}>
+      <div className={`relative bg-white rounded-xl border shadow-sm flex items-stretch ${isConflicting ? 'border-rose-300' : 'border-gray-100'}`}>
         {/* 拖曳把手 / 鎖定圖示 */}
         {fixed ? (
           <div className="px-2.5 flex items-center justify-center text-stone-200 shrink-0 border-r border-gray-100 cursor-not-allowed" aria-label="固定活動，無法拖曳">
@@ -195,14 +272,34 @@ function SortableEventCard({ event, index, onOpen, onEditTime, onRemove, isConfl
         )}
 
         {/* 主內容區（點擊開啟詳情） */}
-        <button
-          className="p-3 pr-7 flex flex-col gap-1 flex-1 min-w-0 text-left"
+        <div
+          role="button"
+          tabIndex={0}
+          className="p-3 pr-7 flex flex-col gap-1 flex-1 min-w-0 text-left cursor-pointer"
           onClick={() => onOpen(event)}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onOpen(event); }}
         >
           <h3 className="font-bold text-gray-800 text-sm leading-snug line-clamp-2">{event.title}</h3>
 
-          {/* 時間區塊：獨立點擊，不觸發卡片 Modal */}
-          {startHHMM && endHHMM && (
+          {/* 展覽：開放時間 + 「我打算幾點去？」選單，選擇後自動插隊排序 */}
+          {exhib && (
+            <>
+              {openingHours && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-stone-400 font-mono">
+                  <Clock size={10} className="shrink-0" />
+                  <span>開放時間：{openingHours}</span>
+                </span>
+              )}
+              <ExhibitionTimePicker
+                eventId={event.id}
+                currentTime={event.visit_time}
+                onUpdateVisitTime={onUpdateVisitTime}
+              />
+            </>
+          )}
+
+          {/* 固定活動：可點擊修改預計抵達時間 */}
+          {!exhib && startHHMM && endHHMM && (
             <span
               role="button"
               tabIndex={0}
@@ -228,7 +325,7 @@ function SortableEventCard({ event, index, onOpen, onEditTime, onRemove, isConfl
               <span className="truncate">{event.venue_name}</span>
             </div>
           )}
-        </button>
+        </div>
 
         {/* 刪除按鈕 */}
         <button
@@ -596,18 +693,25 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
     if (!targetDate) return;
 
     if (sourceDate === targetDate) {
-      // ── 同天排序：時間槽繼承（與桌機邏輯完全相同）──────────────────────────
-      // 原理：把「時間坑位」固定，讓活動重新填入坑位，下次 render 自動按 visit_time 重排。
+      // ── 同天排序：時間槽繼承（僅對展覽類活動重排，固定活動時間不可被覆蓋）──
       const dayEvents = dayEventMap[sourceDate] ?? [];
       const oldIndex  = dayEvents.findIndex(e => e.id === active.id);
       const newIndex  = dayEvents.findIndex(e => e.id === over.id);
       if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
 
-      const timeSlots = dayEvents.map(e => getEffectiveSortTime(e)).sort();
+      // 只收集展覽（可拖曳）的時間槽做重排，固定活動保持 start_time 不動
+      const flexSlots = dayEvents
+        .filter(e => !isFixedEvent(e))
+        .map(e => getEffectiveSortTime(e))
+        .sort();
+
       const reordered = arrayMove(dayEvents, oldIndex, newIndex);
-      reordered.forEach((e, i) => {
-        if (timeSlots[i] !== getEffectiveSortTime(e)) {
-          updateVisitTime(e.id, timeSlots[i]);
+      let slotIdx = 0;
+      reordered.forEach(e => {
+        if (isFixedEvent(e)) return;
+        const newSlot = flexSlots[slotIdx++];
+        if (newSlot !== getEffectiveSortTime(e)) {
+          updateVisitTime(e.id, newSlot);
         }
       });
     } else {
@@ -617,6 +721,25 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
           description: '此活動時間由主辦方決定，請選擇正確的日期加入行程。',
         });
         return;
+      }
+      // ── 展覽邊界防護：只能排入展期內的日期 ──────────────────────────────
+      if (isExhibition(event)) {
+        const exhibStart = event.start_time.slice(0, 10);
+        const exhibEnd   = event.end_date ?? event.end_time?.slice(0, 10);
+        if (targetDate < exhibStart) {
+          const [, sm, sd] = exhibStart.split('-');
+          const [, tm, td] = targetDate.split('-');
+          toast(`⚠️ 展覽尚未開始，無法排入 ${parseInt(tm)}月${parseInt(td)}日`, {
+            description: `此展覽展期自 ${parseInt(sm)}月${parseInt(sd)}日起。`,
+          });
+          return;
+        }
+        if (exhibEnd && targetDate > exhibEnd) {
+          const [, em, ed] = exhibEnd.split('-');
+          const [, tm, td] = targetDate.split('-');
+          toast(`⚠️ 此展覽展期僅至 ${parseInt(em)}月${parseInt(ed)}日，無法排入 ${parseInt(tm)}月${parseInt(td)}日`);
+          return;
+        }
       }
       updateEventDate(String(active.id), targetDate);
     }
@@ -675,6 +798,7 @@ export default function MobileTimeline({ sortedDates, formatTabLabel }: MobileTi
                     onOpen={setDetailEvent}
                     onEditTime={handleEditTime}
                     onRemove={removeEvent}
+                    onUpdateVisitTime={updateVisitTime}
                     isConflicting={overlapSet.has(evt.id)}
                   />
                 ))}

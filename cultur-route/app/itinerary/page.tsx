@@ -21,7 +21,6 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import type { PlannedEvent } from '@/types';
 import { submitEvent } from '../actions/submitEvent';
 import { ITINERARY_TOUR_KEY_V3 } from '@/lib/tourConfig';
-import OnboardingModal from '@/components/OnboardingModal';
 import MobileTimeline from '@/components/MobileTimeline';
 import EventDetailModal from '@/components/EventDetailModal';
 import { useAffiliateLinks } from '@/hooks/useAffiliateLinks';
@@ -42,10 +41,10 @@ const STAY_LABELS: Record<number, string> = {
 
 const WEEKDAYS = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
 
-/** 展覽 TimePicker 選項：09:00–17:00，排除 12:00–13:00（午休） */
 const EXHIBITION_TIME_OPTIONS = [
-  '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00',
+  '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
 ];
+
 
 const RESOURCE_CARD_CONFIG = [
   { key: 'transport',     icon: '🏍️', title: '台東租車 / 租機車', iconBg: 'bg-amber-100'  },
@@ -290,7 +289,6 @@ export default function ItineraryPage() {
   const [submitErrorMsg,    setSubmitErrorMsg]    = useState('');
   const [mockTourEvents,    setMockTourEvents]    = useState<PlannedEvent[]>([]);
   const [isDesktop,         setIsDesktop]         = useState<boolean | null>(null);
-  const [showOnboarding,    setShowOnboarding]    = useState(false);
   const [detailEvent,       setDetailEvent]       = useState<PlannedEvent | null>(null);
   const reportCardRef    = useRef<HTMLDivElement>(null);
   const postcardRef      = useRef<HTMLDivElement>(null);
@@ -326,15 +324,12 @@ export default function ItineraryPage() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // 手機版新手：掛載後判斷是否開啟 OnboardingModal，並在無日期時預設今天
+  // 手機版：首次訪問且無行程日期時，自動預設今天（方便新手直接開始規劃）
   useEffect(() => {
     if (isDesktop === null || isDesktop) return;
-    if (!localStorage.getItem(ITINERARY_TOUR_KEY_V3)) {
-      if (!tripStartDate) {
-        const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
-        setTripDates(today, today);
-      }
-      setShowOnboarding(true);
+    if (!tripStartDate) {
+      const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+      setTripDates(today, today);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDesktop]);
@@ -346,14 +341,6 @@ export default function ItineraryPage() {
     return () => window.removeEventListener('cultrRoute:tourDestroyed', handler);
   }, []);
 
-  // 手機版：TourGuide FAB 點擊時觸發 OnboardingModal（只處理 itinerary context）
-  useEffect(() => {
-    const handler = (e: Event) => {
-      if ((e as CustomEvent).detail?.context === 'itinerary') setShowOnboarding(true);
-    };
-    window.addEventListener('cultrRoute:showOnboarding', handler);
-    return () => window.removeEventListener('cultrRoute:showOnboarding', handler);
-  }, []);
 
   // 掛載時從 app_stats 讀取累計總讚數
   useEffect(() => {
@@ -398,9 +385,20 @@ export default function ItineraryPage() {
       {
         id: 'mock-2', title: '🗺️ [新手任務] 排好後，點擊最下方的按鈕生成路線！',
         description: '', vibe_tags: [], weather_resilience: 3, is_free: true,
-        start_time: `${actualActiveDate}T17:00:00+08:00`, venue_name: '台東海濱公園', address: '台東市大同路',
+        start_time: `${actualActiveDate}T14:00:00+08:00`, venue_name: '台東海濱公園', address: '台東市大同路',
         latitude: 22.7553, longitude: 121.1514,
         assigned_date: actualActiveDate, stay_duration: 90,
+      },
+      {
+        id: 'mock-3', title: '🖼️ [示範] 展覽卡片 — 點「我打算幾點去？」選個時間，我就自動插隊排好！',
+        description: '', vibe_tags: [], weather_resilience: 5, is_free: true,
+        category: '展覽',
+        start_time: `${actualActiveDate}T09:00:00+08:00`,
+        end_time: `${actualActiveDate}T17:00:00+08:00`,
+        end_date: actualActiveDate,
+        venue_name: '台東縣立美術館', address: '台東市新生路1號',
+        latitude: 22.7524, longitude: 121.1509,
+        assigned_date: actualActiveDate, stay_duration: 120,
       },
     ]);
   }, [isMounted, actualActiveDate, plannedEvents]);
@@ -595,21 +593,11 @@ export default function ItineraryPage() {
     if (showMap) setLegDurations([]);
   };
 
-  const handleOnboardingClose = () => {
-    localStorage.setItem(ITINERARY_TOUR_KEY_V3, 'true');
-    setShowOnboarding(false);
-    setMockTourEvents([]);
-  };
 
   if (!isMounted) return null;
 
   return (
     <main className="min-h-[100dvh] bg-[#f8f6f0] relative">
-
-      {/* ── 手機版新手歡迎彈窗 ──────────────────────────────────────────────── */}
-      {showOnboarding && isDesktop === false && (
-        <OnboardingModal context="itinerary" onClose={handleOnboardingClose} />
-      )}
 
       {/* ── Toast 通知（日期變更防呆） ────────────────────────────────────────── */}
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center pointer-events-none w-full max-w-xs px-4">
@@ -688,10 +676,25 @@ export default function ItineraryPage() {
                                       <span className="truncate">{event.venue_name}</span>
                                     </span>
                                   )}
-                                  <span className="flex items-center gap-1.5 text-xs text-stone-500">
-                                    <Clock size={11} className="text-stone-400 shrink-0" />
-                                    停留 {STAY_LABELS[event.stay_duration ?? 90] ?? '1.5 小時'}
-                                  </span>
+                                  {isExhibition(event) ? (
+                                    (() => {
+                                      const hours = event.opening_hours ??
+                                        (event.end_time
+                                          ? `${toTaipeiHHMM(event.start_time)} – ${toTaipeiHHMM(event.end_time)}`
+                                          : null);
+                                      return hours ? (
+                                        <span className="flex items-center gap-1.5 text-xs text-teal-600">
+                                          <Clock size={11} className="shrink-0" />
+                                          {hours}
+                                        </span>
+                                      ) : null;
+                                    })()
+                                  ) : (
+                                    <span className="flex items-center gap-1.5 text-xs text-stone-500">
+                                      <Clock size={11} className="text-stone-400 shrink-0" />
+                                      停留 {STAY_LABELS[event.stay_duration ?? 90] ?? '1.5 小時'}
+                                    </span>
+                                  )}
                                   {event.ticket_url?.startsWith('http') && (
                                     <a href={event.ticket_url} target="_blank" rel="noopener noreferrer"
                                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-md hover:bg-violet-100 transition-colors">
@@ -960,8 +963,27 @@ export default function ItineraryPage() {
                                 <Calendar size={12} />
                                 {formatAssignedDate(event.assigned_date, sortedDates)}
                               </div>
-                              {/* 時間顯示：HH:MM – HH:MM（僅在有明確時間時顯示） */}
-                              {(() => {
+                              {/* 時間顯示：展覽「我打算幾點去？」/ 固定活動 HH:MM – HH:MM */}
+                              {isExhibition(event) ? (
+                                <div
+                                  className="flex items-center gap-2 bg-violet-50 border border-violet-100 rounded-lg px-2.5 py-1.5 mb-1 w-fit"
+                                  onClick={e => e.stopPropagation()}
+                                >
+                                  <Clock size={11} className="text-violet-500 shrink-0" />
+                                  <span className="text-[11px] text-violet-600 font-medium whitespace-nowrap">我打算幾點去？</span>
+                                  <select
+                                    id="tour-exhibition-time-select"
+                                    value={event.visit_time ?? ''}
+                                    onChange={e => updateVisitTime(event.id, e.target.value)}
+                                    className="text-[11px] font-bold text-violet-700 bg-white border border-violet-200 rounded px-1.5 py-0.5 outline-none focus:border-violet-400 cursor-pointer"
+                                  >
+                                    <option value="">選擇時間</option>
+                                    {EXHIBITION_TIME_OPTIONS.map(t => (
+                                      <option key={t} value={t}>{t}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              ) : (() => {
                                 const startHHMM = getStartHHMM(event);
                                 if (!startHHMM) return null;
                                 const endHHMM = minToHHMM(hhmmToMin(startHHMM) + (event.stay_duration ?? 60));
@@ -985,33 +1007,6 @@ export default function ItineraryPage() {
                                 <div className="flex items-center text-violet-400 text-[11px] gap-1 mb-1">
                                   <span className="font-bold tracking-wide">展期</span>
                                   <span>{formatExhibitionRange(event.start_time, event.end_date)}</span>
-                                </div>
-                              )}
-                              {/* Feature 3：展覽 / 長期活動 — 彈性前往時間選擇 */}
-                              {isExhibition(event) && (
-                                <div
-                                  className="flex items-center gap-2 bg-violet-50 border border-violet-100 rounded-lg px-2.5 py-1.5 mb-1 w-fit"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <Clock size={11} className="text-violet-500 shrink-0" />
-                                  <span className="text-[11px] text-violet-600 font-medium whitespace-nowrap">此活動為展覽，預計前往</span>
-                                  <select
-                                    value={event.visit_time ?? ''}
-                                    onChange={(e) => updateVisitTime(event.id, e.target.value)}
-                                    className="text-[11px] font-bold text-violet-700 bg-white border border-violet-200 rounded px-1.5 py-0.5 outline-none focus:border-violet-400 cursor-pointer"
-                                  >
-                                    <option value="">選擇時間</option>
-                                    {EXHIBITION_TIME_OPTIONS.map(t => (
-                                      <option key={t} value={t}>{t}</option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
-                              {/* 展覽開放時間防呆提醒 */}
-                              {isExhibition(event) && (
-                                <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 px-2 py-1.5 rounded mt-1 mb-1">
-                                  <span className="shrink-0">💡</span>
-                                  <span>展覽確切開放時間，建議出發前至官網確認。</span>
                                 </div>
                               )}
                               <div className="flex flex-wrap items-center gap-3 mt-2">

@@ -56,9 +56,10 @@ export default function TourGuide() {
 
   const getFilteredSteps = useCallback(() => {
     if (isItinerary) {
-      const hasEvents = document.querySelector('.planned-event-card') !== null;
       return steps.filter((s) => {
-        if ((s as DriveStep & { element?: string }).element === '#tour-itinerary-events' && !hasEvents) return false;
+        const el = (s as DriveStep & { element?: string }).element;
+        if (el === '.tour-fixed-event-card' && !document.querySelector('.tour-fixed-event-card')) return false;
+        if (el === '.tour-exhibition-card'  && !document.querySelector('.tour-exhibition-card'))  return false;
         return true;
       });
     }
@@ -82,11 +83,6 @@ export default function TourGuide() {
   }, [pathname, hasTour, isDesktop, isItinerary, getFilteredSteps, tourKey]);
 
   const startTour = useCallback(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      const context = isItinerary ? 'itinerary' : 'explore';
-      window.dispatchEvent(new CustomEvent('cultrRoute:showOnboarding', { detail: { context } }));
-      return;
-    }
     const effectiveKey = isItinerary ? ITINERARY_TOUR_KEY_V3 : tourKey;
     buildTour(getFilteredSteps(), effectiveKey).drive();
   }, [isItinerary, getFilteredSteps, tourKey]);

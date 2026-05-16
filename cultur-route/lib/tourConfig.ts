@@ -1,93 +1,63 @@
 import type { DriveStep } from 'driver.js';
 
-export const HOME_TOUR_KEY = 'cultrRoute_homeTour_v2';
+export const HOME_TOUR_KEY = 'cultrRoute_homeTour_v3';
 export const ITINERARY_TOUR_KEY = 'cultrRoute_itineraryTour_v2';
 export const ITINERARY_TOUR_KEY_V3 = 'hasSeenTour_v3';
 
+// ── 首頁 3 步驟（Step 1-3）────────────────────────────────────────────────────
 export const homeSteps: DriveStep[] = [
   {
-    element: '#tour-home-header',
+    element: '#tour-event-type-filter',
     popover: {
-      title: '👋 歡迎來到 CultureRoute！',
-      description:
-        '台東在地藝文活動一站彙整。輸入你的停留日期，探索專屬台東的文化路徑。',
+      title: '🎭 Step 1 — 探索',
+      description: '根據您的興趣，快速篩選展覽、演出或工作坊。',
       side: 'bottom',
       align: 'start',
     },
   },
   {
-    element: '#tour-date-filter',
-    popover: {
-      title: '📅 設定旅遊日期',
-      description:
-        '輸入你預計抵達與離開台東的日期，系統會自動篩選出這段期間舉辦的所有活動。',
-      side: 'bottom',
-    },
-  },
-  {
-    element: '#tour-event-type-filter',
-    popover: {
-      title: '🎭 依類型篩選活動',
-      description:
-        '想看演出、展覽還是講座？點擊膠囊按鈕快速切換，找到你最感興趣的活動類型。',
-      side: 'bottom',
-    },
-  },
-  {
     element: '#tour-event-grid',
     popover: {
-      title: '🎪 探索藝文活動',
-      description:
-        '每張卡片代表一個活動。點擊卡片查看詳情，滑鼠停留可出現「加入行程」按鈕，手機用右下角的 ＋ 按鈕。',
+      title: '➕ Step 2 — 加入',
+      description: '點擊「+ 加入行程」，將喜歡的活動放入您的文化口袋。記得先選好日期喔！',
+      side: 'top',
+      align: 'center',
+    },
+  },
+  {
+    element: '#tour-bottom-nav-route',
+    popover: {
+      title: '🗺️ Step 3 — 規劃',
+      description: '在這裡，我們為您整理好每日行程，並偵測潛在的時間衝突。',
       side: 'top',
       align: 'center',
     },
   },
 ];
 
+// ── 行程頁 3 步驟（Step 4-6）─────────────────────────────────────────────────
 export const itinerarySteps: DriveStep[] = [
   {
-    element: '#tour-itinerary-tabs',
+    element: '.tour-fixed-event-card',
     popover: {
-      title: '📅 日期分頁',
-      description:
-        '系統已根據你的旅遊日期自動建立每一天的分頁。點擊分頁切換日期，右側漸層代表還有更多天數可左右滑動。',
-      side: 'bottom',
-    },
-  },
-  {
-    element: '#tour-itinerary-events',
-    popover: {
-      title: '✋ 拖拉調整順序',
-      description:
-        '長按活動卡片並拖拉，可以自由調整當天的參觀順序，打造最順路的行程！',
+      title: '🔒 Step 4 — 鎖定',
+      description: '演出與講座時間是固定的，我們已為您釘死在時間軸上，確保您不撲空。',
       side: 'right',
     },
   },
   {
-    element: '#tour-itinerary-map',
+    element: '.tour-exhibition-card',
     popover: {
-      title: '🗺️ 路線地圖',
-      description:
-        '地圖會標示今日所有活動的地點。點擊「時間確認，生成路線圖」即可一鍵規劃最佳移動路線。',
-      side: 'left',
-    },
-  },
-  {
-    element: '#tour-itinerary-export',
-    popover: {
-      title: '📤 儲存 ＆ 分享行程',
-      description:
-        '規劃完成後，可匯出至 Google / Apple 日曆，或下載精美的台東回憶明信片留念！',
-      side: 'top',
+      title: '🎨 Step 5 — 展覽排序',
+      description: '展覽行程最彈性！選擇您打算前往的時間，系統會自動幫您排入當天最順的順序。',
+      side: 'right',
     },
   },
   {
     element: '#tour-generate-route-btn',
     popover: {
-      title: '✨ 最後一步：生成專屬路線！',
-      description:
-        '排好行程了嗎？點擊這個按鈕，系統會幫你畫出完整的地圖與交通路線喔！',
+      title: '✨ Step 6 — 完成',
+      description: '一切就緒！生成您的專屬文化地圖，開始台東之旅吧。',
       side: 'top',
       align: 'center',
     },
@@ -95,13 +65,6 @@ export const itinerarySteps: DriveStep[] = [
       setTimeout(() => {
         element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 120);
-    },
-  },
-  {
-    popover: {
-      title: '📱 把台東帶在身邊！',
-      description:
-        '點擊瀏覽器底部的「分享」或選單按鈕，選擇「加入主畫面」，就能把這個網站變成手機 App，隨時查看行程不迷路！',
     },
   },
 ];

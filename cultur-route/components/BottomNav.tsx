@@ -29,6 +29,7 @@ export default function BottomNav() {
       {/* 路線規劃（帶活動數量 badge） */}
       <Link
         href="/itinerary"
+        id="tour-bottom-nav-route"
         className={[
           'flex-1 h-16 flex flex-col items-center justify-center gap-0.5 transition-colors',
           pathname === '/itinerary' ? 'text-teal-700' : 'text-stone-400 active:text-stone-600',
