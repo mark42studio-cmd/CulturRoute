@@ -14,7 +14,14 @@ import {
   itinerarySteps,
 } from '@/lib/tourConfig';
 
-const LEGACY_TOUR_KEYS = ['cultrRoute_homeTour_v1', 'cultrRoute_itineraryTour_v1', 'cultrRoute_itineraryTour_v2'];
+const LEGACY_TOUR_KEYS = [
+  'cultrRoute_homeTour_v1',
+  'cultrRoute_homeTour_v2',
+  'cultrRoute_homeTour_v3',
+  'cultrRoute_homeTour_v4',
+  'cultrRoute_itineraryTour_v1',
+  'cultrRoute_itineraryTour_v2',
+];
 
 function buildTour(steps: DriveStep[], tourKey: string) {
   let d: ReturnType<typeof driver>;
@@ -30,6 +37,8 @@ function buildTour(steps: DriveStep[], tourKey: string) {
     onDestroyStarted: () => {
       localStorage.setItem(tourKey, 'true');
       window.dispatchEvent(new CustomEvent('cultrRoute:tourDestroyed'));
+      // 導覽結束（完成或跳過）後，優雅地回到頂端
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       d.destroy();
     },
   });
@@ -54,17 +63,14 @@ export default function TourGuide() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
+  // 對所有步驟做 DOM 存在檢查，沒有目標元素的步驟直接跳過
   const getFilteredSteps = useCallback(() => {
-    if (isItinerary) {
-      return steps.filter((s) => {
-        const el = (s as DriveStep & { element?: string }).element;
-        if (el === '.tour-fixed-event-card' && !document.querySelector('.tour-fixed-event-card')) return false;
-        if (el === '.tour-exhibition-card'  && !document.querySelector('.tour-exhibition-card'))  return false;
-        return true;
-      });
-    }
-    return steps;
-  }, [isItinerary, steps]);
+    return steps.filter((s) => {
+      const el = (s as DriveStep & { element?: string }).element;
+      if (!el) return true;
+      return !!document.querySelector(el as string);
+    });
+  }, [steps]);
 
   // 清除舊版 v1/v2 快取，確保使用者能看到最新導引
   useEffect(() => {

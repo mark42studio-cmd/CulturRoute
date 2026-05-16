@@ -305,6 +305,86 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
 
   return (
     <>
+    {/* 今日進行中橫幅（未篩選時才顯示） */}
+    {!isFiltering && (() => {
+      const ongoingCount = initialEvents.filter(isOngoing).length;
+      return ongoingCount > 0 ? (
+        <div className="mb-6 flex items-center gap-2 min-w-0 border-b border-green-200 pb-4">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+          <span className="text-green-800 text-sm tracking-wide">
+            今日（{TODAY.slice(5).replace('-', '/')}）正有 <span className="font-bold">{ongoingCount}</span> 個活動進行中
+          </span>
+        </div>
+      ) : null;
+    })()}
+
+    {/* ── 日期篩選區塊：最優先，讓使用者第一眼就設定日期 ── */}
+    <div id="tour-date-filter" className="mb-6 border-b border-stone-200 pb-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <div className="flex items-center gap-2 min-w-0">
+          <CalendarRange className="text-teal-800 shrink-0" size={18} />
+          <h2 className="text-sm sm:text-base font-serif tracking-wide sm:tracking-widest text-stone-700 uppercase">你預計在台東停留的時間？</h2>
+        </div>
+        {!isFiltering && (
+          <button
+            onClick={() => setTripDates(TODAY, TODAY)}
+            className="flex items-center gap-1.5 text-xs tracking-wider text-teal-800 border border-teal-700 hover:bg-teal-800 hover:text-white px-3 py-2 transition-colors shrink-0"
+          >
+            <CalendarRange size={12} />
+            快速選今日
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 w-full">
+        <div className="flex-1 min-w-0">
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onSelect={(start, end) => setTripDates(start, end)}
+          />
+        </div>
+        {isFiltering && (
+          <button
+            onClick={() => setTripDates('', '')}
+            className="shrink-0 px-4 py-3 text-xs text-stone-400 hover:text-stone-600 tracking-wider border border-stone-300 hover:border-stone-500 transition-colors rounded-xl"
+          >
+            清除
+          </button>
+        )}
+      </div>
+
+      {/* ── 地區篩選器 ── */}
+      <div className="mt-4 flex items-center gap-3 w-full max-w-full">
+        <span className="text-[10px] font-medium text-stone-400 uppercase tracking-[0.2em] shrink-0">地區</span>
+        <div className="-mr-4 pr-4 flex-1 min-w-0 flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide snap-x snap-mandatory">
+          {(
+            [
+              { key: 'all',      label: '全部' },
+              { key: 'city',     label: '市區' },
+              { key: 'sea',      label: '海線' },
+              { key: 'mountain', label: '山線' },
+              { key: 'south',    label: '南迴線' },
+              { key: 'island',   label: '離島' },
+            ] as const
+          ).map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setDistrictFilter(key)}
+              className={[
+                'shrink-0 snap-start px-4 py-2 text-sm tracking-wide border transition-all duration-200 whitespace-nowrap rounded-full min-h-[40px]',
+                districtFilter === key
+                  ? 'bg-teal-800 text-white border-teal-800'
+                  : 'bg-transparent text-stone-500 border-stone-300 hover:border-teal-700 hover:text-teal-700',
+              ].join(' ')}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
     <div className="flex flex-col lg:flex-row-reverse gap-6 lg:items-start w-full">
 
       {/* ── 地圖面板 ──────────────────────────────────────────────────────────
@@ -317,117 +397,42 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
         </div>
       </aside>
 
-      {/* ── 主內容：篩選器 + 活動列表 ──────────────────────────────────────── */}
+      {/* ── 活動列表 ──────────────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0">
-      {/* 今日進行中橫幅（未篩選時才顯示） */}
-      {!isFiltering && (() => {
-        const ongoingCount = initialEvents.filter(isOngoing).length;
-        return ongoingCount > 0 ? (
-          <div className="mb-6 flex items-center gap-2 min-w-0 border-b border-green-200 pb-4">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
-            <span className="text-green-800 text-sm tracking-wide">
-              今日（{TODAY.slice(5).replace('-', '/')}）正有 <span className="font-bold">{ongoingCount}</span> 個活動進行中
-            </span>
-          </div>
-        ) : null;
-      })()}
-
-      <div id="tour-date-filter" className="mb-10 border-b border-stone-200 pb-8">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-          <div className="flex items-center gap-2 min-w-0">
-            <CalendarRange className="text-teal-800 shrink-0" size={18} />
-            <h2 className="text-sm sm:text-base font-serif tracking-wide sm:tracking-widest text-stone-700 uppercase">你預計在台東停留的時間？</h2>
-          </div>
-          {!isFiltering && (
-            <button
-              onClick={() => setTripDates(TODAY, TODAY)}
-              className="flex items-center gap-1.5 text-xs tracking-wider text-teal-800 border border-teal-700 hover:bg-teal-800 hover:text-white px-3 py-2 transition-colors shrink-0"
-            >
-              <CalendarRange size={12} />
-              快速選今日
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3 w-full">
-          <div className="flex-1 min-w-0">
-            <DateRangePicker
-              startDate={startDate}
-              endDate={endDate}
-              onSelect={(start, end) => setTripDates(start, end)}
-            />
-          </div>
-          {isFiltering && (
-            <button
-              onClick={() => setTripDates('', '')}
-              className="shrink-0 px-4 py-3 text-xs text-stone-400 hover:text-stone-600 tracking-wider border border-stone-300 hover:border-stone-500 transition-colors rounded-xl"
-            >
-              清除
-            </button>
-          )}
-        </div>
-
-        {/* ── 地區篩選器 ── */}
-        <div className="mt-4 flex items-center gap-3 w-full max-w-full">
-          <span className="text-[10px] font-medium text-stone-400 uppercase tracking-[0.2em] shrink-0">地區</span>
-          <div className="-mr-4 pr-4 flex-1 min-w-0 flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide snap-x snap-mandatory">
-            {(
-              [
-                { key: 'all',      label: '全部' },
-                { key: 'city',     label: '市區' },
-                { key: 'sea',      label: '海線' },
-                { key: 'mountain', label: '山線' },
-                { key: 'south',    label: '南迴線' },
-                { key: 'island',   label: '離島' },
-              ] as const
-            ).map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setDistrictFilter(key)}
-                className={[
-                  'shrink-0 snap-start px-4 py-2 text-sm tracking-wide border transition-all duration-200 whitespace-nowrap rounded-full min-h-[40px]',
-                  districtFilter === key
-                    ? 'bg-teal-800 text-white border-teal-800'
-                    : 'bg-transparent text-stone-500 border-stone-300 hover:border-teal-700 hover:text-teal-700',
-                ].join(' ')}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       <div className="mb-5 flex items-baseline justify-between">
         <h3 className="text-xl font-serif tracking-wide text-stone-800">{isFiltering ? '這段期間的精彩活動' : '所有藝文活動'}</h3>
         <span className="text-stone-400 text-[10px] tracking-[0.2em] uppercase border-b border-stone-300 pb-0.5">{currentEvents.length} 筆</span>
       </div>
 
       {/* ── 類型膠囊篩選器 ──────────────────────────────────────────────────── */}
-      <div id="tour-event-type-filter" className="mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
-        <div className="flex gap-2 w-max min-w-max pb-0.5">
-          {(
-            [
-              { key: 'all',  label: '✨ 全部' },
-              { key: '演出', label: '🎭 演出' },
-              { key: '講座', label: '🎤 講座' },
-              { key: '展覽', label: '🏛️ 展覽' },
-              { key: '工作坊', label: '🛠️ 工作坊' },
-            ] as const
-          ).map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setViewMode(key)}
-              className={[
-                'shrink-0 snap-start whitespace-nowrap px-4 py-2.5 rounded-full text-sm tracking-wide border transition-all duration-200 min-h-[40px]',
-                viewMode === key
-                  ? 'bg-stone-800 text-white border-stone-800'
-                  : 'bg-stone-100 text-stone-500 border-stone-200 hover:border-stone-400 hover:text-stone-700',
-              ].join(' ')}
-            >
-              {label}
-            </button>
-          ))}
+      <div id="tour-event-type-filter" className="mb-8 relative">
+        {/* 右側漸層：暗示使用者可向右滑動查看更多選項 */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#f8f6f0] to-transparent z-10" />
+        <div className="-mx-4 px-4 overflow-x-auto snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-2 w-max min-w-max pb-0.5">
+            {(
+              [
+                { key: 'all',  label: '✨ 全部' },
+                { key: '演出', label: '🎭 演出' },
+                { key: '講座', label: '🎤 講座' },
+                { key: '展覽', label: '🏛️ 展覽' },
+                { key: '工作坊', label: '🛠️ 工作坊' },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setViewMode(key)}
+                className={[
+                  'shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-sm tracking-wide border transition-all duration-200 min-h-[36px]',
+                  viewMode === key
+                    ? 'bg-stone-800 text-white border-stone-800'
+                    : 'bg-stone-100 text-stone-500 border-stone-200 hover:border-stone-400 hover:text-stone-700',
+                ].join(' ')}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -457,7 +462,7 @@ export default function EventBrowser({ initialEvents }: { initialEvents: Event[]
           <div className="opacity-90 hover:opacity-100 transition-opacity">{renderMissedEventGrid(missedEvents)}</div>
         </div>
       )}
-      </div>{/* end 主內容 */}
+      </div>{/* end 活動列表 */}
     </div>
 
     <EventDetailModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />

@@ -38,22 +38,21 @@ export default async function Home() {
 
   return (
     <main className="w-full min-h-screen max-w-7xl mx-auto px-4 pt-12 pb-28 md:pb-12 bg-[#f8f6f0] overflow-x-hidden">
-      <header id="tour-home-header" className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-8 w-full">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2 break-words">
-            CultureRoute 臺東藝文 - 你若來台東
-            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-3 align-middle font-normal tracking-normal">測試版</span>
-          </h1>
-          <p className="text-slate-500 text-lg">探索此時此地的文化路徑</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-          <SubmitEventModal />
-          <ReportIssueModal />
-        </div>
+      <header id="tour-home-header" className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2 break-words">
+          CultureRoute 臺東藝文 - 你若來台東
+          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-3 align-middle font-normal tracking-normal">測試版</span>
+        </h1>
+        <p className="text-slate-500 text-lg">探索此時此地的文化路徑</p>
       </header>
 
-      {/* 🌟 把抓到的資料交給 Client Component 去處理互動與篩選 */}
       <EventBrowser initialEvents={upcomingEvents} />
+
+      {/* 上架/報修入口：置於頁尾，不干擾核心瀏覽動線 */}
+      <div id="tour-action-buttons" className="mt-12 pt-8 border-t border-stone-200 flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <SubmitEventModal />
+        <ReportIssueModal />
+      </div>
     </main>
   );
 }

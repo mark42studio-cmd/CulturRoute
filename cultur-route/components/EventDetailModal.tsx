@@ -193,10 +193,10 @@ export default function EventDetailModal({ event, onClose }: Props) {
           <div className="flex justify-center pt-3 pb-1 shrink-0">
             <div className="w-10 h-1 bg-stone-300 rounded-full" />
           </div>
-          {/* 關閉按鈕 */}
+          {/* 關閉按鈕：safe-area-inset-top 防止被狀態列/瀏海遮擋 */}
           <button
             onClick={handleMobileClose}
-            className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center"
+            className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4 z-20 w-11 h-11 rounded-full bg-white/80 backdrop-blur-sm text-stone-600 flex items-center justify-center shadow-sm border border-stone-200/50"
             aria-label="關閉"
           >
             <X size={18} />
