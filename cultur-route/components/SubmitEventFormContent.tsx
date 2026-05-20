@@ -84,8 +84,8 @@ export default function SubmitEventFormContent({
         body: JSON.stringify({ rawDate: form.event_time.trim() }),
       });
       const parsed = await res.json();
-      start_date = parsed.start_date ?? null;
-      end_date = parsed.end_date ?? null;
+      start_date = parsed.start_date || null;
+      end_date = parsed.end_date || null;
     } catch {
       // silent fail, raw_date still written
     }
@@ -108,7 +108,11 @@ export default function SubmitEventFormContent({
     setLoading(false);
 
     if (error) {
-      setErrors({ _global: `提交失敗：${error.message}` });
+      const isSchemaError = error.message?.includes('schema cache') || error.message?.includes('column');
+      const friendlyMsg = isSchemaError
+        ? '投稿暫時無法送出，請稍後再試或聯繫平台方。'
+        : `投稿失敗，請確認填寫內容後重試。`;
+      setErrors({ _global: friendlyMsg });
     } else {
       setSubmitted(true);
     }
@@ -212,7 +216,7 @@ export default function SubmitEventFormContent({
           name="location"
           value={form.location}
           onChange={handleChange}
-          placeholder="例：台東縣台東市中正路 1 號"
+          placeholder="例：天空之鏡"
           className={inputClass(errors.location)}
         />
       </Field>

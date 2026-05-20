@@ -51,7 +51,9 @@
       "PowerShell(cd E:\\\\CulturRoute\\\\backend; $env:PYTHONIOENCODING=\"utf-8\"; $env:PYTHONUTF8=\"1\"; python scraper.py --only \"台東藝文平台\" 2>&1)",
       "PowerShell(cd E:\\\\CulturRoute\\\\backend; $env:PYTHONIOENCODING=\"utf-8\"; $env:PYTHONUTF8=\"1\"; python query_event.py 2>&1)",
       "PowerShell(cd E:\\\\CulturRoute\\\\cultur-route; $env:PYTHONUTF8=\"1\"; npx tsc --noEmit 2>&1 | Select-Object -First 40)",
-      "PowerShell(Get-ChildItem \"E:\\\\CulturRoute\\\\cultur-route\\\\components\" -ErrorAction SilentlyContinue | Select-Object Name; if \\(-not $?\\) { \"no components dir\" })"
+      "PowerShell(Get-ChildItem \"E:\\\\CulturRoute\\\\cultur-route\\\\components\" -ErrorAction SilentlyContinue | Select-Object Name; if \\(-not $?\\) { \"no components dir\" })",
+      "Skill(firecrawl-scrape)",
+      "PowerShell(Select-String *)"
     ]
   }
 }

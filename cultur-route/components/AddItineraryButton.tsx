@@ -36,15 +36,31 @@ export default function AddItineraryButton({ event }: { event: Event }) {
       return;
     }
 
-    // ── Task 2: 展期邊界強制驗證——展期與行程無交集時完全阻擋 ─────────────────────────
+    // ── Task 2: 展期邊界驗證 ─────────────────────────────────────────────────────
     const eventStartStr = dateOnlyTaipei(event.start_time);
     const rawEventEnd   = event.end_date ?? (event.end_time ? dateOnlyTaipei(event.end_time) : null);
     const eventEndStr   = rawEventEnd ?? eventStartStr;
 
-    if (eventEndStr < tripStartDate || eventStartStr > tripEndDate) {
+    // 活動完全結束於行程開始前 → 阻擋
+    if (eventEndStr < tripStartDate) {
       const startLabel = formatDateZH(eventStartStr);
       const endLabel   = eventEndStr !== eventStartStr ? ` - ${formatDateZH(eventEndStr)}` : '';
       toast(`⚠️ 選擇的日期不在該活動的展演期間內 (${startLabel}${endLabel})`);
+      return;
+    }
+
+    // 活動開始於行程結束後（多留幾天場景）→ 自動延長行程並提示住宿
+    if (eventStartStr > tripEndDate) {
+      setTripDates(tripStartDate, eventStartStr);
+      addEvent(event);
+      setPendingJumpToDate(eventStartStr);
+      toast('✅ 此活動超出原定時間，已為您自動延長行程。記得提早預訂住宿喔！', {
+        action: {
+          label: '找住宿',
+          onClick: () => window.open(buildAgodaUrl(tripStartDate, addOneDay(eventStartStr)), '_blank'),
+        },
+        duration: 6000,
+      });
       return;
     }
 
