@@ -114,6 +114,20 @@ export default function SubmitEventFormContent({
         : `投稿失敗，請確認填寫內容後重試。`;
       setErrors({ _global: friendlyMsg });
     } else {
+      const payload = {
+        title: form.title.trim(),
+        location: form.location.trim(),
+        raw_date: form.event_time.trim(),
+        comments: form.comments.trim() || null,
+      };
+      console.log('🟢 [前端] 準備發送 Telegram 通報...');
+      fetch('/api/telegram-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(res => console.log('🟢 [前端] Telegram API 路由回傳:', res.status))
+        .catch(err => console.error('🔴 [前端] 呼叫 Telegram API 失敗:', err));
       setSubmitted(true);
     }
   };

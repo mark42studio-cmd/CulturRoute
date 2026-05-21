@@ -53,7 +53,10 @@
       "PowerShell(cd E:\\\\CulturRoute\\\\cultur-route; $env:PYTHONUTF8=\"1\"; npx tsc --noEmit 2>&1 | Select-Object -First 40)",
       "PowerShell(Get-ChildItem \"E:\\\\CulturRoute\\\\cultur-route\\\\components\" -ErrorAction SilentlyContinue | Select-Object Name; if \\(-not $?\\) { \"no components dir\" })",
       "Skill(firecrawl-scrape)",
-      "PowerShell(Select-String *)"
+      "PowerShell(Select-String *)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://notify-api.line.me\" -UseBasicParsing -TimeoutSec 10; \"STATUS: $\\($r.StatusCode\\)\" } catch { \"ERROR: $_\" })",
+      "PowerShell(node -e \"const dns = require\\('dns'\\); dns.lookup\\('notify-api.line.me', \\(e, a\\) => console.log\\(e ? 'DNS_ERROR: ' + e.message : 'DNS_OK: ' + a\\)\\)\")",
+      "PowerShell(node -e \"const dns = require\\('dns'\\); dns.lookup\\('google.com', \\(e, a\\) => console.log\\(e ? 'DNS_ERROR: ' + e.message : 'DNS_OK: ' + a\\)\\)\")"
     ]
   }
 }
