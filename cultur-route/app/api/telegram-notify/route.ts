@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, title, location, raw_date, comments, issue_type, description } = body;
 
+    const adminUrl = 'https://cultureroute.vercel.app/admin';
     let message = '';
 
     if (type === 'repair') {
@@ -22,6 +23,9 @@ export async function POST(request: Request) {
 📌 <b>報修項目/活動：</b> ${title || '未提供'}
 ⚠️ <b>問題類型：</b> ${issue_type || '未分類'}
 📝 <b>狀況詳細說明：</b> ${description || '無詳細說明'}
+
+🔗 <b>點此快速前往後台處理：</b>
+${adminUrl}
 `;
     } else {
       message = `
@@ -31,6 +35,9 @@ export async function POST(request: Request) {
 📍 <b>活動地點：</b> ${location}
 📅 <b>活動時間：</b> ${raw_date}
 📝 <b>備註摘要：</b> ${comments || '無'}
+
+🔗 <b>點此快速前往後台審核：</b>
+${adminUrl}
 `;
     }
 
