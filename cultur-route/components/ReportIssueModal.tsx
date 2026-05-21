@@ -56,6 +56,15 @@ export default function ReportIssueModal() {
     if (error) {
       setErrors({ _global: `送出失敗：${error.message}` });
     } else {
+      fetch('/api/telegram-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'repair',
+          title: form.event_name.trim() || null,
+          description: form.description.trim(),
+        }),
+      }).catch(() => {});
       setSubmitted(true);
       setTimeout(() => {
         setIsOpen(false);

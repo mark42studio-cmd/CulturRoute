@@ -115,12 +115,12 @@ export default function SubmitEventFormContent({
       setErrors({ _global: friendlyMsg });
     } else {
       const payload = {
+        type: 'submission',
         title: form.title.trim(),
         location: form.location.trim(),
         raw_date: form.event_time.trim(),
         comments: form.comments.trim() || null,
       };
-      console.log('🟢 [前端] 準備發送 Telegram 通報...');
       fetch('/api/telegram-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,21 +1,30 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  console.log('🚀 [Telegram Bot] API 路由被觸發！');
-
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
   if (!botToken || !chatId) {
-    console.log('⚠️ [Telegram Bot] 缺少 Token 或 Chat ID，靜默跳過發送。');
-    return NextResponse.json({ success: false, message: 'Credentials missing' });
+    console.log('⚠️ [Telegram Bot] 缺少環境變數設定，拒絕發送。');
+    return NextResponse.json({ success: false, message: 'Credentials missing' }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const { title, location, raw_date, comments } = body;
+    const { type, title, location, raw_date, comments, issue_type, description } = body;
 
-    const message = `
+    let message = '';
+
+    if (type === 'repair') {
+      message = `
+🛠️ <b>【CulturRoute 平台有新報修通報！】</b>
+
+📌 <b>報修項目/活動：</b> ${title || '未提供'}
+⚠️ <b>問題類型：</b> ${issue_type || '未分類'}
+📝 <b>狀況詳細說明：</b> ${description || '無詳細說明'}
+`;
+    } else {
+      message = `
 🔔 <b>【CulturRoute 有新活動投件！】</b>
 
 📌 <b>活動名稱：</b> ${title}
@@ -23,8 +32,8 @@ export async function POST(request: Request) {
 📅 <b>活動時間：</b> ${raw_date}
 📝 <b>備註摘要：</b> ${comments || '無'}
 `;
+    }
 
-    console.log('📤 [Telegram Bot] 正在發送請求...');
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,9 +45,7 @@ export async function POST(request: Request) {
     });
 
     const resData = await response.json();
-    console.log(`📩 [Telegram Bot] 回傳狀態: ${response.status}`);
-
-    return NextResponse.json({ success: response.ok, data: resData });
+    return NextResponse.json({ success: response.ok, data: resData }, { status: response.ok ? 200 : 400 });
   } catch (error) {
     console.error('❌ [Telegram Bot] 後端發送出錯:', error);
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
