@@ -19,6 +19,7 @@ const LEGACY_TOUR_KEYS = [
   'cultrRoute_homeTour_v2',
   'cultrRoute_homeTour_v3',
   'cultrRoute_homeTour_v4',
+  'cultrRoute_homeTour_v5',
   'cultrRoute_itineraryTour_v1',
   'cultrRoute_itineraryTour_v2',
 ];

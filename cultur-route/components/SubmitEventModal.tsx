@@ -23,6 +23,7 @@ export default function SubmitEventModal() {
   return (
     <>
       <button
+        id="tour-submit-event-btn"
         onClick={() => setIsOpen(true)}
         className="text-center px-6 py-2.5 rounded-full bg-amber-700 hover:bg-amber-800 text-white text-sm tracking-wide shadow-md transition-all duration-300"
       >

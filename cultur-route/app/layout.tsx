@@ -5,6 +5,7 @@ import "./globals.css";
 import ItinerarySidebar from '@/components/ItinerarySidebar';
 import TourGuide from '@/components/TourGuide';
 import BottomNav from '@/components/BottomNav';
+import PWAInstallModal from '@/components/PWAInstallModal';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Toaster } from 'sonner';
 
@@ -114,6 +115,7 @@ export default function RootLayout({
         {/* 🌟 把側邊欄元件放在這裡，children 的上面 */}
         <ItinerarySidebar />
         <TourGuide />
+        <PWAInstallModal />
 
         {children}
 
